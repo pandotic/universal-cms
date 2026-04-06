@@ -1,0 +1,43 @@
+export const ROUTES = {
+  home: "/",
+  ecosystem: "/ecosystem",
+  categories: "/categories",
+  category: (slug: string) => `/categories/${slug}`,
+  frameworks: "/frameworks",
+  framework: (slug: string) => `/frameworks/${slug}`,
+  directory: "/directory",
+  vendor: (slug: string) => `/directory/${slug}`,
+  glossary: "/glossary",
+  term: (slug: string) => `/glossary/${slug}`,
+  compare: (...slugs: string[]) => `/compare/${slugs.join("/")}`,
+  // Career Hub
+  careersTraining: "/careers-training",
+  certifications: "/careers-training/certifications",
+  trainings: "/careers-training/trainings",
+  freeTrainings: "/careers-training/free-trainings",
+  chProviders: "/careers-training/providers",
+  chProvider: (slug: string) => `/careers-training/providers/${slug}`,
+  chProgram: (slug: string) => `/careers-training/programs/${slug}`,
+  chRoles: "/careers-training/roles",
+  chRole: (slug: string) => `/careers-training/roles/${slug}`,
+  chResources: "/careers-training/resources",
+  chResource: (slug: string) => `/careers-training/resources/${slug}`,
+  chJobs: "/careers-training/jobs",
+  // ESG Score & Resources
+  score: "/score",
+  smallBusiness: "/small-business",
+  resources: "/resources",
+  consultants: "/directory/consultants",
+  // ESG Score Sharing
+  scoreShare: "/score/share",
+  // Account - Career Hub
+  accountCareers: "/account/careers-training",
+  accountDashboard: "/account/careers-training/dashboard",
+  accountPrograms: "/account/careers-training/my-programs",
+  accountCredentials: "/account/careers-training/my-credentials",
+  accountSavedJobs: "/account/careers-training/saved-jobs",
+  accountSettings: "/account/careers-training/settings",
+  // Account - ESG Score
+  accountEsgScore: "/account/esg-score",
+  accountEsgDashboard: "/account/esg-score/dashboard",
+} as const;
