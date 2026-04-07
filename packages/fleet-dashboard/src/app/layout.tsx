@@ -55,6 +55,12 @@ export default function RootLayout({
                   API Keys
                 </Link>
                 <Link
+                  href="/api-central"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  API Central
+                </Link>
+                <Link
                   href="/audit"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
