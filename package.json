@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "test": "pnpm --filter @pandotic/universal-cms test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm --filter @pandotic/universal-cms build",
     "changeset": "changeset",
@@ -10,6 +11,7 @@
   "packageManager": "pnpm@9.15.0",
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
-    "@changesets/cli": "^2.30.0"
+    "@changesets/cli": "^2.30.0",
+    "vitest": "^4.1.3"
   }
 }
