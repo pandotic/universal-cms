@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand Colors */
+  --color-brand-primary: #0f766e;
+  --color-brand-primary-light: #14b8a6;
+  --color-brand-primary-dark: #134e4a;
+  --color-brand-secondary: #334155;
+  --color-brand-accent: #6d28d9;
+
+  /* Layer: Rules & Standards (slate) */
+  --color-layer-rules-50: #f8fafc;
+  --color-layer-rules-100: #f1f5f9;
+  --color-layer-rules-200: #e2e8f0;
+  --color-layer-rules-500: #64748b;
+  --color-layer-rules-700: #334155;
+  --color-layer-rules-900: #0f172a;
+
+  /* Layer: Data & Measurement (teal) */
+  --color-layer-data-50: #f0fdfa;
+  --color-layer-data-100: #ccfbf1;
+  --color-layer-data-200: #99f6e4;
+  --color-layer-data-500: #14b8a6;
+  --color-layer-data-700: #0f766e;
+  --color-layer-data-900: #134e4a;
+
+  /* Layer: Implementation & Services (violet) */
+  --color-layer-impl-50: #f5f3ff;
+  --color-layer-impl-100: #ede9fe;
+  --color-layer-impl-200: #ddd6fe;
+  --color-layer-impl-500: #8b5cf6;
+  --color-layer-impl-700: #6d28d9;
+  --color-layer-impl-900: #4c1d95;
+
+  /* Semantic surface tokens (values come from :root / .dark below) */
+  --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-surface-tertiary: var(--color-surface-tertiary);
+  --color-surface-invert: var(--color-surface-invert);
+  --color-foreground: var(--color-foreground);
+  --color-foreground-secondary: var(--color-foreground-secondary);
+  --color-foreground-tertiary: var(--color-foreground-tertiary);
+  --color-foreground-muted: var(--color-foreground-muted);
+  --color-foreground-invert: var(--color-foreground-invert);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-hover: var(--color-hover);
+  --color-active: var(--color-active);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spotlight-pulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.15); }
+  }
+
+  --animate-spotlight-pulse: spotlight-pulse 2s ease-in-out infinite;
+
+  /* Scroll reveal */
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Gentle float for decorative elements */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+/* Scroll-reveal base state */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delays for child animations */
+.stagger-1 { transition-delay: 100ms; }
+.stagger-2 { transition-delay: 200ms; }
+.stagger-3 { transition-delay: 300ms; }
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Dark mode glass variants */
+.dark .glass {
+  background: rgba(15, 23, 42, 0.3);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-light {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Section wave divider */
+.wave-divider {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+.wave-divider svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 60px;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #111827;
+
+  /* Semantic surface tokens — light mode */
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f9fafb;
+  --color-surface-tertiary: #f3f4f6;
+  --color-surface-invert: #111827;
+  --color-foreground: #111827;
+  --color-foreground-secondary: #6b7280;
+  --color-foreground-tertiary: #9ca3af;
+  --color-foreground-muted: #d1d5db;
+  --color-foreground-invert: #ffffff;
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+  --color-hover: #f3f4f6;
+  --color-active: #e5e7eb;
+}
+
+/* Dark mode overrides */
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+
+  --color-surface: #0f172a;
+  --color-surface-secondary: #1e293b;
+  --color-surface-tertiary: #334155;
+  --color-surface-invert: #f9fafb;
+  --color-foreground: #f1f5f9;
+  --color-foreground-secondary: #94a3b8;
+  --color-foreground-tertiary: #64748b;
+  --color-foreground-muted: #475569;
+  --color-foreground-invert: #0f172a;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-hover: #1e293b;
+  --color-active: #334155;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling for glossary alphabet navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

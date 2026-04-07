@@ -1,0 +1,235 @@
+{
+  "name": "@pandotic/universal-cms",
+  "version": "0.1.0",
+  "description": "Universal CMS for Next.js + Supabase sites — modular admin panel, analytics, content management",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "types": "./dist/config.d.ts",
+      "development": "./src/config.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts",
+      "development": "./src/types/index.ts"
+    },
+    "./security": {
+      "import": "./dist/security/index.js",
+      "types": "./dist/security/index.d.ts",
+      "development": "./src/security/index.ts"
+    },
+    "./middleware": {
+      "import": "./dist/middleware/index.js",
+      "types": "./dist/middleware/index.d.ts",
+      "development": "./src/middleware/index.ts"
+    },
+    "./version": {
+      "import": "./dist/version.js",
+      "types": "./dist/version.d.ts",
+      "development": "./src/version.ts"
+    },
+    "./data/content": {
+      "import": "./dist/data/content-pages.js",
+      "types": "./dist/data/content-pages.d.ts",
+      "development": "./src/data/content-pages.ts"
+    },
+    "./data/entities": {
+      "import": "./dist/data/entities.js",
+      "types": "./dist/data/entities.d.ts",
+      "development": "./src/data/entities.ts"
+    },
+    "./data/reviews": {
+      "import": "./dist/data/reviews.js",
+      "types": "./dist/data/reviews.d.ts",
+      "development": "./src/data/reviews.ts"
+    },
+    "./data/categories": {
+      "import": "./dist/data/categories.js",
+      "types": "./dist/data/categories.d.ts",
+      "development": "./src/data/categories.ts"
+    },
+    "./data/media": {
+      "import": "./dist/data/media.js",
+      "types": "./dist/data/media.d.ts",
+      "development": "./src/data/media.ts"
+    },
+    "./data/forms": {
+      "import": "./dist/data/forms.js",
+      "types": "./dist/data/forms.d.ts",
+      "development": "./src/data/forms.ts"
+    },
+    "./data/settings": {
+      "import": "./dist/data/site-settings.js",
+      "types": "./dist/data/site-settings.d.ts",
+      "development": "./src/data/site-settings.ts"
+    },
+    "./data/activity": {
+      "import": "./dist/data/activity-log.js",
+      "types": "./dist/data/activity-log.d.ts",
+      "development": "./src/data/activity-log.ts"
+    },
+    "./data/errors": {
+      "import": "./dist/data/error-log.js",
+      "types": "./dist/data/error-log.d.ts",
+      "development": "./src/data/error-log.ts"
+    },
+    "./data/affiliates": {
+      "import": "./dist/data/affiliates.js",
+      "types": "./dist/data/affiliates.d.ts",
+      "development": "./src/data/affiliates.ts"
+    },
+    "./data/certifications": {
+      "import": "./dist/data/certifications.js",
+      "types": "./dist/data/certifications.d.ts",
+      "development": "./src/data/certifications.ts"
+    },
+    "./data/cta-blocks": {
+      "import": "./dist/data/cta-blocks.js",
+      "types": "./dist/data/cta-blocks.d.ts",
+      "development": "./src/data/cta-blocks.ts"
+    },
+    "./data/listicles": {
+      "import": "./dist/data/listicles.js",
+      "types": "./dist/data/listicles.d.ts",
+      "development": "./src/data/listicles.ts"
+    },
+    "./data/redirects": {
+      "import": "./dist/data/redirects.js",
+      "types": "./dist/data/redirects.d.ts",
+      "development": "./src/data/redirects.ts"
+    },
+    "./data/ai-conversations": {
+      "import": "./dist/data/ai-conversations.js",
+      "types": "./dist/data/ai-conversations.d.ts",
+      "development": "./src/data/ai-conversations.ts"
+    },
+    "./data/internal-links": {
+      "import": "./dist/data/internal-links.js",
+      "types": "./dist/data/internal-links.d.ts",
+      "development": "./src/data/internal-links.ts"
+    },
+    "./data/link-checker": {
+      "import": "./dist/data/link-checker.js",
+      "types": "./dist/data/link-checker.d.ts",
+      "development": "./src/data/link-checker.ts"
+    },
+    "./ai": {
+      "import": "./dist/ai/index.js",
+      "types": "./dist/ai/index.d.ts",
+      "development": "./src/ai/index.ts"
+    },
+    "./components/admin": {
+      "import": "./dist/components/admin/index.js",
+      "types": "./dist/components/admin/index.d.ts",
+      "development": "./src/components/admin/index.ts"
+    },
+    "./components/ui": {
+      "import": "./dist/components/ui/index.js",
+      "types": "./dist/components/ui/index.d.ts",
+      "development": "./src/components/ui/index.ts"
+    },
+    "./components/theme": {
+      "import": "./dist/components/theme/index.js",
+      "types": "./dist/components/theme/index.d.ts",
+      "development": "./src/components/theme/index.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts",
+      "development": "./src/utils/index.ts"
+    },
+    "./registry": {
+      "import": "./dist/registry.js",
+      "types": "./dist/registry.d.ts",
+      "development": "./src/registry.ts"
+    },
+    "./data/api-usage": {
+      "import": "./dist/data/api-usage.js",
+      "types": "./dist/data/api-usage.d.ts",
+      "development": "./src/data/api-usage.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-popover": "^1.1.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.6.0"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=0.30.0",
+    "@supabase/ssr": ">=0.5.0",
+    "@supabase/supabase-js": ">=2.0.0",
+    "class-variance-authority": ">=0.7.0",
+    "lucide-react": ">=0.400.0",
+    "next": ">=14.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "tailwindcss": ">=4.0.0",
+    "zod": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "lucide-react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/ssr": "^0.6.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.469.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.3",
+    "zod": "^3.24.0"
+  },
+  "keywords": [
+    "cms",
+    "next.js",
+    "supabase",
+    "admin-panel",
+    "content-management"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pandotic/universal-cms"
+  },
+  "license": "MIT",
+  "author": "Pandotic"
+}
