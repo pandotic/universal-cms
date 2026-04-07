@@ -1,6 +1,6 @@
 [build]
   command = "cd ../.. && pnpm install && pnpm --filter @pandotic/fleet-dashboard build"
-  publish = "packages/fleet-dashboard/.next"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
