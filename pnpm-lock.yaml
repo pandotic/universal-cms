@@ -100,6 +100,34 @@ importers:
         specifier: ^3.24.0
         version: 3.25.76
 
+  packages/fleet-dashboard:
+    dependencies:
+      '@pandotic/universal-cms':
+        specifier: workspace:*
+        version: link:../cms-core
+      next:
+        specifier: ^16.1.6
+        version: 16.2.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: ^19.2.3
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.4(react@19.2.4)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.17
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   template:
     dependencies:
       '@pandotic/universal-cms':

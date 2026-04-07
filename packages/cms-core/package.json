@@ -33,7 +33,8 @@
     "./components/admin": { "import": "./dist/components/admin/index.js", "types": "./dist/components/admin/index.d.ts", "development": "./src/components/admin/index.ts" },
     "./components/ui": { "import": "./dist/components/ui/index.js", "types": "./dist/components/ui/index.d.ts", "development": "./src/components/ui/index.ts" },
     "./components/theme": { "import": "./dist/components/theme/index.js", "types": "./dist/components/theme/index.d.ts", "development": "./src/components/theme/index.ts" },
-    "./utils": { "import": "./dist/utils/index.js", "types": "./dist/utils/index.d.ts", "development": "./src/utils/index.ts" }
+    "./utils": { "import": "./dist/utils/index.js", "types": "./dist/utils/index.d.ts", "development": "./src/utils/index.ts" },
+    "./registry": { "import": "./dist/registry.js", "types": "./dist/registry.d.ts", "development": "./src/registry.ts" }
   },
   "files": [
     "dist",

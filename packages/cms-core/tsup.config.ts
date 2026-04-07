@@ -30,6 +30,7 @@ export default defineConfig({
     "components/ui/index": "src/components/ui/index.ts",
     "components/theme/index": "src/components/theme/index.ts",
     "utils/index": "src/utils/index.ts",
+    registry: "src/registry.ts",
   },
   format: ["esm"],
   dts: true,
