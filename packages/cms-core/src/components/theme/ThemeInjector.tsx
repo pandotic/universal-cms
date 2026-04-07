@@ -4,9 +4,9 @@ import { getSetting } from "../../data/site-settings";
 export async function ThemeInjector({ client }: { client: SupabaseClient }) {
   try {
     const [themeOverrides, customCss, customCssUrls] = await Promise.all([
-      getSetting("theme_overrides", client),
-      getSetting("custom_css", client),
-      getSetting("custom_css_urls", client),
+      getSetting(client, "theme_overrides"),
+      getSetting(client, "custom_css"),
+      getSetting(client, "custom_css_urls"),
     ]);
 
     // Build :root CSS variable overrides

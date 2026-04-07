@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { cmsConfig } from "../../config";
 import { cn } from "../../utils";
+import { useCmsConfig } from "./CmsProvider";
 import {
   LayoutDashboard,
   FileText,
@@ -56,6 +56,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const cmsConfig = useCmsConfig();
 
   // Build flat list of nav items filtered by enabled modules
   const allItems: FlatNavItem[] = cmsConfig.adminNav.flatMap((group) =>

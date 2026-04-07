@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cmsConfig } from "../../config";
+import type { CmsNavGroup, CmsNavItem } from "../../config";
+import { useCmsConfig } from "./CmsProvider";
 import { cn } from "../../utils";
 import {
   LayoutDashboard,
@@ -69,15 +70,16 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSidebarProps) {
   const pathname = usePathname();
+  const cmsConfig = useCmsConfig();
 
   const filteredNav = cmsConfig.adminNav
-    .map((group) => ({
+    .map((group: CmsNavGroup) => ({
       ...group,
       items: group.items.filter(
-        (item) => !item.module || cmsConfig.modules[item.module]
+        (item: CmsNavItem) => !item.module || cmsConfig.modules[item.module]
       ),
     }))
-    .filter((group) => group.items.length > 0);
+    .filter((group: CmsNavGroup) => group.items.length > 0);
 
   return (
     <aside

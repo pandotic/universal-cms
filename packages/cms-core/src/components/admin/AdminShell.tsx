@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { cmsConfig } from "../../config";
+import { useCmsConfig } from "./CmsProvider";
 import { cn } from "../../utils";
 import { AdminSidebar } from "./AdminSidebar";
 import { CommandPalette } from "./CommandPalette";
@@ -53,6 +53,7 @@ function buildBreadcrumbs(pathname: string) {
 }
 
 export function AdminShell({ children, title, description }: AdminShellProps) {
+  const cmsConfig = useCmsConfig();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
