@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { requireAdmin, apiError } from "@pandotic/universal-cms/middleware";
 
 export async function POST(request: NextRequest) {
+  const authClient = await createClient();
+  const authError = await requireAdmin(authClient, request);
+  if (authError) return authError;
+
   try {
     const { messages } = await request.json();
 
-    // AI chat requires ANTHROPIC_API_KEY env var
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
         { error: "ANTHROPIC_API_KEY not configured" },
@@ -18,6 +22,6 @@ export async function POST(request: NextRequest) {
       data: { message: "AI chat is ready to be configured." },
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return apiError(e);
   }
 }

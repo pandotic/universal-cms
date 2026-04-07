@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin, apiError } from "@pandotic/universal-cms/middleware";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authClient = await createClient();
+  const authError = await requireAdmin(authClient, request);
+  if (authError) return authError;
+
   try {
     const supabase = await createAdminClient();
 
@@ -25,6 +30,6 @@ export async function GET() {
       },
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return apiError(e);
   }
 }

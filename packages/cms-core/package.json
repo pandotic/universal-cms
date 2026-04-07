@@ -9,6 +9,8 @@
     "./config": "./src/config.ts",
     "./types": "./src/types/index.ts",
     "./security": "./src/security/index.ts",
+    "./middleware": "./src/middleware/index.ts",
+    "./version": "./src/version.ts",
     "./data/content": "./src/data/content-pages.ts",
     "./data/entities": "./src/data/entities.ts",
     "./data/reviews": "./src/data/reviews.ts",

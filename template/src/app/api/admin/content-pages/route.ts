@@ -1,27 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin, apiError } from "@pandotic/universal-cms/middleware";
 import {
   getAllContentPages,
   createContentPage,
 } from "@pandotic/universal-cms/data/content";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authClient = await createClient();
+  const authError = await requireAdmin(authClient, request);
+  if (authError) return authError;
+
   try {
     const supabase = await createAdminClient();
     const pages = await getAllContentPages(supabase);
     return NextResponse.json({ data: pages });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return apiError(e);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const authClient = await createClient();
+  const authError = await requireAdmin(authClient, request);
+  if (authError) return authError;
+
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
     const page = await createContentPage(supabase, body);
     return NextResponse.json({ data: page }, { status: 201 });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return apiError(e);
   }
 }
