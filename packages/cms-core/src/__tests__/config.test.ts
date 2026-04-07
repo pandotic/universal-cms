@@ -45,7 +45,7 @@ describe("modulesFromPreset", () => {
   it("returns a record with every CmsModuleName key", () => {
     const result = modulesFromPreset(modulePresets.appMarketing);
     // Should have exactly 30 keys (all module names)
-    expect(Object.keys(result).length).toBe(30);
+    expect(Object.keys(result).length).toBe(31);
   });
 });
 

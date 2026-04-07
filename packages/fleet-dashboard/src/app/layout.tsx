@@ -7,10 +7,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Fleet Dashboard",
-    template: "%s | Fleet Dashboard",
+    default: "Pandotic Hub",
+    template: "%s | Pandotic Hub",
   },
-  description: "Monitor all sites deployed with Universal CMS",
+  description: "Operations hub for Pandotic — fleet management, API usage tracking, and cost analytics across all deployed sites and apps",
 };
 
 export default function RootLayout({
@@ -26,21 +26,39 @@ export default function RootLayout({
             <div className="flex h-14 items-center justify-between">
               <Link href="/" className="flex items-center gap-3">
                 <span className="text-lg font-semibold tracking-tight text-white">
-                  Fleet Dashboard
+                  Pandotic Hub
                 </span>
               </Link>
               <nav className="flex items-center gap-6 text-sm">
                 <Link
-                  href="/"
+                  href="/fleet"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
-                  Overview
+                  Fleet
                 </Link>
                 <Link
                   href="/modules"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
-                  Module Matrix
+                  Modules
+                </Link>
+                <Link
+                  href="/api-usage"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  API Usage
+                </Link>
+                <Link
+                  href="/api-keys"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  API Keys
+                </Link>
+                <Link
+                  href="/audit"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Audit
                 </Link>
               </nav>
             </div>

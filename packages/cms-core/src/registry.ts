@@ -286,6 +286,15 @@ export const MODULE_REGISTRY: ModuleInfo[] = [
     migrations: MODULE_MIGRATIONS.bulkImport,
     adminPath: "/admin/bulk-import",
   },
+  {
+    name: "apiUsage",
+    label: "API Usage Tracking",
+    description: "Track API calls, tokens, and costs across all providers. Self-reports usage to the Pandotic Hub for fleet-wide cost analytics.",
+    category: "system",
+    migrations: MODULE_MIGRATIONS.apiUsage,
+    dataExport: "./data/api-usage",
+    adminPath: "/admin/api-usage",
+  },
 ];
 
 /** Look up a single module by name */

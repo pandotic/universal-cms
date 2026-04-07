@@ -4,7 +4,7 @@ import { modulePresets } from "../config";
 
 describe("MODULE_REGISTRY", () => {
   it("contains exactly 30 modules", () => {
-    expect(MODULE_REGISTRY.length).toBe(30);
+    expect(MODULE_REGISTRY.length).toBe(31);
   });
 
   it("has unique module names", () => {

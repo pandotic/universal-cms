@@ -31,6 +31,7 @@ export default defineConfig({
     "components/theme/index": "src/components/theme/index.ts",
     "utils/index": "src/utils/index.ts",
     registry: "src/registry.ts",
+    "data/api-usage": "src/data/api-usage.ts",
   },
   format: ["esm"],
   dts: true,

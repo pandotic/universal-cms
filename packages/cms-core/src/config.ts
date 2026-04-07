@@ -40,7 +40,8 @@ export type CmsModuleName =
   // System
   | "errorLog"
   | "activityLog"
-  | "bulkImport";
+  | "bulkImport"
+  | "apiUsage";
 
 export type CmsRole = "admin" | "editor" | "moderator";
 
@@ -131,6 +132,7 @@ export const MODULE_MIGRATIONS: Record<CmsModuleName, string[]> = {
   errorLog: ["00018_error_log"],
   activityLog: ["00007_activity_log"],
   bulkImport: [], // UI-only, uses existing tables
+  apiUsage: ["00025_api_usage_tracking"],
 };
 
 // Migrations that are always required regardless of module selection
@@ -155,7 +157,7 @@ const ALL_MODULES: CmsModuleName[] = [
   "ratings", "forms", "ctaManager", "seo", "redirects", "linkChecker",
   "internalLinks", "imagesSeo", "compareTools", "assessmentTool",
   "resourcesPage", "smallBusinessPage", "errorLog", "activityLog",
-  "bulkImport",
+  "bulkImport", "apiUsage",
 ];
 
 export const modulePresets = {
