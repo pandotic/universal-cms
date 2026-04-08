@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { ThemeInjector } from "@pandotic/universal-cms/components/theme";
+import {
+  TrackingInjector,
+  WebmasterVerification,
+  TrackingNoscript,
+} from "@pandotic/universal-cms/components/tracking";
 import { createClient } from "@/lib/supabase/server";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -29,8 +34,11 @@ export default async function RootLayout({
           }}
         />
         <ThemeInjector client={supabase} />
+        <WebmasterVerification client={supabase} />
+        <TrackingInjector client={supabase} />
       </head>
       <body className="min-h-screen bg-surface text-foreground antialiased">
+        <TrackingNoscript client={supabase} />
         <Providers>
           {children}
         </Providers>

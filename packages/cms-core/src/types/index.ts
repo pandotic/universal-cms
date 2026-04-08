@@ -132,12 +132,28 @@ export interface EntityRatings {
   aggregate_metrics: Partial<Record<ReviewSourceName, SourceMetrics>>;
 }
 
-// ─── Analytics Provider Config ──────────────────────────────────────────────
+// ─── Tracking & Analytics ───────────────────────────────────────────────────
+
+export type TrackingProvider =
+  | "ga4"           // Google Analytics 4
+  | "gtm"           // Google Tag Manager
+  | "posthog"       // PostHog
+  | "rybbit"        // Rybbit Analytics
+  | "linkedin"      // LinkedIn Insight Tag
+  | "meta_pixel"    // Meta/Facebook Pixel
+  | "cloudflare"    // Cloudflare Web Analytics
+  | "custom";       // Custom script snippet
 
 export interface AnalyticsProviderConfig {
-  provider: string;
+  provider: TrackingProvider;
   config: Record<string, unknown>;
   enabled: boolean;
+}
+
+export interface WebmasterVerification {
+  google?: string;    // Google Search Console
+  bing?: string;      // Bing Webmaster Tools
+  yandex?: string;    // Yandex Webmaster
 }
 
 // ─── Error Log ──────────────────────────────────────────────────────────────

@@ -111,7 +111,7 @@ export const cmsConfig: CmsConfig = {
   ],
 
   analytics: {
-    availableProviders: ["ga4", "gtm", "posthog", "custom"],
+    availableProviders: ["ga4", "gtm", "posthog", "rybbit", "linkedin", "meta_pixel", "cloudflare", "custom"],
   },
 
   storage: {

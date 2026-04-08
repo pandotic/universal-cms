@@ -141,6 +141,11 @@
       "types": "./dist/components/theme/index.d.ts",
       "development": "./src/components/theme/index.ts"
     },
+    "./components/tracking": {
+      "import": "./dist/components/tracking/index.js",
+      "types": "./dist/components/tracking/index.d.ts",
+      "development": "./src/components/tracking/index.ts"
+    },
     "./utils": {
       "import": "./dist/utils/index.js",
       "types": "./dist/utils/index.d.ts",
