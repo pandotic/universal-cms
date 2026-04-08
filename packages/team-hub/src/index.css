@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafaf9;
+    --bg-tertiary: #f5f5f4;
+
+    --border-default: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.12);
+
+    --text-primary: #18181b;
+    --text-secondary: #52525b;
+    --text-tertiary: #a1a1aa;
+
+    --priority-urgent: #dc2626;
+    --priority-urgent-bg: #fef2f2;
+    --priority-discuss: #ca8a04;
+    --priority-discuss-bg: #fefce8;
+    --priority-fyi: #71717a;
+    --priority-fyi-bg: #fafafa;
+
+    --status-green: #16a34a;
+    --status-yellow: #ca8a04;
+    --status-red: #dc2626;
+    --status-gray: #71717a;
+
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  .dark {
+    --bg-primary: #0a0a0b;
+    --bg-secondary: #141416;
+    --bg-tertiary: #1c1c1f;
+    --border-default: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.12);
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+  }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    border-color: var(--border-default);
+  }
+}
+
+@layer components {
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
