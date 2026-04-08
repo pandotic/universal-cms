@@ -1,10 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAnalyticsProviders } from "../../data/site-settings";
+import type { TrackingScope } from "../../types";
 
 interface ProviderEntry {
   provider: string;
   config: Record<string, unknown>;
   enabled: boolean;
+  scope?: string;
 }
 
 function renderGA4(config: Record<string, unknown>) {
@@ -56,6 +58,18 @@ function renderRybbit(config: Record<string, unknown>) {
       defer
       src={`${host}/api/script`}
       data-site-id={siteId}
+    />
+  );
+}
+
+function renderClarity(config: Record<string, unknown>) {
+  const projectId = config.project_id as string;
+  if (!projectId) return null;
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${projectId}");`,
+      }}
     />
   );
 }
@@ -117,21 +131,59 @@ const RENDERERS: Record<string, (config: Record<string, unknown>) => React.JSX.E
   gtm: renderGTM,
   posthog: renderPostHog,
   rybbit: renderRybbit,
+  clarity: renderClarity,
   linkedin: renderLinkedIn,
   meta_pixel: renderMetaPixel,
   cloudflare: renderCloudflare,
   custom: renderCustom,
 };
 
-export async function TrackingInjector({ client }: { client: SupabaseClient }) {
+/**
+ * Default scope for each provider when not explicitly set.
+ * "all" = fires on every page (app + marketing)
+ * "marketing" = fires only on public/marketing pages
+ */
+const DEFAULT_SCOPE: Record<string, TrackingScope> = {
+  posthog: "all",
+  clarity: "all",
+  rybbit: "all",
+  ga4: "marketing",
+  gtm: "marketing",
+  linkedin: "marketing",
+  meta_pixel: "marketing",
+  cloudflare: "marketing",
+  custom: "marketing",
+};
+
+/**
+ * Renders tracking scripts for enabled providers matching the given scope.
+ *
+ * @param client  - Supabase client for reading settings
+ * @param scope   - Which providers to render:
+ *                  "all"       = only providers scoped to every page (PostHog, Clarity, Rybbit)
+ *                  "marketing" = only providers scoped to marketing pages (GA4, GTM, LinkedIn, etc.)
+ *                  If omitted, renders ALL enabled providers (backward-compatible).
+ */
+export async function TrackingInjector({
+  client,
+  scope,
+}: {
+  client: SupabaseClient;
+  scope?: TrackingScope;
+}) {
   try {
     const providers = await getAnalyticsProviders(client);
-    const enabled = providers.filter((p: ProviderEntry) => p.enabled);
-    if (enabled.length === 0) return null;
+    const filtered = providers.filter((p: ProviderEntry) => {
+      if (!p.enabled) return false;
+      if (!scope) return true; // no scope filter = render all
+      const providerScope = (p.scope as TrackingScope) || DEFAULT_SCOPE[p.provider] || "marketing";
+      return providerScope === scope;
+    });
+    if (filtered.length === 0) return null;
 
     return (
       <>
-        {enabled.map((p: ProviderEntry, i: number) => {
+        {filtered.map((p: ProviderEntry, i: number) => {
           const render = RENDERERS[p.provider];
           if (!render) return null;
           return <span key={`${p.provider}-${i}`}>{render(p.config)}</span>;

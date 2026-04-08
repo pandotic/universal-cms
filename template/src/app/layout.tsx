@@ -35,7 +35,8 @@ export default async function RootLayout({
         />
         <ThemeInjector client={supabase} />
         <WebmasterVerification client={supabase} />
-        <TrackingInjector client={supabase} />
+        {/* App-wide trackers only (PostHog, Clarity, Rybbit) */}
+        <TrackingInjector client={supabase} scope="all" />
       </head>
       <body className="min-h-screen bg-surface text-foreground antialiased">
         <TrackingNoscript client={supabase} />

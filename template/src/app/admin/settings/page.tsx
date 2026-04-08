@@ -55,6 +55,7 @@ interface AnalyticsProviderEntry {
   provider: string;
   config: Record<string, string>;
   enabled: boolean;
+  scope?: "all" | "marketing";
 }
 
 interface WebmasterSettings {
@@ -84,10 +85,24 @@ const PROVIDER_LABELS: Record<string, string> = {
   gtm: "Google Tag Manager",
   posthog: "PostHog",
   rybbit: "Rybbit Analytics",
+  clarity: "Microsoft Clarity",
   linkedin: "LinkedIn Insight Tag",
   meta_pixel: "Meta / Facebook Pixel",
   cloudflare: "Cloudflare Web Analytics",
   custom: "Custom Script",
+};
+
+/** Default scope for each provider type */
+const PROVIDER_DEFAULT_SCOPE: Record<string, "all" | "marketing"> = {
+  posthog: "all",
+  clarity: "all",
+  rybbit: "all",
+  ga4: "marketing",
+  gtm: "marketing",
+  linkedin: "marketing",
+  meta_pixel: "marketing",
+  cloudflare: "marketing",
+  custom: "marketing",
 };
 
 const PROVIDER_FIELDS: Record<string, { key: string; label: string; placeholder: string }[]> = {
@@ -101,6 +116,7 @@ const PROVIDER_FIELDS: Record<string, { key: string; label: string; placeholder:
     { key: "site_id", label: "Site ID", placeholder: "Your Rybbit site ID" },
     { key: "host", label: "Host (optional)", placeholder: "https://app.rybbit.io" },
   ],
+  clarity: [{ key: "project_id", label: "Project ID", placeholder: "Your Clarity project ID" }],
   linkedin: [{ key: "partner_id", label: "Partner ID", placeholder: "Your LinkedIn partner ID" }],
   meta_pixel: [{ key: "pixel_id", label: "Pixel ID", placeholder: "Your Meta Pixel ID" }],
   cloudflare: [{ key: "beacon_token", label: "Beacon Token", placeholder: "Your Cloudflare beacon token" }],
@@ -221,7 +237,7 @@ export default function SettingsPage() {
       ...prev,
       analytics_providers: [
         ...prev.analytics_providers,
-        { provider: "ga4", config: {}, enabled: true },
+        { provider: "ga4", config: {}, enabled: true, scope: PROVIDER_DEFAULT_SCOPE["ga4"] },
       ],
     }));
   }
@@ -238,8 +254,12 @@ export default function SettingsPage() {
       ...prev,
       analytics_providers: prev.analytics_providers.map((p, i) => {
         if (i !== index) return p;
-        if (field === "provider") return { ...p, provider: value as string, config: {} };
+        if (field === "provider") {
+          const newProvider = value as string;
+          return { ...p, provider: newProvider, config: {}, scope: PROVIDER_DEFAULT_SCOPE[newProvider] || "marketing" };
+        }
         if (field === "enabled") return { ...p, enabled: value as boolean };
+        if (field === "scope") return { ...p, scope: value as "all" | "marketing" };
         return p;
       }),
     }));
@@ -496,8 +516,8 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>Analytics &amp; Tracking</CardTitle>
               <CardDescription>
-                Configure one or more analytics and tracking providers. All enabled providers
-                will have their scripts injected into every page.
+                Configure one or more analytics and tracking providers. Use the scope setting
+                to control whether a tag fires on all pages or only on the marketing site.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -545,6 +565,19 @@ export default function SettingsPage() {
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Label className="text-xs whitespace-nowrap">Scope</Label>
+                    <Select
+                      value={provider.scope || PROVIDER_DEFAULT_SCOPE[provider.provider] || "marketing"}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        updateProvider(index, "scope", e.target.value)
+                      }
+                    >
+                      <option value="all">All pages (app + marketing)</option>
+                      <option value="marketing">Marketing site only</option>
+                    </Select>
                   </div>
 
                   {(PROVIDER_FIELDS[provider.provider] ?? []).map((field) => (

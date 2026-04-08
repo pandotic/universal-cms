@@ -139,15 +139,20 @@ export type TrackingProvider =
   | "gtm"           // Google Tag Manager
   | "posthog"       // PostHog
   | "rybbit"        // Rybbit Analytics
+  | "clarity"       // Microsoft Clarity
   | "linkedin"      // LinkedIn Insight Tag
   | "meta_pixel"    // Meta/Facebook Pixel
   | "cloudflare"    // Cloudflare Web Analytics
   | "custom";       // Custom script snippet
 
+/** Where the tracking script should fire */
+export type TrackingScope = "all" | "marketing";
+
 export interface AnalyticsProviderConfig {
   provider: TrackingProvider;
   config: Record<string, unknown>;
   enabled: boolean;
+  scope?: TrackingScope; // defaults to "marketing" if omitted
 }
 
 export interface WebmasterVerification {
