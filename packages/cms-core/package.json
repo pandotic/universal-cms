@@ -155,6 +155,26 @@
       "import": "./dist/data/api-usage.js",
       "types": "./dist/data/api-usage.d.ts",
       "development": "./src/data/api-usage.ts"
+    },
+    "./types/hub": {
+      "import": "./dist/types/hub.js",
+      "types": "./dist/types/hub.d.ts",
+      "development": "./src/types/hub.ts"
+    },
+    "./data/hub": {
+      "import": "./dist/data/hub-properties.js",
+      "types": "./dist/data/hub-properties.d.ts",
+      "development": "./src/data/hub-properties.ts"
+    },
+    "./data/hub-users": {
+      "import": "./dist/data/hub-users.js",
+      "types": "./dist/data/hub-users.d.ts",
+      "development": "./src/data/hub-users.ts"
+    },
+    "./data/hub-activity": {
+      "import": "./dist/data/hub-activity.js",
+      "types": "./dist/data/hub-activity.d.ts",
+      "development": "./src/data/hub-activity.ts"
     }
   },
   "files": [
@@ -205,7 +225,7 @@
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@supabase/ssr": "^0.6.0",
-    "@supabase/supabase-js": "^2.49.0",
+    "@supabase/supabase-js": "^2.102.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
