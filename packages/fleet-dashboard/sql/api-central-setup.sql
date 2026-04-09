@@ -57,7 +57,7 @@ create index if not exists idx_api_secrets_service on api_secrets(service_id);
 create index if not exists idx_projects_active on projects(active);
 
 -- ─── RLS Policies ────────────────────────────────────────────────────────────
--- Auth is handled at the Netlify Function layer, so we allow anon access
+-- Auth is handled at the API route layer, so we allow anon access
 -- through PostgREST. If you want DB-level auth, replace these with
 -- authenticated-only policies.
 
