@@ -41,6 +41,12 @@ export default function RootLayout({
                   Fleet
                 </Link>
                 <Link
+                  href="/groups"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Groups
+                </Link>
+                <Link
                   href="/modules"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
@@ -63,6 +69,12 @@ export default function RootLayout({
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
                   Audit
+                </Link>
+                <Link
+                  href="/users"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Users
                 </Link>
                 <UserNav />
               </nav>

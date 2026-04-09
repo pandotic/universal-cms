@@ -20,6 +20,19 @@ export async function listProperties(
   if (filters?.healthStatus)
     query = query.eq("health_status", filters.healthStatus);
 
+  // Filter by group: fetch property IDs from hub_group_properties, then filter
+  if (filters?.groupId) {
+    const { data: gp, error: gpError } = await client
+      .from("hub_group_properties")
+      .select("property_id")
+      .eq("group_id", filters.groupId);
+
+    if (gpError) throw gpError;
+    const ids = (gp ?? []).map((r: { property_id: string }) => r.property_id);
+    if (ids.length === 0) return [];
+    query = query.in("id", ids);
+  }
+
   const { data, error } = await query.order("name");
   if (error) throw error;
   return data ?? [];

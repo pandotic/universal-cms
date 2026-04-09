@@ -36,6 +36,7 @@ export default defineConfig({
     "data/hub-properties": "src/data/hub-properties.ts",
     "data/hub-users": "src/data/hub-users.ts",
     "data/hub-activity": "src/data/hub-activity.ts",
+    "data/hub-groups": "src/data/hub-groups.ts",
   },
   format: ["esm"],
   dts: true,

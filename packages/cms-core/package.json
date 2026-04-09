@@ -175,6 +175,11 @@
       "import": "./dist/data/hub-activity.js",
       "types": "./dist/data/hub-activity.d.ts",
       "development": "./src/data/hub-activity.ts"
+    },
+    "./data/hub-groups": {
+      "import": "./dist/data/hub-groups.js",
+      "types": "./dist/data/hub-groups.d.ts",
+      "development": "./src/data/hub-groups.ts"
     }
   },
   "files": [
