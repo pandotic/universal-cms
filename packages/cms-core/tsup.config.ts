@@ -29,6 +29,7 @@ export default defineConfig({
     "components/admin/index": "src/components/admin/index.ts",
     "components/ui/index": "src/components/ui/index.ts",
     "components/theme/index": "src/components/theme/index.ts",
+    "components/tracking/index": "src/components/tracking/index.ts",
     "utils/index": "src/utils/index.ts",
     registry: "src/registry.ts",
     "data/api-usage": "src/data/api-usage.ts",
