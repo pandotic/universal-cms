@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranscript, useProcessTranscript } from '@/hooks/useTranscript'
 import { useOpenIssues } from '@/hooks/useIssues'
 import { TranscriptResults } from './TranscriptResults'
-import { FileText, Loader2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { FileText, Loader2, Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface TranscriptSyncProps {
@@ -16,6 +17,45 @@ export function TranscriptSync({ meetingId, readOnly }: TranscriptSyncProps) {
   const processTranscript = useProcessTranscript()
   const [showInput, setShowInput] = useState(false)
   const [text, setText] = useState('')
+  const [fetchingGranola, setFetchingGranola] = useState(false)
+  const [granolaMeetings, setGranolaMeetings] = useState<Array<{ id: string; title: string; date: string }> | null>(null)
+
+  const handleFetchGranolaList = async () => {
+    setFetchingGranola(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-granola', {
+        body: { action: 'list' },
+      })
+      if (error) throw error
+      setGranolaMeetings(data.meetings ?? data ?? [])
+    } catch {
+      toast.error('Could not fetch from Granola. Check if GRANOLA_API_KEY is set.')
+      // Fall back to manual paste
+      setShowInput(true)
+    } finally {
+      setFetchingGranola(false)
+    }
+  }
+
+  const handleSelectGranolaMeeting = async (granolaMeetingId: string) => {
+    setFetchingGranola(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-granola', {
+        body: { action: 'transcript', meeting_id: granolaMeetingId },
+      })
+      if (error) throw error
+      const transcriptText = data.transcript ?? data.text ?? JSON.stringify(data)
+      setText(transcriptText)
+      setGranolaMeetings(null)
+      setShowInput(true)
+      toast.success('Transcript fetched from Granola')
+    } catch {
+      toast.error('Could not fetch transcript. Try pasting manually.')
+      setShowInput(true)
+    } finally {
+      setFetchingGranola(false)
+    }
+  }
 
   const handleProcess = () => {
     if (!text.trim()) return
@@ -64,24 +104,73 @@ export function TranscriptSync({ meetingId, readOnly }: TranscriptSyncProps) {
 
   if (readOnly) return null
 
+  // Granola meeting picker
+  if (granolaMeetings) {
+    return (
+      <div className="space-y-2">
+        <p className="text-[12px] font-medium" style={{ color: 'var(--text-tertiary)' }}>
+          Select a Granola meeting
+        </p>
+        {granolaMeetings.length === 0 ? (
+          <p className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
+            No recent meetings found. <button onClick={() => { setGranolaMeetings(null); setShowInput(true) }} className="underline" style={{ color: 'var(--accent)' }}>Paste manually</button>
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {granolaMeetings.map((gm) => (
+              <button
+                key={gm.id}
+                onClick={() => handleSelectGranolaMeeting(gm.id)}
+                className="flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-[13px] transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
+                style={{ borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+              >
+                <FileText size={14} style={{ color: 'var(--text-tertiary)' }} />
+                <span className="flex-1">{gm.title || 'Untitled meeting'}</span>
+                {gm.date && <span className="text-[11px]" style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{gm.date}</span>}
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => { setGranolaMeetings(null); setShowInput(true) }}
+          className="text-[12px]"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          Or paste transcript manually
+        </button>
+      </div>
+    )
+  }
+
   // Not yet synced
   if (!showInput) {
     return (
-      <button
-        onClick={() => setShowInput(true)}
-        className="flex items-center gap-2 rounded-md border px-3 py-2 text-[13px] font-medium transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
-        style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-      >
-        <FileText size={14} />
-        Sync meeting transcript
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={handleFetchGranolaList}
+          disabled={fetchingGranola}
+          className="flex items-center gap-2 rounded-md border px-3 py-2 text-[13px] font-medium transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
+          style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
+        >
+          {fetchingGranola ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+          Fetch from Granola
+        </button>
+        <button
+          onClick={() => setShowInput(true)}
+          className="flex items-center gap-2 rounded-md border px-3 py-2 text-[13px] font-medium transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
+          style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
+        >
+          <FileText size={14} />
+          Paste transcript
+        </button>
+      </div>
     )
   }
 
   return (
     <div className="space-y-3">
       <p className="text-[12px] font-medium" style={{ color: 'var(--text-tertiary)' }}>
-        Paste the meeting transcript from Granola
+        {text ? 'Transcript from Granola (edit if needed)' : 'Paste the meeting transcript from Granola'}
       </p>
       <textarea
         value={text}

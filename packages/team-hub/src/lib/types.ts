@@ -69,6 +69,7 @@ export interface Meeting {
   current_section: number
   section_started_at: string | null
   timer_paused: boolean
+  prep_ready: string[]
   created_at: string
   updated_at: string
 }
@@ -145,6 +146,7 @@ export interface MeetingTranscript {
   id: string
   meeting_id: string
   granola_meeting_id: string | null
+  granola_url: string | null
   transcript_text: string | null
   ai_summary: string | null
   ai_extracted_todos: ExtractedTodo[]
@@ -204,4 +206,37 @@ export interface WeeklyUserStats {
   chronic_carry_forwards: number
   pending_commitments: number
   broken_commitments: number
+}
+
+// Phase 3 types
+
+export interface MeetingPrep {
+  id: string
+  meeting_id: string
+  user_id: string
+  issue_id: string
+  priority_vote: number
+  note: string | null
+  created_at: string
+}
+
+export interface MeetingPrepWithUser extends MeetingPrep {
+  users: Pick<User, 'name' | 'short_name' | 'color'>
+}
+
+export interface MeetingIssueOrder {
+  id: string
+  meeting_id: string
+  issue_id: string
+  sort_position: number
+}
+
+export interface MeetingStats {
+  meeting_id: string
+  meeting_date: string
+  rating: number | null
+  chair_id: string | null
+  issues_resolved: number
+  todos_created: number
+  commitments_made: number
 }
