@@ -131,6 +131,78 @@ The analytics integration (`src/lib/analytics/`) is mostly provider-agnostic alr
    const pages = await getAllContentPages(supabase);
    ```
 
+---
+
+## Hub Dashboard — Future Phases
+
+> The App Admin foundation is complete (admin-core, admin-ui, admin-schema, apps/dashboard).
+> These phases build out the full Hub vision from `DASHBOARD.md` incrementally.
+> SQL schemas for all tables are already defined in DASHBOARD.md — copy into migrations when starting a phase.
+> All hub tables use `hub_` prefix. Migrations start at `00100_` to avoid collision with per-site migrations.
+
+### Phase A: Hub Properties (replaces `connected_apps`)
+
+Migrate `connected_apps` to the richer `hub_properties` table.
+
+- **Table**: `hub_properties` (DASHBOARD.md SQL: `00100_hub_properties`)
+- **Adds over connected_apps**: `property_type` (site|app), `slug`, `preset`, `enabled_modules[]`, `status` (active/paused/archived/error), `ssl_valid`, `ssl_expires_at`, `last_deploy_at`, `metadata` jsonb
+- **Dashboard**: new entity adapter, property detail page, property grid with type badges, migration script from connected_apps
+
+### Phase B: Groups & Scoped Access
+
+Organize properties into portfolios for B2B clients and internal teams.
+
+- **Tables**: `hub_groups`, `hub_group_properties` (DASHBOARD.md SQL: `00101_hub_groups`)
+- **Dashboard**: group management panel, group dashboard view, group-level aggregated stats
+
+### Phase C: Hub Users & RBAC Upgrade
+
+Hub-level roles (`super_admin`, `group_admin`, `member`, `viewer`) for multi-property access.
+
+- **Tables**: `hub_users`, `hub_user_group_access` (DASHBOARD.md SQL: `00102_hub_users`)
+- **Dashboard**: hub user management, group access assignment, RLS via user_group_access chain
+
+### Phase D: Hub Activity Log
+
+Cross-property activity tracking at the Hub level.
+
+- **Table**: `hub_activity_log` (DASHBOARD.md SQL: `00103_hub_activity_log`)
+- **Dashboard**: hub-wide activity feed, per-property activity, filter by user/property/group
+
+### Phase E: Claude Agent Workflows
+
+AI agents that run automated tasks (SEO audit, broken links, image optimization, dependency updates, etc.).
+
+- **Tables**: `hub_agents`, `hub_agent_runs` (DASHBOARD.md SQL: `00104_agents`)
+- **Dashboard**: agent management, run history, manual trigger, agent status on property cards
+- **Note**: Hub manages state only; execution happens in consuming projects via edge functions/cron
+
+### Phase F: Social Media Content & Briefs
+
+Generate social content from published articles with brand voice consistency.
+
+- **Tables**: `hub_brand_voice_briefs`, `hub_social_content` (DASHBOARD.md SQL: `00105_social_content`)
+- **Dashboard**: brand voice editor, content generator, content calendar, content list
+- **Note**: No direct API posting — content for copy/paste into Buffer, Hootsuite, or native platforms
+
+### Phase G: AppConfig Module System
+
+Parallel to CmsConfig — a module system for SaaS app admin (userManagement, subscriptions, billing, notifications, featureFlags, supportTickets, appAnalytics, dataExport, webhooks, apiKeys).
+
+### Phase H: Cross-Property Analytics & Integration
+
+`PropertyDataFetcher` interface, webhook events (deploy, health, errors), package exports under `@pandotic/universal-cms/types/hub`, `/data/hub`, `/components/hub`.
+
+### Starting a New Phase
+
+1. Read this section and `DASHBOARD.md` for full context (SQL schemas are ready to copy)
+2. Create migrations in `apps/dashboard/supabase/migrations/`
+3. Create entity adapters in `apps/dashboard/src/adapters/` (follow `connectedApp.ts` pattern)
+4. Add tabs/pages to the dashboard
+5. Build admin-core services if needed (parameterized Supabase client pattern)
+
+---
+
 ## Migration CLI Tool
 
 Planned CLI commands for project scaffolding and migration management:
