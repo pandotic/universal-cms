@@ -2,6 +2,8 @@
 // Sites provide their own CmsConfig values. This file exports only
 // the shared types and quick-start module presets.
 
+import type { TrackingProvider } from "./types";
+
 export type CmsModuleName =
   // Content & Pages
   | "contentPages"
@@ -78,8 +80,8 @@ export interface CmsConfig {
 
   analytics: {
     // Provider-agnostic: configured via site_settings in admin
-    // This just controls which providers are available
-    availableProviders: string[];
+    // This just controls which providers are available in the admin UI
+    availableProviders: TrackingProvider[];
   };
 
   storage: {
