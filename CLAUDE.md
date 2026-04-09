@@ -60,7 +60,7 @@ Apps define an `EntityAdapter` (from admin-core) to describe their domain entity
 
 ## Future
 
-`DASHBOARD.md` contains the full Hub vision (hub_properties, hub_groups, hub_agents, hub_social_content). Current implementation focuses on the admin-extraction packages; hub features will be built incrementally.
+`ROADMAP.md` has the phased plan (A through H) for building out the full Hub Dashboard. `DASHBOARD.md` has the complete architectural vision with SQL schemas ready to copy. Start with the "Hub Dashboard — Future Phases" section in `ROADMAP.md`.
 
 ## Reference
 
