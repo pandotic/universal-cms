@@ -1,15 +1,21 @@
 import Link from "next/link";
 import { cmsConfig } from "@/cms.config";
+import { TrackingInjector } from "@pandotic/universal-cms/components/tracking";
+import { createClient } from "@/lib/supabase/server";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const { siteName, primaryEntity } = cmsConfig;
+  const supabase = await createClient();
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Marketing-only trackers (GA4, GTM, LinkedIn, Meta Pixel, etc.) */}
+      <TrackingInjector client={supabase} scope="marketing" />
+
       {/* Header — Customize for your site */}
       <header className="border-b border-border bg-surface">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
