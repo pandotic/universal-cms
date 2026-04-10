@@ -1,4 +1,5 @@
 import { IssueCard } from './IssueCard'
+import { IssueReorderControls } from '@/components/meeting/IssueReorder'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CircleDot } from 'lucide-react'
 import { useUIStore } from '@/stores/ui'
@@ -8,9 +9,10 @@ interface IssueListProps {
   issues: OpenIssue[]
   meetingId?: string
   isLoading?: boolean
+  showReorderControls?: boolean
 }
 
-export function IssueList({ issues, meetingId, isLoading }: IssueListProps) {
+export function IssueList({ issues, meetingId, isLoading, showReorderControls }: IssueListProps) {
   const openDumpModal = useUIStore((s) => s.openDumpModal)
 
   if (isLoading) {
@@ -37,6 +39,28 @@ export function IssueList({ issues, meetingId, isLoading }: IssueListProps) {
     )
   }
 
+  // When in meeting with reorder controls, show flat list (already ordered)
+  if (showReorderControls && meetingId) {
+    return (
+      <div className="space-y-2">
+        {issues.map((issue, i) => (
+          <div key={issue.id} className="flex items-start gap-1">
+            <IssueReorderControls
+              meetingId={meetingId}
+              issueId={issue.id}
+              currentPosition={i}
+              totalIssues={issues.length}
+            />
+            <div className="flex-1">
+              <IssueCard issue={issue} meetingId={meetingId} />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Standard grouped view
   const urgent = issues.filter((i) => i.priority === 'urgent')
   const discuss = issues.filter((i) => i.priority === 'discuss')
   const fyi = issues.filter((i) => i.priority === 'fyi')

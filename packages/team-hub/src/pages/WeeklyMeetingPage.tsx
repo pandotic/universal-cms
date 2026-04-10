@@ -1,5 +1,6 @@
 import { useCurrentMeeting } from '@/hooks/useMeetings'
 import { MeetingView } from '@/components/meeting/MeetingView'
+import { MeetingPrepPanel } from '@/components/meeting/MeetingPrepPanel'
 
 export default function WeeklyMeetingPage() {
   const { data: meeting, isLoading, error } = useCurrentMeeting()
@@ -29,5 +30,13 @@ export default function WeeklyMeetingPage() {
 
   if (!meeting) return null
 
-  return <MeetingView meeting={meeting} />
+  return (
+    <div>
+      {/* Show prep panel before meeting starts */}
+      {meeting.status === 'scheduled' && (
+        <MeetingPrepPanel meeting={meeting} />
+      )}
+      <MeetingView meeting={meeting} />
+    </div>
+  )
 }

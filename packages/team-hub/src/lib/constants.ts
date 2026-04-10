@@ -24,9 +24,14 @@ export const TEAM_MEMBERS = [
 ] as const
 
 export const AGENDA_SECTIONS = [
-  { number: '01', title: 'Company health', timeBudget: '5 min' },
-  { number: '02', title: 'Command Center review', timeBudget: '10 min' },
-  { number: '03', title: 'Issues list — IDS', timeBudget: '15 min' },
-  { number: '04', title: 'To-dos', timeBudget: '5 min' },
-  { number: '05', title: 'Closing', timeBudget: '1 min' },
+  { number: '01', title: 'Company health', timeBudget: '5 min', seconds: 300 },
+  { number: '02', title: 'Command Center review', timeBudget: '10 min', seconds: 600 },
+  { number: '03', title: 'Accountability review', timeBudget: '5 min', seconds: 300 },
+  { number: '04', title: 'Issues list — IDS', timeBudget: '15 min', seconds: 900 },
+  { number: '05', title: 'To-dos', timeBudget: '5 min', seconds: 300 },
+  { number: '06', title: 'Notes', timeBudget: '2 min', seconds: 120 },
+  { number: '07', title: 'Closing + Transcript', timeBudget: '3 min', seconds: 180 },
 ] as const
+
+export const COMMITMENT_STATUSES = ['pending', 'fulfilled', 'broken', 'carried'] as const
+export type CommitmentStatus = (typeof COMMITMENT_STATUSES)[number]

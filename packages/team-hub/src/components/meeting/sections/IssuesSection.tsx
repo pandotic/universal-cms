@@ -1,5 +1,6 @@
 import { useOpenIssues } from '@/hooks/useIssues'
 import { IssueList } from '@/components/issues/IssueList'
+import { useOrderedIssues } from '@/components/meeting/IssueReorder'
 import { useUIStore } from '@/stores/ui'
 
 interface IssuesSectionProps {
@@ -11,12 +12,16 @@ export function IssuesSection({ meetingId, readOnly }: IssuesSectionProps) {
   const { data: issues, isLoading } = useOpenIssues()
   const openDumpModal = useUIStore((s) => s.openDumpModal)
 
+  // Apply meeting-specific ordering (from prep votes or manual reorder)
+  const orderedIssues = useOrderedIssues(readOnly ? undefined : meetingId, issues ?? [])
+
   return (
     <div>
       <IssueList
-        issues={issues ?? []}
+        issues={orderedIssues}
         meetingId={readOnly ? undefined : meetingId}
         isLoading={isLoading}
+        showReorderControls={!readOnly}
       />
       {!readOnly && (
         <button
