@@ -10,6 +10,7 @@ import { BootstrapAdminPage } from './pages/BootstrapAdminPage';
 import { ConnectedAppsPage } from './pages/ConnectedAppsPage';
 import { RegisterAppPage } from './pages/RegisterAppPage';
 import { AdminPage } from './pages/AdminPage';
+import { PMFEvaluatorPage } from './pages/PMFEvaluatorPage';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -73,6 +74,11 @@ export function App() {
           <Route path="/dashboard" element={<ConnectedAppsPage />} />
           <Route path="/dashboard/register" element={<RegisterAppPage />} />
           <Route path="/admin" element={<AdminRouteWrapper />} />
+        </Route>
+
+        {/* Full-bleed layout for embedded tools */}
+        <Route element={<RequireAuth><AppLayout fullBleed /></RequireAuth>}>
+          <Route path="/dashboard/tools/pmf-evaluator" element={<PMFEvaluatorPage />} />
         </Route>
       </Routes>
     </AuthProvider>

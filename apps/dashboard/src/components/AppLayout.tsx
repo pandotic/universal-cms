@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Shield, LogOut } from 'lucide-react';
+import { LayoutDashboard, Shield, LogOut, Wrench } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useIsPlatformAdmin } from '@universal-cms/admin-core';
 import { supabase } from '../lib/supabaseClient';
 import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
 
-export function AppLayout() {
+export function AppLayout({ fullBleed = false }: { fullBleed?: boolean }) {
   const { user, signOut } = useAuth();
   const { isAdmin } = useIsPlatformAdmin(
     supabase as unknown as SupabaseClientAdapter,
@@ -29,6 +29,14 @@ export function AppLayout() {
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
+            </Link>
+
+            <Link
+              to="/dashboard/tools/pmf-evaluator"
+              className={`flex items-center gap-1.5 text-sm ${isActive('/dashboard/tools') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              <Wrench className="h-4 w-4" />
+              Tools
             </Link>
 
             {isAdmin && (
@@ -55,7 +63,7 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className={fullBleed ? '' : 'max-w-7xl mx-auto px-6 py-8'}>
         <Outlet />
       </main>
     </div>
