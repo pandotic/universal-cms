@@ -1,5 +1,13 @@
 # Universal CMS — Project Context for Claude
 
+## Local Development Environment
+
+**Owner:** Dan Golden (`dangolden`)
+**Local GitHub repos directory:** `/Users/dangolden/Documents/Github/`
+**This repo locally:** `/Users/dangolden/Documents/Github/universal-cms/`
+
+When providing terminal commands for the user to run locally, always use `/Users/dangolden/Documents/Github/` as the base path for git repos. Do NOT use `~/universal-cms` or `~/repos/` — those don't exist.
+
 ## Project Overview
 
 Monorepo (`pnpm workspaces`) with three packages:
