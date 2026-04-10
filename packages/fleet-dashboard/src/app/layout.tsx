@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { UserNav } from "./user-nav";
 
 export const metadata: Metadata = {
   title: {
@@ -28,10 +29,22 @@ export default function RootLayout({
               </Link>
               <nav className="flex items-center gap-6 text-sm">
                 <Link
+                  href="/properties"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Properties
+                </Link>
+                <Link
                   href="/fleet"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
                   Fleet
+                </Link>
+                <Link
+                  href="/groups"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Groups
                 </Link>
                 <Link
                   href="/modules"
@@ -63,6 +76,13 @@ export default function RootLayout({
                 >
                   Audit
                 </Link>
+                <Link
+                  href="/users"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Users
+                </Link>
+                <UserNav />
               </nav>
             </div>
           </div>
