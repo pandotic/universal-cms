@@ -71,6 +71,12 @@ export default function RootLayout({
                   API Central
                 </Link>
                 <Link
+                  href="/skill-store"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Skill Store
+                </Link>
+                <Link
                   href="/audit"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
