@@ -3,7 +3,7 @@ import { AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePMFBridge } from '../hooks/usePMFBridge';
 
-const PMF_URL = import.meta.env.VITE_PMF_EVALUATOR_URL as string | undefined;
+const PMF_URL = (import.meta.env.VITE_PMF_EVALUATOR_URL as string | undefined) ?? 'https://pmfdf.netlify.app';
 
 function getOrigin(url: string): string {
   try {
