@@ -4,6 +4,7 @@ import { useCurrentUserStore } from '@/stores/currentUser'
 import { useDumpClassify } from '@/hooks/useDumpClassify'
 import { useCreateIssue } from '@/hooks/useIssues'
 import { useCreateTodo } from '@/hooks/useTodos'
+import { useCreateNote } from '@/hooks/useNotes'
 import { AiClassificationPanel } from './AiClassificationPanel'
 import { TEAM_MEMBERS } from '@/lib/constants'
 import { getNextMeetingDate, formatDate } from '@/lib/utils'
@@ -30,6 +31,7 @@ export function DumpModal() {
   const [dueDate, setDueDate] = useState(formatDate(getNextMeetingDate()))
 
   const classify = useDumpClassify()
+  const createNote = useCreateNote()
   const createIssue = useCreateIssue()
   const createTodo = useCreateTodo()
 
@@ -105,7 +107,20 @@ export function DumpModal() {
         }
       )
     }
-  }, [text, effectiveType, classification, priority, classify, createIssue, createTodo, closeDumpModal, owner, dueDate])
+
+    // Handle note type (from dump bar "Just a note" button)
+    if (dumpModalPresetType === 'note' && !effectiveType) {
+      createNote.mutate(
+        { text: text.trim() },
+        {
+          onSuccess: () => {
+            toast.success('Note saved')
+            closeDumpModal()
+          },
+        }
+      )
+    }
+  }, [text, effectiveType, classification, priority, classify, createIssue, createTodo, createNote, closeDumpModal, owner, dueDate, dumpModalPresetType])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

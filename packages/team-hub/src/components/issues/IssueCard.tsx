@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { MoreHorizontal, ArrowRight, X } from 'lucide-react'
+import { MoreHorizontal, ArrowRight, X, MessageSquare } from 'lucide-react'
 import { PriorityBadge } from '@/components/ui/PriorityBadge'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ResolveDialog } from './ResolveDialog'
+import { IssueDiscussionPanel } from './IssueDiscussionPanel'
 import { useDeferIssue, useDropIssue } from '@/hooks/useIssues'
 import { timeAgo } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -16,6 +17,7 @@ interface IssueCardProps {
 export function IssueCard({ issue, meetingId }: IssueCardProps) {
   const [showResolve, setShowResolve] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const [showDiscussion, setShowDiscussion] = useState(false)
   const deferIssue = useDeferIssue()
   const dropIssue = useDropIssue()
 
@@ -74,6 +76,15 @@ export function IssueCard({ issue, meetingId }: IssueCardProps) {
             </div>
           </div>
           <div className="relative flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+            {meetingId && (
+              <button
+                onClick={() => setShowDiscussion(!showDiscussion)}
+                className="rounded-md border p-1 transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
+                style={{ borderColor: 'var(--border-default)', color: showDiscussion ? 'var(--accent)' : 'var(--text-tertiary)' }}
+              >
+                <MessageSquare size={14} />
+              </button>
+            )}
             <button
               onClick={() => setShowResolve(true)}
               className="rounded-md border px-2 py-1 text-[12px] font-medium transition-colors duration-150 hover:bg-[var(--bg-tertiary)]"
@@ -113,6 +124,9 @@ export function IssueCard({ issue, meetingId }: IssueCardProps) {
             )}
           </div>
         </div>
+        {showDiscussion && (
+          <IssueDiscussionPanel issueId={issue.id} meetingId={meetingId} />
+        )}
       </div>
 
       {showResolve && (

@@ -121,9 +121,19 @@ export function useCarryForwardTodo() {
 
   return useMutation({
     mutationFn: async ({ id, newDueDate }: { id: string; newDueDate: string }) => {
+      // Increment carry_count and update due date
+      const { data: todo } = await supabase
+        .from('todos')
+        .select('carry_count')
+        .eq('id', id)
+        .single()
+
       const { error } = await supabase
         .from('todos')
-        .update({ due_date: newDueDate })
+        .update({
+          due_date: newDueDate,
+          carry_count: (todo?.carry_count ?? 0) + 1,
+        })
         .eq('id', id)
       if (error) throw error
     },

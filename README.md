@@ -6,20 +6,44 @@ A modular, config-driven CMS framework for Next.js + Supabase. Extract your admi
 
 ```
 universal-cms/
-├── packages/cms-core/     # @pandotic/universal-cms — the npm package
-│   └── src/
-│       ├── ai/            # AI chat (Anthropic SDK)
-│       ├── components/    # Admin shell, UI library, theme
-│       ├── config.ts      # Module system, presets, types
-│       ├── data/          # 17 data modules (Supabase queries)
-│       ├── security/      # Rate limiting, validation, headers
-│       ├── types/         # Shared TypeScript types
-│       └── utils/         # cn(), contrast, colors
-├── template/              # Starter Next.js 16 app
-│   ├── src/app/admin/     # Admin pages
-│   ├── src/app/api/       # API routes
-│   └── supabase/          # SQL migrations (24 files)
+├── packages/
+│   ├── cms-core/          # @pandotic/universal-cms — the CMS npm package
+│   ├── admin-core/        # @universal-cms/admin-core — headless admin logic (RBAC, services, hooks)
+│   ├── admin-ui/          # @universal-cms/admin-ui — React admin UI components
+│   └── admin-schema/      # @universal-cms/admin-schema — Supabase SQL migrations for admin tables
+├── apps/
+│   └── dashboard/         # @universal-cms/dashboard — admin hub app (Vite + React)
+├── template/              # Starter Next.js 16 app (uses cms-core)
 └── docs/                  # Documentation
+```
+
+### Admin System (Three-Tier Model)
+
+The admin packages implement a three-tier permission model:
+
+| Tier | Role | Scope |
+|------|------|-------|
+| Platform Admin | `platform_admin` | Full system access across all orgs and entities |
+| Group Admin | `org_admin` | Manages a specific organization and its members |
+| Entity Admin | `entity_admin` | Manages specific entities they own or are assigned |
+
+**Entity Adapter Pattern**: Apps define an `EntityAdapter` to tell the admin system what their domain entity is (e.g., "Home" in HomeDoc, "Concert" in ConcertBucket). The admin-ui components render list/detail views based on this adapter.
+
+```typescript
+import type { EntityAdapter } from '@universal-cms/admin-core';
+
+const myAdapter: EntityAdapter = {
+  entityName: 'Widget',
+  entityNamePlural: 'Widgets',
+  tableName: 'widgets',
+  ownerColumn: 'user_id',
+  displayColumn: 'title',
+  fields: [
+    { key: 'title', label: 'Title', type: 'text', showInList: true, showInDetail: true, isPrimary: true },
+    { key: 'status', label: 'Status', type: 'select', showInList: true, showInDetail: true,
+      options: [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
+  ],
+};
 ```
 
 ## Quick Start
@@ -134,17 +158,55 @@ import { rateLimit, validateInput } from "@pandotic/universal-cms/security";
 - **AI:** Anthropic Claude (optional)
 - **Language:** TypeScript (strict)
 
+## Admin Dashboard
+
+The admin dashboard (`apps/dashboard/`) is a standalone Vite + React app that dogfoods the admin packages.
+
+```bash
+# Setup
+cp apps/dashboard/.env.example apps/dashboard/.env
+# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+
+# Run admin-schema migrations first (provides user_profiles, user_roles, organizations, etc.)
+# Then run apps/dashboard/supabase/migrations/001_connected_apps.sql
+
+# Build packages (order matters)
+pnpm --filter @universal-cms/admin-core build
+pnpm --filter @universal-cms/admin-ui build
+
+# Start dashboard
+pnpm --filter @universal-cms/dashboard dev
+```
+
+The dashboard is an **oversight hub** — it shows connected apps with health status and deep-links into each app's own admin UI. It does not remotely control other apps.
+
+### Installing Admin Packages in Other Apps
+
+```bash
+# Via git dependency
+pnpm add @universal-cms/admin-core@github:pandotic/universal-cms#main --filter your-app
+# Or link locally during development
+pnpm --filter your-app add @universal-cms/admin-core@workspace:*
+```
+
 ## Development
 
 ```bash
 # Typecheck everything
 pnpm -r typecheck
 
+# Build admin packages (order matters: admin-core before admin-ui)
+pnpm --filter @universal-cms/admin-core build
+pnpm --filter @universal-cms/admin-ui build
+
 # Typecheck just cms-core
 cd packages/cms-core && pnpm typecheck
 
 # Typecheck just template
 cd template && pnpm typecheck
+
+# Typecheck dashboard
+pnpm --filter @universal-cms/dashboard type-check
 ```
 
 ## License

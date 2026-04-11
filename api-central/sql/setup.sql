@@ -44,6 +44,7 @@ create table if not exists projects (
   entity text,
   description text,
   active boolean default true,
+  scope text default 'pandotic',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

@@ -127,6 +127,9 @@ export function useUpdateMeeting() {
       status?: Meeting['status']
       started_at?: string
       notes?: string
+      current_section?: number
+      section_started_at?: string
+      timer_paused?: boolean
     }) => {
       const update: Record<string, unknown> = {}
       if (input.rating !== undefined) update.rating = input.rating
@@ -134,6 +137,9 @@ export function useUpdateMeeting() {
       if (input.status !== undefined) update.status = input.status
       if (input.started_at !== undefined) update.started_at = input.started_at
       if (input.notes !== undefined) update.notes = input.notes
+      if (input.current_section !== undefined) update.current_section = input.current_section
+      if (input.section_started_at !== undefined) update.section_started_at = input.section_started_at
+      if (input.timer_paused !== undefined) update.timer_paused = input.timer_paused
       if (input.status === 'archived') update.archived_at = new Date().toISOString()
 
       const { error } = await supabase

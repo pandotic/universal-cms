@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { UserNav } from "./user-nav";
 
 export const metadata: Metadata = {
   title: {
@@ -20,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-zinc-950 text-zinc-100 antialiased`}>
+      <body className="min-h-screen bg-zinc-950 text-zinc-100 antialiased font-sans">
         <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-14 items-center justify-between">
@@ -31,10 +29,22 @@ export default function RootLayout({
               </Link>
               <nav className="flex items-center gap-6 text-sm">
                 <Link
+                  href="/properties"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Properties
+                </Link>
+                <Link
                   href="/fleet"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
                   Fleet
+                </Link>
+                <Link
+                  href="/groups"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Groups
                 </Link>
                 <Link
                   href="/modules"
@@ -55,11 +65,30 @@ export default function RootLayout({
                   API Keys
                 </Link>
                 <Link
+                  href="/api-central"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  API Central
+                </Link>
+                <Link
+                  href="/skill-store"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Skill Store
+                </Link>
+                <Link
                   href="/audit"
                   className="text-zinc-400 transition-colors hover:text-white"
                 >
                   Audit
                 </Link>
+                <Link
+                  href="/users"
+                  className="text-zinc-400 transition-colors hover:text-white"
+                >
+                  Users
+                </Link>
+                <UserNav />
               </nav>
             </div>
           </div>
