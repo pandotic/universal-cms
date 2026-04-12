@@ -1,0 +1,72 @@
+{
+  "name": "@pandotic/skill-library",
+  "version": "0.1.0",
+  "description": "Skill library for Pandotic Hub — marketing skill definitions, deployment adapters, and scheduled fleet execution",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts",
+      "development": "./src/types/index.ts"
+    },
+    "./data/hub-skills": {
+      "import": "./dist/data/hub-skills.js",
+      "types": "./dist/data/hub-skills.d.ts",
+      "development": "./src/data/hub-skills.ts"
+    },
+    "./data/hub-skill-deployments": {
+      "import": "./dist/data/hub-skill-deployments.js",
+      "types": "./dist/data/hub-skill-deployments.d.ts",
+      "development": "./src/data/hub-skill-deployments.ts"
+    },
+    "./deploy": {
+      "import": "./dist/deploy/index.js",
+      "types": "./dist/deploy/index.d.ts",
+      "development": "./src/deploy/index.ts"
+    },
+    "./skills/marketing": {
+      "import": "./dist/skills/marketing/index.js",
+      "types": "./dist/skills/marketing/index.d.ts",
+      "development": "./src/skills/marketing/index.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pandotic/universal-cms": "workspace:*"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": ">=2.0.0"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.102.1",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "skill-library",
+    "marketing-automation",
+    "fleet-management",
+    "pandotic"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pandotic/universal-cms"
+  },
+  "license": "MIT",
+  "author": "Pandotic"
+}
