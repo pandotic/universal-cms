@@ -185,6 +185,26 @@
       "import": "./dist/data/hub-groups.js",
       "types": "./dist/data/hub-groups.d.ts",
       "development": "./src/data/hub-groups.ts"
+    },
+    "./types/admin": {
+      "import": "./dist/types/admin.js",
+      "types": "./dist/types/admin.d.ts",
+      "development": "./src/types/admin.ts"
+    },
+    "./data/hub-admin": {
+      "import": "./dist/data/hub-admin.js",
+      "types": "./dist/data/hub-admin.d.ts",
+      "development": "./src/data/hub-admin.ts"
+    },
+    "./types/agent": {
+      "import": "./dist/types/agent.js",
+      "types": "./dist/types/agent.d.ts",
+      "development": "./src/types/agent.ts"
+    },
+    "./data/hub-agents": {
+      "import": "./dist/data/hub-agents.js",
+      "types": "./dist/data/hub-agents.d.ts",
+      "development": "./src/data/hub-agents.ts"
     }
   },
   "files": [
