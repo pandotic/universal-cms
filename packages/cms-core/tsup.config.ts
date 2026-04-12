@@ -42,6 +42,8 @@ export default defineConfig({
     "data/hub-admin": "src/data/hub-admin.ts",
     "types/agent": "src/types/agent.ts",
     "data/hub-agents": "src/data/hub-agents.ts",
+    "types/social": "src/types/social.ts",
+    "data/hub-social": "src/data/hub-social.ts",
   },
   format: ["esm"],
   dts: true,

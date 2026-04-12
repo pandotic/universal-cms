@@ -205,6 +205,16 @@
       "import": "./dist/data/hub-agents.js",
       "types": "./dist/data/hub-agents.d.ts",
       "development": "./src/data/hub-agents.ts"
+    },
+    "./types/social": {
+      "import": "./dist/types/social.js",
+      "types": "./dist/types/social.d.ts",
+      "development": "./src/types/social.ts"
+    },
+    "./data/hub-social": {
+      "import": "./dist/data/hub-social.js",
+      "types": "./dist/data/hub-social.d.ts",
+      "development": "./src/data/hub-social.ts"
     }
   },
   "files": [
