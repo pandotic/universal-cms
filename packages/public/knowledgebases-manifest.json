@@ -1,0 +1,15 @@
+[
+  {
+    "id": "hvac-installation",
+    "name": "HVAC Installation Expert",
+    "icon": "Thermometer",
+    "category": "Mechanical",
+    "domain": "HVAC Installation & Systems",
+    "description": "Expert knowledge for HVAC system installation, sizing, ductwork design, refrigerant handling, maintenance, and troubleshooting. Covers residential and light commercial systems up to 25 tons.",
+    "triggers": ["HVAC", "heating", "cooling", "air conditioning", "ductwork", "refrigerant", "heat pump", "furnace", "thermostat"],
+    "version": "1.0.0",
+    "author": "pandotic",
+    "path": "knowledgebases/hvac-installation",
+    "type": "knowledgebase"
+  }
+]

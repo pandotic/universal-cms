@@ -1,0 +1,30 @@
+{
+  "name": "pando-skillo",
+  "version": "1.0.0",
+  "description": "Internal skills marketplace — browse, select, and deploy Claude skills to any repo via PR",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pando-skillo": "./bin/cli.cjs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:netlify": "npx netlify dev",
+    "build": "node scripts/sync-public.cjs && vite build && vite build --config vite.widget.config.js",
+    "build:widget": "vite build --config vite.widget.config.js",
+    "dev:widget": "vite build --config vite.widget.config.js --watch",
+    "preview": "vite preview",
+    "sync": "node scripts/sync-public.cjs",
+    "validate": "node scripts/validate-manifest.cjs"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.18",
+    "postcss": "^8.4.35",
+    "postcss-prefix-selector": "^2.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.1.4"
+  }
+}
