@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { UserNav } from "./user-nav";
+import { NavDropdown } from "./nav-dropdown";
 
 export const metadata: Metadata = {
   title: {
@@ -27,67 +28,34 @@ export default function RootLayout({
                   Pandotic Hub
                 </span>
               </Link>
-              <nav className="flex items-center gap-6 text-sm">
-                <Link
-                  href="/properties"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Properties
-                </Link>
-                <Link
-                  href="/fleet"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Fleet
-                </Link>
-                <Link
-                  href="/groups"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Groups
-                </Link>
-                <Link
-                  href="/modules"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Modules
-                </Link>
-                <Link
-                  href="/api-usage"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  API Usage
-                </Link>
-                <Link
-                  href="/api-keys"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  API Keys
-                </Link>
-                <Link
-                  href="/api-central"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  API Central
-                </Link>
-                <Link
-                  href="/skill-store"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Skill Store
-                </Link>
-                <Link
-                  href="/audit"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Audit
-                </Link>
-                <Link
-                  href="/users"
-                  className="text-zinc-400 transition-colors hover:text-white"
-                >
-                  Users
-                </Link>
+              <nav className="flex items-center gap-1 text-sm">
+                <NavDropdown
+                  label="Operations"
+                  items={[
+                    { href: "/fleet", label: "Fleet Status" },
+                    { href: "/properties", label: "Properties" },
+                    { href: "/modules", label: "Modules" },
+                    { href: "/api-usage", label: "API Usage" },
+                    { href: "/api-keys", label: "API Keys" },
+                    { href: "/api-central", label: "API Central" },
+                    { href: "/skill-store", label: "Skill Store" },
+                  ]}
+                />
+                <NavDropdown
+                  label="CMS"
+                  items={[
+                    { href: "/cms/projects", label: "Projects" },
+                    { href: "/cms/content", label: "Content Pages" },
+                  ]}
+                />
+                <NavDropdown
+                  label="Admin"
+                  items={[
+                    { href: "/groups", label: "Groups" },
+                    { href: "/users", label: "Users" },
+                    { href: "/audit", label: "Audit Log" },
+                  ]}
+                />
                 <UserNav />
               </nav>
             </div>

@@ -191,45 +191,25 @@
       "types": "./dist/data/hub-groups.d.ts",
       "development": "./src/data/hub-groups.ts"
     },
-    "./types/admin": {
-      "import": "./dist/types/admin.js",
-      "types": "./dist/types/admin.d.ts",
-      "development": "./src/types/admin.ts"
+    "./types/projects": {
+      "import": "./dist/types/projects.js",
+      "types": "./dist/types/projects.d.ts",
+      "development": "./src/types/projects.ts"
     },
-    "./data/hub-admin": {
-      "import": "./dist/data/hub-admin.js",
-      "types": "./dist/data/hub-admin.d.ts",
-      "development": "./src/data/hub-admin.ts"
+    "./data/projects": {
+      "import": "./dist/data/projects.js",
+      "types": "./dist/data/projects.d.ts",
+      "development": "./src/data/projects.ts"
     },
-    "./types/agent": {
-      "import": "./dist/types/agent.js",
-      "types": "./dist/types/agent.d.ts",
-      "development": "./src/types/agent.ts"
+    "./data/project-parsers": {
+      "import": "./dist/data/project-parsers.js",
+      "types": "./dist/data/project-parsers.d.ts",
+      "development": "./src/data/project-parsers.ts"
     },
-    "./data/hub-agents": {
-      "import": "./dist/data/hub-agents.js",
-      "types": "./dist/data/hub-agents.d.ts",
-      "development": "./src/data/hub-agents.ts"
-    },
-    "./types/social": {
-      "import": "./dist/types/social.js",
-      "types": "./dist/types/social.d.ts",
-      "development": "./src/types/social.ts"
-    },
-    "./data/hub-social": {
-      "import": "./dist/data/hub-social.js",
-      "types": "./dist/data/hub-social.d.ts",
-      "development": "./src/data/hub-social.ts"
-    },
-    "./admin-core": {
-      "import": "../admin-core/dist/index.js",
-      "types": "../admin-core/dist/index.d.ts",
-      "development": "../admin-core/src/index.ts"
-    },
-    "./admin-ui": {
-      "import": "../admin-ui/dist/index.js",
-      "types": "../admin-ui/dist/index.d.ts",
-      "development": "../admin-ui/src/index.ts"
+    "./components/projects": {
+      "import": "./dist/components/projects/index.js",
+      "types": "./dist/components/projects/index.d.ts",
+      "development": "./src/components/projects/index.ts"
     }
   },
   "files": [

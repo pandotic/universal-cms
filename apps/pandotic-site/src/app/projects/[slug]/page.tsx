@@ -18,13 +18,14 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return getContentFolderSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const slugs = await getContentFolderSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectWithContent(slug);
+  const project = await getProjectWithContent(slug);
   if (!project) return { title: "Project Not Found" };
 
   const description =
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProjectPage({ params }: PageProps) {
   const { slug } = await params;
-  const project = getProjectWithContent(slug);
+  const project = await getProjectWithContent(slug);
 
   if (!project) {
     return (
@@ -73,10 +74,8 @@ export default async function ProjectPage({ params }: PageProps) {
 
   return (
     <>
-      {/* Hero */}
       <ProjectHero project={project} productPage={project.productPage} />
 
-      {/* Problem Section */}
       {project.productPage.problemSection && (
         <section className="py-12 md:py-20 px-4 md:px-6 border-t border-white/5">
           <div className="max-w-4xl mx-auto">
@@ -95,7 +94,6 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* How It Works */}
       {project.productPage.howItWorks.length > 0 && (
         <section className="py-12 md:py-20 px-4 md:px-6">
           <div className="max-w-7xl mx-auto">
@@ -129,25 +127,21 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Features */}
       <ProjectFeatureGrid
         features={project.features}
         projectName={project.name}
       />
 
-      {/* Video */}
       <ProjectVideoEmbed
         videoId={project.video_long_id}
         projectName={project.name}
       />
 
-      {/* Case Study */}
       <ProjectCaseStudy
         caseStudy={project.caseStudy}
         projectName={project.name}
       />
 
-      {/* Why It's Different */}
       {project.productPage.whyDifferent && (
         <section className="py-12 md:py-20 px-4 md:px-6 bg-white/[0.01]">
           <div className="max-w-4xl mx-auto">
@@ -166,10 +160,8 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Tech Differentiators */}
       <ProjectTechStack differentiators={project.techDifferentiators} />
 
-      {/* What We Built */}
       {project.productPage.whatWeBuilt.length > 0 && (
         <section className="py-12 md:py-20 px-4 md:px-6">
           <div className="max-w-5xl mx-auto">
@@ -199,13 +191,10 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Proof Points */}
       <ProjectProofPoints proofPoints={project.proofPoints} />
 
-      {/* Screenshots */}
       <ProjectScreenshots slug={slug} screenshots={[]} />
 
-      {/* CTA */}
       <section className="py-12 md:py-20 px-4 md:px-6 text-center">
         <ScrollReveal className="max-w-3xl mx-auto">
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
@@ -223,7 +212,6 @@ export default async function ProjectPage({ params }: PageProps) {
         </ScrollReveal>
       </section>
 
-      {/* Blog Preview */}
       <BlogCards />
     </>
   );
