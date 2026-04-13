@@ -251,7 +251,7 @@ export async function getSocialContentStats(
 ): Promise<SocialContentStats> {
   const { data, error } = await client
     .from(SOCIAL_CONTENT_TABLE)
-    .select("status, platform, published_at")
+    .select("status, platform, published_at, scheduled_for")
     .eq("property_id", propertyId);
 
   if (error) throw error;
@@ -294,6 +294,8 @@ export async function getSocialContentStats(
       if (item.published_at && (!lastPublished || item.published_at > lastPublished)) {
         lastPublished = item.published_at;
       }
+    } else if (status === "approved" && item.scheduled_for) {
+      stats.scheduledCount += 1;
     }
   }
 
