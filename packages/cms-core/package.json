@@ -185,6 +185,26 @@
       "import": "./dist/data/hub-groups.js",
       "types": "./dist/data/hub-groups.d.ts",
       "development": "./src/data/hub-groups.ts"
+    },
+    "./types/projects": {
+      "import": "./dist/types/projects.js",
+      "types": "./dist/types/projects.d.ts",
+      "development": "./src/types/projects.ts"
+    },
+    "./data/projects": {
+      "import": "./dist/data/projects.js",
+      "types": "./dist/data/projects.d.ts",
+      "development": "./src/data/projects.ts"
+    },
+    "./data/project-parsers": {
+      "import": "./dist/data/project-parsers.js",
+      "types": "./dist/data/project-parsers.d.ts",
+      "development": "./src/data/project-parsers.ts"
+    },
+    "./components/projects": {
+      "import": "./dist/components/projects/index.js",
+      "types": "./dist/components/projects/index.d.ts",
+      "development": "./src/components/projects/index.ts"
     }
   },
   "files": [

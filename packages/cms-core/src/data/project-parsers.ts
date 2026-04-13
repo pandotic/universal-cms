@@ -6,7 +6,7 @@ import type {
   ParsedProductPage,
   ParsedBlurbs,
   ParsedPortfolio,
-} from "@/types/projects";
+} from "../types/projects.js";
 
 /**
  * Parse features.md content into structured feature objects.
@@ -43,7 +43,6 @@ export function parseProofPoints(content: string): ParsedProofPoint[] {
     const match = line.match(/^(\d+)\.\s+\*\*(.+?)\*\*\s*(.*)$/);
     if (match) {
       const index = parseInt(match[1], 10);
-      // Combine the bold part and any trailing text
       const statement = (match[2] + (match[3] ? " " + match[3] : "")).trim();
       points.push({ index, statement });
     }
@@ -82,41 +81,31 @@ export function parseTechDifferentiators(
 
 /**
  * Parse product-page.md into structured page sections.
- * Format: # headline, intro paragraph, then --- separated sections with ## headings.
  */
 export function parseProductPage(content: string): ParsedProductPage {
-  // Remove the initial title line (# HomeDoc — ...)
   const withoutMainTitle = content.replace(/^#\s+.+$/m, "").trim();
 
-  // Split on --- separators
   const majorSections = withoutMainTitle
     .split(/\n---\n/)
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // First section: headline + hero description
   const heroSection = majorSections[0] || "";
   const headline = extractFirstHeading(content) || "";
   const heroDescription = heroSection
     .replace(/^#\s+.+$/m, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "") // remove image refs
-    .replace(/\[.*?\]\(.*?\)/g, "") // remove links
+    .replace(/!\[.*?\]\(.*?\)/g, "")
+    .replace(/\[.*?\]\(.*?\)/g, "")
     .trim()
     .split("\n")
     .filter((l) => l.trim())
     .join(" ");
 
-  // Find "The Problem" section
   const problemSection = findSection(majorSections, "The Problem") || "";
-
-  // Find "How It Works" section and extract features
   const howItWorksRaw = findSection(majorSections, "How It Works") || "";
   const howItWorks = parseHowItWorks(howItWorksRaw);
-
-  // Find "Why It's Different" section
   const whyDifferent = findSection(majorSections, "Why It") || "";
 
-  // Find "What We Built" section and extract bullets
   const whatWeBuiltRaw = findSection(majorSections, "What We Built") || "";
   const whatWeBuilt = whatWeBuiltRaw
     .split("\n")
@@ -135,13 +124,11 @@ export function parseProductPage(content: string): ParsedProductPage {
 
 /**
  * Parse case-study.md into structured highlights.
- * Format: ### headings for Challenge, Solution, Key Features, Business Impact, Pandotic's Role.
  */
 export function parseCaseStudy(content: string): ParsedCaseStudy {
   const challenge = extractH3Section(content, "The Challenge") || "";
   const solution = extractH3Section(content, "The Solution") || "";
 
-  // Extract key features as a list
   const keyFeaturesRaw = extractH3Section(content, "Key Features") || "";
   const keyFeatures = keyFeaturesRaw
     .split(/\n\d+\.\s+/)
@@ -160,14 +147,12 @@ export function parseCaseStudy(content: string): ParsedCaseStudy {
 
 /**
  * Parse blurbs.md into categorized blurb texts and taglines.
- * Format: ## headings for each blurb type, ## Taglines with numbered list.
  */
 export function parseBlurbs(content: string): ParsedBlurbs {
   const short = extractH2Body(content, "Homepage Blurb") || "";
   const medium = extractH2Body(content, "Medium Portfolio Blurb") || "";
   const sales = extractH2Body(content, "Sales-Oriented Blurb") || "";
 
-  // Extract taglines
   const taglinesSection = extractH2Body(content, "Taglines") || "";
   const taglines = taglinesSection
     .split("\n")
@@ -183,13 +168,9 @@ export function parseBlurbs(content: string): ParsedBlurbs {
 
 /**
  * Parse portfolio.md into summary and bullet points.
- * Format: paragraphs followed by bullet list.
  */
 export function parsePortfolio(content: string): ParsedPortfolio {
-  // Remove the main title
   const body = content.replace(/^#\s+.+$/m, "").trim();
-
-  // Remove the subtitle
   const withoutSubtitle = body.replace(/^##\s+.+$/m, "").trim();
 
   const lines = withoutSubtitle.split("\n");
@@ -215,7 +196,7 @@ export function parsePortfolio(content: string): ParsedPortfolio {
   };
 }
 
-// --- Helpers ---
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function extractBoldSection(text: string, label: string): string {
   const regex = new RegExp(`\\*\\*${escapeRegex(label)}\\*\\*\\s*(.+?)(?=\\*\\*|$)`, "s");
@@ -231,7 +212,6 @@ function extractFirstHeading(text: string): string {
 function findSection(sections: string[], headingContains: string): string {
   for (const section of sections) {
     if (section.match(new RegExp(`^##\\s+.*${escapeRegex(headingContains)}`, "m"))) {
-      // Return body without the heading
       return section.replace(/^##\s+.+$/m, "").trim();
     }
   }

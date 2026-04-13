@@ -18,12 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-function ProjectCard({ project }: { project: Project }) {
-  const description =
-    project.has_detail_page
-      ? getProjectDescription(project.slug)
-      : legacyDescriptions[project.slug] || project.tagline;
-
+function ProjectCard({ project, description }: { project: Project; description: string }) {
   return (
     <div className="p-5 md:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-colors flex flex-col h-full">
       <p className="text-[var(--color-accent)] text-xs font-semibold tracking-wider uppercase mb-3">
@@ -36,7 +31,6 @@ function ProjectCard({ project }: { project: Project }) {
         {description}
       </p>
 
-      {/* Tags */}
       {project.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-4">
           {project.tags.slice(0, 4).map((tag) => (
@@ -50,7 +44,6 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
       )}
 
-      {/* CTAs */}
       <div className="flex flex-wrap gap-3">
         {project.has_detail_page && (
           <Link
@@ -75,8 +68,18 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-export default function Projects() {
-  const allProjects = getAllProjects();
+export default async function Projects() {
+  const allProjects = await getAllProjects();
+
+  // Pre-fetch descriptions for all projects
+  const descriptions: Record<string, string> = {};
+  await Promise.all(
+    allProjects.map(async (project) => {
+      descriptions[project.slug] = project.has_detail_page
+        ? await getProjectDescription(project.slug)
+        : legacyDescriptions[project.slug] || project.tagline;
+    }),
+  );
 
   // Group by category
   const grouped = allProjects.reduce(
@@ -89,7 +92,6 @@ export default function Projects() {
     {} as Record<string, Project[]>,
   );
 
-  // Define category display order
   const categoryOrder = ["green-buildings", "proptech", "education"];
   const orderedCategories = [
     ...categoryOrder.filter((c) => grouped[c]),
@@ -98,7 +100,6 @@ export default function Projects() {
 
   return (
     <>
-      {/* Header */}
       <section className="py-20 md:py-32 px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <TextReveal as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
@@ -113,7 +114,6 @@ export default function Projects() {
         </div>
       </section>
 
-      {/* Category Sections */}
       {orderedCategories.map((cat) => {
         const catMeta = categories[cat];
         const projects = grouped[cat];
@@ -132,7 +132,7 @@ export default function Projects() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                 {projects.map((project, i) => (
                   <ScrollReveal key={project.slug} delay={i * 0.1}>
-                    <ProjectCard project={project} />
+                    <ProjectCard project={project} description={descriptions[project.slug]} />
                   </ScrollReveal>
                 ))}
               </div>
@@ -141,7 +141,6 @@ export default function Projects() {
         );
       })}
 
-      {/* CTA */}
       <section className="py-12 md:py-20 px-4 md:px-6 text-center">
         <ScrollReveal className="max-w-3xl mx-auto">
           <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white mb-4">

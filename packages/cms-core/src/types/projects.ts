@@ -1,18 +1,15 @@
-// Supabase-ready data model for projects.
-// These interfaces map 1:1 to future `projects` and `project_sections` tables.
-// When the admin interface is built, swap the file-based data layer to Supabase
-// client calls — no component changes needed.
-
-// --- Database-aligned types ---
+// ─── Project Portfolio Types ────────────────────────────────────────────────
+// Universal types for project showcases across all Pandotic sites.
+// Maps 1:1 to the `projects` and `project_sections` Supabase tables.
 
 export interface Project {
-  id: string; // UUID in Supabase, slug for now
+  id: string;
   slug: string;
   name: string;
   client: string;
   tagline: string;
   status: "draft" | "published";
-  category: string; // e.g. "green-buildings", "education", "proptech"
+  category: string;
   has_live_demo: boolean;
   demo_url: string | null;
   live_url: string | null;
@@ -23,7 +20,9 @@ export interface Project {
   video_short_id: string | null;
   tags: string[];
   sort_order: number;
-  has_detail_page: boolean; // true if content folder exists
+  has_detail_page: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type SectionType =
@@ -40,11 +39,13 @@ export interface ProjectSection {
   project_id: string;
   section_type: SectionType;
   title: string;
-  content: string; // markdown body
+  content: string;
   sort_order: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
-// --- Parsed, structured types for rendering ---
+// ─── Parsed content types for rendering ─────────────────────────────────────
 
 export interface ParsedFeature {
   title: string;
@@ -92,7 +93,6 @@ export interface ParsedPortfolio {
   bullets: string[];
 }
 
-// Full project with all content, ready to render
 export interface ProjectWithContent extends Project {
   productPage: ParsedProductPage;
   caseStudy: ParsedCaseStudy;
