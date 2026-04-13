@@ -26,10 +26,20 @@
       "types": "./dist/data/hub-skill-deployments.d.ts",
       "development": "./src/data/hub-skill-deployments.ts"
     },
+    "./data/manifest-sync": {
+      "import": "./dist/data/manifest-sync.js",
+      "types": "./dist/data/manifest-sync.d.ts",
+      "development": "./src/data/manifest-sync.ts"
+    },
     "./deploy": {
       "import": "./dist/deploy/index.js",
       "types": "./dist/deploy/index.d.ts",
       "development": "./src/deploy/index.ts"
+    },
+    "./deploy/github-pr": {
+      "import": "./dist/deploy/github-pr.js",
+      "types": "./dist/deploy/github-pr.d.ts",
+      "development": "./src/deploy/github-pr.ts"
     },
     "./skills/marketing": {
       "import": "./dist/skills/marketing/index.js",
@@ -37,13 +47,24 @@
       "development": "./src/skills/marketing/index.ts"
     }
   },
+  "bin": {
+    "pando-skillo": "./bin/cli.cjs"
+  },
   "files": [
     "dist",
-    "src"
+    "src",
+    "skills",
+    "knowledgebases",
+    "components",
+    "bin",
+    "skills-manifest.json",
+    "knowledgebases-manifest.json"
   ],
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/validate-manifest.cjs",
+    "sync": "node scripts/sync-public.cjs"
   },
   "dependencies": {
     "@pandotic/universal-cms": "workspace:*"

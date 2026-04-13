@@ -209,3 +209,93 @@ export async function failRun(
     completed_at: new Date().toISOString(),
   });
 }
+
+// ─── Version Pinning ──────────────────────────────────────────────────────
+
+export async function pinDeployment(
+  client: SupabaseClient,
+  id: string
+): Promise<SkillDeployment> {
+  return updateDeployment(client, id, { pinned: true });
+}
+
+export async function unpinDeployment(
+  client: SupabaseClient,
+  id: string
+): Promise<SkillDeployment> {
+  return updateDeployment(client, id, { pinned: false });
+}
+
+// ─── Outdated Detection ───────────────────────────────────────────────────
+
+export async function getOutdatedDeployments(
+  client: SupabaseClient,
+  skillId?: string
+): Promise<SkillDeployment[]> {
+  let query = client
+    .from(DEPLOYMENTS_TABLE)
+    .select("*")
+    .eq("pinned", false)
+    .neq("status", "removed");
+
+  if (skillId) query = query.eq("skill_id", skillId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  // Filter where deployed_version !== current_version
+  return (data ?? []).filter((d) => d.deployed_version !== d.current_version);
+}
+
+// ─── PR Recording ─────────────────────────────────────────────────────────
+
+export async function recordPRDeployment(
+  client: SupabaseClient,
+  id: string,
+  prUrl: string,
+  repo: string
+): Promise<SkillDeployment> {
+  return updateDeployment(client, id, {
+    github_pr_url: prUrl,
+    github_repo: repo,
+    status: "active",
+  });
+}
+
+// ─── Deployment Matrix ────────────────────────────────────────────────────
+
+export interface MatrixCell {
+  deployment_id: string;
+  skill_id: string;
+  property_id: string;
+  status: string;
+  deployed_version: string;
+  current_version: string;
+  pinned: boolean;
+  last_run_status: string | null;
+}
+
+export async function listDeploymentMatrix(
+  client: SupabaseClient
+): Promise<MatrixCell[]> {
+  const { data, error } = await client
+    .from(DEPLOYMENTS_TABLE)
+    .select(
+      "id, skill_id, property_id, status, deployed_version, current_version, pinned, last_run_status"
+    )
+    .neq("status", "removed")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((d) => ({
+    deployment_id: d.id,
+    skill_id: d.skill_id,
+    property_id: d.property_id,
+    status: d.status,
+    deployed_version: d.deployed_version,
+    current_version: d.current_version,
+    pinned: d.pinned,
+    last_run_status: d.last_run_status,
+  }));
+}

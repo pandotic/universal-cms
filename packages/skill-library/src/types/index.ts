@@ -1,10 +1,15 @@
 // ─── Skill Library Types ──────────────────────────────────────────────────
-// Types for the Pandotic Skill Library — marketing skill definitions,
-// deployments, and fleet-wide scheduled execution.
+// Types for the Pandotic Skill Library — skill definitions, deployments,
+// fleet-wide scheduled execution, and site-level PR deployment.
+
+// ─── Skill Scope ──────────────────────────────────────────────────────────
+
+/** Where a skill lives and executes */
+export type SkillScope = "fleet" | "site" | "both";
 
 // ─── Skill Platforms ──────────────────────────────────────────────────────
 
-/** Marketing platform a skill targets */
+/** Platform a skill targets */
 export type SkillPlatform =
   | "google_ads"
   | "meta_ads"
@@ -16,9 +21,10 @@ export type SkillPlatform =
   | "analytics"
   | "content"
   | "social_organic"
-  | "cross_platform";
+  | "cross_platform"
+  | "claude_code";
 
-/** Category of marketing skill */
+/** Category of skill */
 export type SkillCategory =
   | "acquisition"
   | "retention"
@@ -26,7 +32,12 @@ export type SkillCategory =
   | "analytics"
   | "content_creation"
   | "brand_management"
-  | "automation";
+  | "automation"
+  | "documents"
+  | "ai_automation"
+  | "developer_tools"
+  | "ui_components"
+  | "knowledge_base";
 
 // ─── Skill Definition ─────────────────────────────────────────────────────
 
@@ -36,7 +47,7 @@ export type SkillExecutionMode = "scheduled" | "manual" | "webhook" | "event";
 /** Current status of a skill definition */
 export type SkillStatus = "draft" | "active" | "paused" | "archived";
 
-/** A reusable marketing skill definition */
+/** A reusable skill definition — fleet-level marketing or site-level implementation */
 export interface SkillDefinition {
   id: string;
   name: string;
@@ -45,6 +56,7 @@ export interface SkillDefinition {
   platform: SkillPlatform;
   category: SkillCategory;
   execution_mode: SkillExecutionMode;
+  scope: SkillScope;
   /** Default config template — deployments can override */
   default_config: Record<string, unknown>;
   /** JSON schema for config validation */
@@ -56,6 +68,12 @@ export interface SkillDefinition {
   version: string;
   /** Tags for filtering/search */
   tags: string[];
+  /** For site skills: path to SKILL.md content relative to skill-library root */
+  content_path: string | null;
+  /** For site skills: companion component IDs (e.g. ui-kit has modal, card, etc.) */
+  component_ids: string[];
+  /** Links this DB record to a flat-file manifest entry */
+  manifest_id: string | null;
   /** Who created this skill definition */
   created_by: string | null;
   created_at: string;
@@ -96,6 +114,16 @@ export interface SkillDeployment {
   /** What kind of site is the target? */
   target_type: DeployTargetType;
   status: DeploymentStatus;
+  /** Version deployed to this property */
+  deployed_version: string;
+  /** Latest version available in the skill library */
+  current_version: string;
+  /** If true, don't auto-update this deployment */
+  pinned: boolean;
+  /** GitHub PR URL that deployed/updated this skill */
+  github_pr_url: string | null;
+  /** Target GitHub repo (owner/name) for site-level deployments */
+  github_repo: string | null;
   /** Last time this deployment executed */
   last_run_at: string | null;
   /** Result of the last execution */
@@ -193,6 +221,54 @@ export interface DeployResult {
   };
 }
 
+// ─── Manifest Skill ───────────────────────────────────────────────────────
+// Represents a skill from the flat-file manifest (skills-manifest.json).
+// These are the source-of-truth definitions that live as SKILL.md files.
+
+/** A skill entry from the flat-file manifest */
+export interface ManifestSkill {
+  id: string;
+  name: string;
+  icon: string;
+  category: string;
+  description: string;
+  triggers: string[];
+  version: string;
+  author: string;
+  path: string;
+  components?: string[];
+  /** Added at sync time — not in the original manifest */
+  scope?: SkillScope;
+}
+
+/** A knowledgebase entry from the flat-file manifest */
+export interface ManifestKnowledgebase {
+  id: string;
+  name: string;
+  icon: string;
+  category: string;
+  domain: string;
+  description: string;
+  triggers: string[];
+  version: string;
+  author: string;
+  path: string;
+  type: "knowledgebase";
+}
+
+// ─── Skill Version ────────────────────────────────────────────────────────
+
+/** A version record tracking changes to a skill over time */
+export interface SkillVersion {
+  id: string;
+  skill_id: string;
+  version: string;
+  changelog: string | null;
+  /** SHA-256 hash of the SKILL.md content at this version */
+  content_hash: string;
+  created_at: string;
+}
+
 // ─── Marketing Skill Template ─────────────────────────────────────────────
 
 /** A built-in marketing skill template with sensible defaults */
@@ -215,8 +291,15 @@ export interface SkillFilters {
   platform?: SkillPlatform;
   category?: SkillCategory;
   status?: SkillStatus;
+  scope?: SkillScope;
   tags?: string[];
   search?: string;
+}
+
+export interface DeploymentMatrixFilters {
+  groupId?: string;
+  scope?: SkillScope;
+  category?: SkillCategory;
 }
 
 export interface DeploymentFilters {
