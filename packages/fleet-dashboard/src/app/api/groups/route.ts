@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { requireHubRole, apiError } from "@pandotic/universal-cms/middleware";
+import { requirePlatformAdmin, getCurrentUserId } from "@/lib/middleware/admin-rbac";
+import { apiError } from "@pandotic/universal-cms/middleware";
 import {
   listGroups,
   createGroup,
@@ -11,13 +12,15 @@ import { getHubUser } from "@pandotic/universal-cms/data/hub-users";
 export async function GET(request: NextRequest) {
   try {
     const authClient = await createClient();
-    const authError = await requireHubRole(authClient, request, [
-      "super_admin",
-      "group_admin",
-      "member",
-      "viewer",
-    ]);
-    if (authError) return authError;
+    const userId = await getCurrentUserId(authClient);
+
+    // Allow any authenticated user to list (RLS will filter)
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const supabase = await createAdminClient();
     const type = request.nextUrl.searchParams.get("type") as
@@ -36,9 +39,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authClient = await createClient();
-    const authError = await requireHubRole(authClient, request, [
-      "super_admin",
-    ]);
+    const userId = await getCurrentUserId(authClient);
+
+    // Require platform admin for creation
+    const authError = await requirePlatformAdmin(authClient, userId ?? undefined);
     if (authError) return authError;
 
     const supabase = await createAdminClient();
@@ -51,11 +55,8 @@ export async function POST(request: NextRequest) {
       group_type: body.group_type,
     });
 
-    const {
-      data: { user },
-    } = await authClient.auth.getUser();
-    if (user) {
-      const hubUser = await getHubUser(supabase, user.id);
+    if (userId) {
+      const hubUser = await getHubUser(supabase, userId);
       await logHubActivity(supabase, {
         user_id: hubUser?.id,
         group_id: group.id,
