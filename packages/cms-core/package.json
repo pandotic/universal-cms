@@ -220,6 +220,16 @@
       "import": "./dist/data/hub-social.js",
       "types": "./dist/data/hub-social.d.ts",
       "development": "./src/data/hub-social.ts"
+    },
+    "./admin-core": {
+      "import": "../admin-core/dist/index.js",
+      "types": "../admin-core/dist/index.d.ts",
+      "development": "../admin-core/src/index.ts"
+    },
+    "./admin-ui": {
+      "import": "../admin-ui/dist/index.js",
+      "types": "../admin-ui/dist/index.d.ts",
+      "development": "../admin-ui/src/index.ts"
     }
   },
   "files": [
@@ -234,6 +244,8 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@universal-cms/admin-core": "workspace:*",
+    "@universal-cms/admin-ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-label": "^2.1.0",
