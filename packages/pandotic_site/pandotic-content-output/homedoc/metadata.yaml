@@ -1,0 +1,39 @@
+project_name: "HomeDoc"
+slug: "homedoc"
+client: "internal"
+generated: "2026-04-07T00:00:00Z"
+generated_by: "pandotic-content skill"
+status: "draft"
+has_live_demo: false
+demo_url: null
+live_url: null
+own_site_url: null
+repo_url: "https://github.com/dangolden/homedoc"
+hero_screenshot: "screenshots/homedoc-dashboard-hero.png"
+video_long_id: "homedoc-long"
+video_short_id: "homedoc-short"
+sections_included:
+  - case-study
+  - portfolio
+  - blurbs
+  - video-script-long
+  - video-script-short
+  - features
+  - proof-points
+  - tech-differentiators
+  - screenshot-brief
+  - links
+  - product-page
+  - internal/secret-sauce
+  - internal/extensible
+tags:
+  - "home-management"
+  - "proptech"
+  - "ai-document-extraction"
+  - "risk-assessment"
+  - "energy-analysis"
+  - "multi-model-ai"
+  - "embeddable-widgets"
+  - "supabase"
+  - "react"
+  - "typescript"
