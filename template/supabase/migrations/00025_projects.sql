@@ -1,6 +1,6 @@
 -- Projects showcase tables
--- Stores the data-driven project portfolio content managed via the CMS.
--- Numbered 00106 to follow Hub migration sequence (00100-00105).
+-- Stores data-driven project portfolio content managed via the CMS.
+-- Per-site migration for consuming sites using @pandotic/universal-cms.
 
 -- projects table
 CREATE TABLE IF NOT EXISTS projects (
@@ -48,33 +48,29 @@ CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
 CREATE INDEX IF NOT EXISTS idx_sections_project ON project_sections(project_id);
 CREATE INDEX IF NOT EXISTS idx_sections_type ON project_sections(section_type);
 
--- Updated_at trigger (reuse if already exists from earlier migrations)
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER projects_updated_at
+-- Updated_at triggers (reuse update_updated_at_column if it exists from earlier migrations)
+CREATE TRIGGER trg_projects_updated_at
   BEFORE UPDATE ON projects
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER project_sections_updated_at
+CREATE TRIGGER trg_project_sections_updated_at
   BEFORE UPDATE ON project_sections
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Row Level Security
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_sections ENABLE ROW LEVEL SECURITY;
 
 -- Public read access for published projects
-CREATE POLICY "Public read access" ON projects
-  FOR SELECT USING (status = 'published');
+CREATE POLICY projects_select_published ON projects
+  FOR SELECT
+  TO anon, authenticated
+  USING (status = 'published');
 
-CREATE POLICY "Public read access" ON project_sections
-  FOR SELECT USING (
+CREATE POLICY project_sections_select_published ON project_sections
+  FOR SELECT
+  TO anon, authenticated
+  USING (
     EXISTS (
       SELECT 1 FROM projects
       WHERE projects.id = project_sections.project_id
@@ -82,25 +78,32 @@ CREATE POLICY "Public read access" ON project_sections
     )
   );
 
--- Admin write access (authenticated users with super_admin or group_admin role)
-CREATE POLICY "Admin write projects" ON projects
-  FOR ALL
+-- Admin full read (drafts too)
+CREATE POLICY projects_select_admin ON projects
+  FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM hub_users
-      WHERE hub_users.auth_user_id = auth.uid()
-      AND hub_users.hub_role IN ('super_admin', 'group_admin')
-    )
-  );
+  USING (has_role('admin') OR has_role('editor'));
 
-CREATE POLICY "Admin write project_sections" ON project_sections
-  FOR ALL
+CREATE POLICY project_sections_select_admin ON project_sections
+  FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM hub_users
-      WHERE hub_users.auth_user_id = auth.uid()
-      AND hub_users.hub_role IN ('super_admin', 'group_admin')
-    )
-  );
+  USING (has_role('admin') OR has_role('editor'));
+
+-- Admin write
+CREATE POLICY projects_insert ON projects
+  FOR INSERT TO authenticated WITH CHECK (has_role('admin'));
+
+CREATE POLICY projects_update ON projects
+  FOR UPDATE TO authenticated USING (has_role('admin'));
+
+CREATE POLICY projects_delete ON projects
+  FOR DELETE TO authenticated USING (has_role('admin'));
+
+CREATE POLICY project_sections_insert ON project_sections
+  FOR INSERT TO authenticated WITH CHECK (has_role('admin') OR has_role('editor'));
+
+CREATE POLICY project_sections_update ON project_sections
+  FOR UPDATE TO authenticated USING (has_role('admin') OR has_role('editor'));
+
+CREATE POLICY project_sections_delete ON project_sections
+  FOR DELETE TO authenticated USING (has_role('admin'));
