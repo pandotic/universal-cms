@@ -31,6 +31,7 @@ export default defineConfig({
     "components/theme/index": "src/components/theme/index.ts",
     "components/tracking/index": "src/components/tracking/index.ts",
     "utils/index": "src/utils/index.ts",
+    "utils/validation": "src/utils/validation.ts",
     registry: "src/registry.ts",
     "data/api-usage": "src/data/api-usage.ts",
     "types/hub": "src/types/hub.ts",

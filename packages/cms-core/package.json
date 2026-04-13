@@ -151,6 +151,11 @@
       "types": "./dist/utils/index.d.ts",
       "development": "./src/utils/index.ts"
     },
+    "./utils/validation": {
+      "import": "./dist/utils/validation.js",
+      "types": "./dist/utils/validation.d.ts",
+      "development": "./src/utils/validation.ts"
+    },
     "./registry": {
       "import": "./dist/registry.js",
       "types": "./dist/registry.d.ts",
@@ -219,6 +224,8 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@universal-cms/admin-core": "workspace:*",
+    "@universal-cms/admin-ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-label": "^2.1.0",
