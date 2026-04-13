@@ -177,7 +177,7 @@ async function decryptValue(encryptedValue: string, pin: string): Promise<string
   }
 }
 
-export function APICentral() {
+export function APICentral({ embedded = false }: { embedded?: boolean } = {}) {
   const { toast: rawToast } = useToast()
   const toast = (message: string, variant: 'success' | 'error' | 'warning' | 'default' = 'default') => {
     rawToast({ title: message, variant })
@@ -1574,38 +1574,53 @@ export function APICentral() {
         </DialogContent>
       </Dialog>
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <Link href="/" className="text-muted-foreground hover:text-foreground flex items-center gap-1">
-          <ChevronLeft className="w-4 h-4" />
-          Dashboard
-        </Link>
-        <span className="text-muted-foreground">/</span>
-        <span>API Central</span>
-      </div>
+      {/* Breadcrumb & Header — hidden when embedded in APIs & AI section */}
+      {!embedded && (
+        <>
+          <div className="flex items-center gap-2 text-sm">
+            <Link href="/" className="text-muted-foreground hover:text-foreground flex items-center gap-1">
+              <ChevronLeft className="w-4 h-4" />
+              Dashboard
+            </Link>
+            <span className="text-muted-foreground">/</span>
+            <span>API Central</span>
+          </div>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
-            <Zap className="w-6 h-6 text-amber-500" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-amber-500" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">API Central</h1>
+                <p className="text-muted-foreground">Hub-and-Spoke Service Manager</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {stats && (
+                <span className="text-sm text-muted-foreground mr-4">
+                  {stats.activeServices} active - {fmt(stats.totalSpend)}/mo
+                </span>
+              )}
+              <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">API Central</h1>
-            <p className="text-muted-foreground">Hub-and-Spoke Service Manager</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+        </>
+      )}
+      {embedded && (
+        <div className="flex items-center justify-end">
           {stats && (
-            <span className="text-sm text-muted-foreground mr-4">
-              {stats.activeServices} active - {fmt(stats.totalSpend)}/mo
+            <span className="text-sm text-zinc-500 mr-4">
+              {stats.activeServices} active &middot; {fmt(stats.totalSpend)}/mo
             </span>
           )}
           <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
-      </div>
+      )}
 
       {/* Tab Nav */}
       <div className="flex gap-1 border-b border-border overflow-x-auto">

@@ -35,9 +35,7 @@ export default function RootLayout({
                     { href: "/fleet", label: "Fleet Status" },
                     { href: "/properties", label: "Properties" },
                     { href: "/modules", label: "Modules" },
-                    { href: "/api-usage", label: "API Usage" },
-                    { href: "/api-keys", label: "API Keys" },
-                    { href: "/api-central", label: "API Central" },
+                    { href: "/apis", label: "APIs & AI" },
                     { href: "/skill-store", label: "Skill Store" },
                   ]}
                 />
@@ -53,7 +51,6 @@ export default function RootLayout({
                   items={[
                     { href: "/groups", label: "Groups" },
                     { href: "/users", label: "Users" },
-                    { href: "/audit", label: "Audit Log" },
                   ]}
                 />
                 <UserNav />
