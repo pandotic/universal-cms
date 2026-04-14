@@ -16,6 +16,13 @@ const sections = [
     icon: "grid",
   },
   {
+    title: "Skill Library",
+    href: "/skills",
+    description: "Browse, upload, and deploy reusable AI skills across your fleet. Track deployment versions with the Fleet Matrix.",
+    stat: "Skills",
+    icon: "zap",
+  },
+  {
     title: "API Usage",
     href: "/api-usage",
     description: "Track API consumption across all apps — AI tokens, Supabase calls, third-party APIs. See costs per site and per provider.",

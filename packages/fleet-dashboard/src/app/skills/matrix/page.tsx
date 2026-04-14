@@ -174,20 +174,22 @@ export default function SkillsMatrixPage() {
                         key={skill.id}
                         className="px-3 py-3 text-center"
                       >
-                        <div
-                          className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md ${getCellColor(cell)} cursor-pointer hover:ring-1 hover:ring-zinc-600 transition-all`}
-                          title={
-                            cell
-                              ? `v${cell.deployed_version}${cell.pinned ? ' (pinned)' : ''}${cell.deployed_version !== cell.current_version ? ` → v${cell.current_version}` : ''}`
-                              : 'Not deployed'
-                          }
-                        >
-                          {cell && (
+                        {cell ? (
+                          <Link
+                            href={`/skills/${skill.id}/deployments/${cell.deployment_id}`}
+                            className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md ${getCellColor(cell)} cursor-pointer hover:ring-1 hover:ring-zinc-600 transition-all`}
+                            title={`v${cell.deployed_version}${cell.pinned ? ' (pinned)' : ''}${cell.deployed_version !== cell.current_version ? ` → v${cell.current_version}` : ''}`}
+                          >
                             <span
                               className={`h-2 w-2 rounded-full ${getCellDot(cell)}`}
                             />
-                          )}
-                        </div>
+                          </Link>
+                        ) : (
+                          <div
+                            className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md ${getCellColor(undefined)}`}
+                            title="Not deployed"
+                          />
+                        )}
                       </td>
                     );
                   })}
