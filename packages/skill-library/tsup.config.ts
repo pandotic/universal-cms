@@ -7,6 +7,7 @@ export default defineConfig({
     "data/hub-skills": "src/data/hub-skills.ts",
     "data/hub-skill-deployments": "src/data/hub-skill-deployments.ts",
     "data/manifest-sync": "src/data/manifest-sync.ts",
+    "data/skill-upload": "src/data/skill-upload.ts",
     "deploy/index": "src/deploy/index.ts",
     "deploy/github-pr": "src/deploy/github-pr.ts",
     "skills/marketing/index": "src/skills/marketing/index.ts",

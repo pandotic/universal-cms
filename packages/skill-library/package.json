@@ -41,6 +41,11 @@
       "types": "./dist/deploy/github-pr.d.ts",
       "development": "./src/deploy/github-pr.ts"
     },
+    "./data/skill-upload": {
+      "import": "./dist/data/skill-upload.js",
+      "types": "./dist/data/skill-upload.d.ts",
+      "development": "./src/data/skill-upload.ts"
+    },
     "./skills/marketing": {
       "import": "./dist/skills/marketing/index.js",
       "types": "./dist/skills/marketing/index.d.ts",

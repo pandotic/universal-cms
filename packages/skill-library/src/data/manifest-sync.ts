@@ -12,7 +12,7 @@ import type { ManifestSkill, ManifestKnowledgebase, SkillScope } from "../types/
 
 // ─── File Loading ─────────────────────────────────────────────────────────
 
-function getPackageRoot(): string {
+export function getPackageRoot(): string {
   const thisFile = fileURLToPath(import.meta.url);
   // Walk up from dist/ or src/ to package root
   let dir = dirname(thisFile);

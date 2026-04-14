@@ -19,4 +19,9 @@ export {
   syncManifestToDb,
   computeContentHash,
 } from "./data/manifest-sync";
+export {
+  processSkillUpload,
+  parseFrontmatter,
+  slugify,
+} from "./data/skill-upload";
 export { marketingSkillTemplates, getTemplateBySlug } from "./skills/marketing/index";
