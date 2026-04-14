@@ -84,16 +84,26 @@ Hub has its own Supabase project (`rimbgolutrxpmwsoswhq` — "Pandotic Hub").
 - Supabase migrations need to be applied to Hub project (`rimbgolutrxpmwsoswhq`)
 - All code follows established patterns and best practices
 
+## Supabase Migrations — Applied ✅
+
+All migrations have been applied to the Pandotic Hub Supabase project (`rimbgolutrxpmwsoswhq`):
+1. `00100_hub_properties.sql` ✅
+2. `00101_hub_groups.sql` ✅
+3. `00102_hub_users.sql` ✅
+4. `00103_hub_activity_log.sql` ✅
+5. `00107_projects.sql` ✅ — `projects` + `project_sections` tables (dropped pre-existing empty `projects` table with wrong schema first)
+
+## Pandotic Site (`apps/pandotic-site`)
+
+- Separate Netlify site ("pandoticsite") with base directory `apps/pandotic-site`
+- **Netlify build command in UI** may override `apps/pandotic-site/netlify.toml` — if deploys fail with "Module not found" for cms-core imports, check the Netlify UI build command matches the toml or is cleared
+- The `package.json` `build` script includes `pnpm --filter @pandotic/universal-cms build` as a safeguard so cms-core is always built first regardless of what Netlify command runs
+- The `netlify.toml` uses `--filter @pandotic/pandotic-site...` (pnpm `...` suffix) to build all workspace deps in topological order
+
+### Open PR
+- **PR #22** (`claude/migrate-pandotic-site-cms-XG6FS` → `main`): Fixes pandotic-site Netlify build (builds cms-core first, 4GB heap). Verify deploy preview passes before merging.
+
 ## Remaining Phases — TODO for Next Sessions
-
-### SQL Migrations — MUST APPLY TO SUPABASE
-The following migrations need to be applied to the Pandotic Hub Supabase project (`rimbgolutrxpmwsoswhq`) in this order:
-1. `packages/fleet-dashboard/supabase/migrations/00100_hub_properties.sql`
-2. `packages/fleet-dashboard/supabase/migrations/00102_hub_users.sql`
-3. `packages/fleet-dashboard/supabase/migrations/00103_hub_activity_log.sql`
-4. `packages/fleet-dashboard/supabase/migrations/00101_hub_groups.sql`
-
-Use the Supabase MCP `execute_sql` tool with `project_id: "rimbgolutrxpmwsoswhq"`.
 
 ### Phase 3: Agent Workflows
 Configure and monitor automated tasks (SEO audit, broken links, dependency updates) per property.
