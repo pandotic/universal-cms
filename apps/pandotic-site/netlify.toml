@@ -1,8 +1,9 @@
 [build]
-  command = "cd ../.. && pnpm --filter @pandotic/pandotic-site build"
+  command = "cd ../.. && pnpm install && pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/pandotic-site build"
   publish = "out"
 
 [build.environment]
+  NODE_VERSION = "20"
   NODE_OPTIONS = "--max-old-space-size=4096"
 
 [[redirects]]
