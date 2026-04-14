@@ -36,7 +36,7 @@ export default function RootLayout({
                     { href: "/properties", label: "Properties" },
                     { href: "/modules", label: "Modules" },
                     { href: "/apis", label: "APIs & AI" },
-                    { href: "/skill-store", label: "Skill Store" },
+                    { href: "/skills", label: "Skills" },
                   ]}
                 />
                 <NavDropdown
