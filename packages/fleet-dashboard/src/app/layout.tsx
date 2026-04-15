@@ -40,7 +40,8 @@ export default function RootLayout({
                 <NavDropdown
                   label="Operations"
                   items={[
-                    { href: "/fleet", label: "Fleet Status" },
+                    { href: "/fleet", label: "Fleet Dashboard" },
+                    { href: "/fleet/status", label: "Fleet Status" },
                     { href: "/properties", label: "Properties" },
                     { href: "/modules", label: "Modules" },
                     { href: "/apis", label: "APIs & AI" },

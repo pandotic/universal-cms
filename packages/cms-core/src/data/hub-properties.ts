@@ -19,6 +19,12 @@ export async function listProperties(
   if (filters?.status) query = query.eq("status", filters.status);
   if (filters?.healthStatus)
     query = query.eq("health_status", filters.healthStatus);
+  if (filters?.ownershipType)
+    query = query.eq("ownership_type", filters.ownershipType);
+  if (filters?.businessStage)
+    query = query.eq("business_stage", filters.businessStage);
+  if (filters?.businessCategory)
+    query = query.eq("business_category", filters.businessCategory);
 
   // Filter by group: fetch property IDs from hub_group_properties, then filter
   if (filters?.groupId) {

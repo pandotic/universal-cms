@@ -12,6 +12,18 @@ export type PropertyStatus = "active" | "paused" | "archived" | "error";
 
 export type HealthStatus = "healthy" | "degraded" | "down" | "unknown";
 
+export type BusinessCategory =
+  | "saas"
+  | "marketplace"
+  | "directory"
+  | "content_site"
+  | "agency_client"
+  | "internal_tool";
+
+export type OwnershipType = "personal" | "pandotic" | "client";
+
+export type BusinessStage = "idea" | "development" | "active" | "maintenance" | "sunset";
+
 export interface HubProperty {
   id: string;
   name: string;
@@ -28,6 +40,15 @@ export interface HubProperty {
   ssl_valid: boolean;
   ssl_expires_at: string | null;
   metadata: Record<string, unknown>;
+  // Business fields
+  business_category: BusinessCategory | null;
+  ownership_type: OwnershipType;
+  client_name: string | null;
+  business_stage: BusinessStage;
+  domains: string[];
+  domain_notes: string | null;
+  llc_entity: string | null;
+  business_notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -106,6 +127,9 @@ export interface PropertyFilters {
   status?: PropertyStatus;
   healthStatus?: HealthStatus;
   groupId?: string;
+  ownershipType?: OwnershipType;
+  businessStage?: BusinessStage;
+  businessCategory?: BusinessCategory;
 }
 
 export interface ActivityFilters {
