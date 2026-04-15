@@ -210,6 +210,26 @@
       "import": "./dist/components/projects/index.js",
       "types": "./dist/components/projects/index.d.ts",
       "development": "./src/components/projects/index.ts"
+    },
+    "./types/hub-package-deployments": {
+      "import": "./dist/types/hub-package-deployments.js",
+      "types": "./dist/types/hub-package-deployments.d.ts",
+      "development": "./src/types/hub-package-deployments.ts"
+    },
+    "./types/hub-marketing": {
+      "import": "./dist/types/hub-marketing.js",
+      "types": "./dist/types/hub-marketing.d.ts",
+      "development": "./src/types/hub-marketing.ts"
+    },
+    "./data/hub-package-deployments": {
+      "import": "./dist/data/hub-package-deployments.js",
+      "types": "./dist/data/hub-package-deployments.d.ts",
+      "development": "./src/data/hub-package-deployments.ts"
+    },
+    "./data/hub-marketing": {
+      "import": "./dist/data/hub-marketing.js",
+      "types": "./dist/data/hub-marketing.d.ts",
+      "development": "./src/data/hub-marketing.ts"
     }
   },
   "files": [

@@ -29,10 +29,23 @@ interface PropertyInfo {
   status: string;
 }
 
+interface PackageCell {
+  deployment_id: string;
+  property_id: string;
+  package_name: string;
+  package_category: string;
+  installed_version: string | null;
+  latest_version: string | null;
+  status: string;
+  pinned: boolean;
+  module_count: number;
+}
+
 export default function SkillsMatrixPage() {
   const [cells, setCells] = useState<MatrixCell[]>([]);
   const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [properties, setProperties] = useState<PropertyInfo[]>([]);
+  const [npmPackages, setNpmPackages] = useState<PackageCell[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +56,7 @@ export default function SkillsMatrixPage() {
         setCells(json.data?.cells ?? []);
         setSkills(json.data?.skills ?? []);
         setProperties(json.data?.properties ?? []);
+        setNpmPackages(json.data?.npmPackages ?? []);
       } catch {
         // empty state
       }
@@ -51,8 +65,32 @@ export default function SkillsMatrixPage() {
     load();
   }, []);
 
+  // Unique package names from npm cells
+  const packageNames = [...new Set(npmPackages.map((p) => p.package_name))].sort();
+
   const getCell = (propertyId: string, skillId: string): MatrixCell | undefined =>
     cells.find((c) => c.property_id === propertyId && c.skill_id === skillId);
+
+  const getPackageCell = (propertyId: string, packageName: string): PackageCell | undefined =>
+    npmPackages.find((p) => p.property_id === propertyId && p.package_name === packageName);
+
+  const getPackageCellColor = (cell?: PackageCell): string => {
+    if (!cell) return 'bg-zinc-800/30';
+    if (cell.status === 'failed') return 'bg-red-500/20';
+    if (cell.pinned) return 'bg-blue-500/20';
+    if (cell.installed_version && cell.latest_version && cell.installed_version !== cell.latest_version) return 'bg-amber-500/20';
+    if (cell.status === 'active') return 'bg-green-500/20';
+    return 'bg-zinc-700/30';
+  };
+
+  const getPackageCellDot = (cell?: PackageCell): string => {
+    if (!cell) return '';
+    if (cell.status === 'failed') return 'bg-red-400';
+    if (cell.pinned) return 'bg-blue-400';
+    if (cell.installed_version && cell.latest_version && cell.installed_version !== cell.latest_version) return 'bg-amber-400';
+    if (cell.status === 'active') return 'bg-green-400';
+    return 'bg-zinc-500';
+  };
 
   const getCellColor = (cell?: MatrixCell): string => {
     if (!cell) return 'bg-zinc-800/30';
@@ -150,6 +188,21 @@ export default function SkillsMatrixPage() {
                     </Link>
                   </th>
                 ))}
+                {packageNames.length > 0 && (
+                  <th className="px-1 py-3">
+                    <div className="mx-auto h-6 w-px bg-zinc-700" />
+                  </th>
+                )}
+                {packageNames.map((pkg) => (
+                  <th
+                    key={pkg}
+                    className="px-3 py-3 text-center text-xs font-medium text-zinc-400"
+                  >
+                    <span title={pkg}>
+                      {pkg.replace('@pandotic/', '').replace('@universal-cms/', '')}
+                    </span>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -186,6 +239,30 @@ export default function SkillsMatrixPage() {
                             <span
                               className={`h-2 w-2 rounded-full ${getCellDot(cell)}`}
                             />
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
+                  {packageNames.length > 0 && (
+                    <td className="px-1 py-3">
+                      <div className="mx-auto h-6 w-px bg-zinc-800" />
+                    </td>
+                  )}
+                  {packageNames.map((pkg) => {
+                    const pkgCell = getPackageCell(property.id, pkg);
+                    return (
+                      <td key={pkg} className="px-3 py-3 text-center">
+                        <div
+                          className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md ${getPackageCellColor(pkgCell)} cursor-pointer hover:ring-1 hover:ring-zinc-600 transition-all`}
+                          title={
+                            pkgCell
+                              ? `v${pkgCell.installed_version ?? '?'}${pkgCell.pinned ? ' (pinned)' : ''}${pkgCell.installed_version !== pkgCell.latest_version ? ` → v${pkgCell.latest_version}` : ''}`
+                              : 'Not installed'
+                          }
+                        >
+                          {pkgCell && (
+                            <span className={`h-2 w-2 rounded-full ${getPackageCellDot(pkgCell)}`} />
                           )}
                         </div>
                       </td>
