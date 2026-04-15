@@ -190,6 +190,20 @@ export default function FleetDashboardPage() {
     }
   }
 
+  async function handleUpdateProperty(propertyId: string, updates: Record<string, unknown>) {
+    try {
+      await fetch(`/api/properties/${propertyId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      await loadData();
+      setToast({ message: "Property updated", type: "success" });
+    } catch {
+      setToast({ message: "Failed to update property", type: "error" });
+    }
+  }
+
   async function handleAddMarketingService(propertyId: string, serviceType: string) {
     try {
       await fetch("/api/marketing", {
@@ -573,7 +587,10 @@ export default function FleetDashboardPage() {
                   />
                 )}
                 {activeTab === "business" && (
-                  <BusinessCols property={property} />
+                  <BusinessCols
+                    property={property}
+                    onUpdate={(updates) => handleUpdateProperty(property.id, updates)}
+                  />
                 )}
               </tr>
             ))}
@@ -873,35 +890,160 @@ function MarketingCols({
 
 // ─── Business Columns ─────────────────────────────────────────────────────
 
-function BusinessCols({ property }: { property: Property }) {
+const BUSINESS_CATEGORIES = [
+  { value: "", label: "—" },
+  { value: "saas", label: "SaaS" },
+  { value: "marketplace", label: "Marketplace" },
+  { value: "directory", label: "Directory" },
+  { value: "content_site", label: "Content Site" },
+  { value: "agency_client", label: "Agency Client" },
+  { value: "internal_tool", label: "Internal Tool" },
+];
+
+const OWNERSHIP_OPTIONS = [
+  { value: "personal", label: "Personal" },
+  { value: "pandotic", label: "Pandotic" },
+  { value: "client", label: "Client" },
+];
+
+const STAGE_OPTIONS = [
+  { value: "idea", label: "Idea" },
+  { value: "development", label: "Development" },
+  { value: "active", label: "Active" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "sunset", label: "Sunset" },
+];
+
+function InlineSelect({
+  value,
+  options,
+  onChange,
+  className = "",
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (val: string) => void;
+  className?: string;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`rounded border-0 bg-transparent py-0 pl-0 pr-5 text-xs focus:ring-1 focus:ring-zinc-600 cursor-pointer ${className}`}
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value} className="bg-zinc-800">
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function InlineText({
+  value,
+  placeholder,
+  onSave,
+}: {
+  value: string;
+  placeholder: string;
+  onSave: (val: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  if (editing) {
+    return (
+      <input
+        type="text"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          if (draft !== value) onSave(draft);
+          setEditing(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            if (draft !== value) onSave(draft);
+            setEditing(false);
+          }
+          if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+        autoFocus
+        className="w-full rounded border border-zinc-600 bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-300 focus:border-zinc-500 focus:outline-none"
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => { setDraft(value); setEditing(true); }}
+      className="text-left text-xs text-zinc-300 hover:text-white"
+      title="Click to edit"
+    >
+      {value || <span className="text-zinc-600">{placeholder}</span>}
+    </button>
+  );
+}
+
+function BusinessCols({
+  property,
+  onUpdate,
+}: {
+  property: Property;
+  onUpdate: (updates: Record<string, unknown>) => void;
+}) {
   return (
     <>
       <td className="px-4 py-3">
-        {property.business_category ? (
-          <span className="text-xs capitalize text-zinc-300">{property.business_category.replace("_", " ")}</span>
-        ) : <span className="text-xs text-zinc-600">-</span>}
+        <InlineSelect
+          value={property.business_category ?? ""}
+          options={BUSINESS_CATEGORIES}
+          onChange={(val) => onUpdate({ business_category: val || null })}
+          className="text-zinc-300"
+        />
       </td>
       <td className="px-4 py-3">
-        <span className="text-xs text-zinc-300">{OWNERSHIP_LABELS[property.ownership_type] ?? property.ownership_type}</span>
-        {property.client_name && <span className="ml-1 text-xs text-zinc-500">({property.client_name})</span>}
+        <div className="flex items-center gap-1">
+          <InlineSelect
+            value={property.ownership_type}
+            options={OWNERSHIP_OPTIONS}
+            onChange={(val) => onUpdate({ ownership_type: val })}
+            className="text-zinc-300"
+          />
+          {property.ownership_type === "client" && (
+            <InlineText
+              value={property.client_name ?? ""}
+              placeholder="Client name"
+              onSave={(val) => onUpdate({ client_name: val || null })}
+            />
+          )}
+        </div>
       </td>
       <td className="px-4 py-3">
-        <span className={`text-xs font-medium capitalize ${STAGE_COLORS[property.business_stage] ?? "text-zinc-400"}`}>
-          {property.business_stage}
-        </span>
+        <InlineSelect
+          value={property.business_stage}
+          options={STAGE_OPTIONS}
+          onChange={(val) => onUpdate({ business_stage: val })}
+          className={`font-medium ${STAGE_COLORS[property.business_stage] ?? "text-zinc-400"}`}
+        />
       </td>
       <td className="px-4 py-3">
-        {property.domains.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs text-zinc-300">{property.domains[0]}</span>
-            {property.domains.length > 1 && <span className="text-xs text-zinc-500">+{property.domains.length - 1}</span>}
-          </div>
-        ) : <span className="text-xs text-zinc-600">-</span>}
+        <InlineText
+          value={property.domains.join(", ")}
+          placeholder="Add domains"
+          onSave={(val) => onUpdate({ domains: val ? val.split(",").map((d) => d.trim()).filter(Boolean) : [] })}
+        />
       </td>
       <td className="px-4 py-3">
-        {property.llc_entity ? (
-          <span className="text-xs text-zinc-300">{property.llc_entity}</span>
-        ) : <span className="text-xs text-zinc-600">-</span>}
+        <InlineText
+          value={property.llc_entity ?? ""}
+          placeholder="LLC entity"
+          onSave={(val) => onUpdate({ llc_entity: val || null })}
+        />
       </td>
     </>
   );
