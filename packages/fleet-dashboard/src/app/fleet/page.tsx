@@ -665,7 +665,11 @@ function DeploymentsCols({
   if (!cmsDeployment) {
     return (
       <>
-        <td className="px-4 py-3"><span className="text-xs text-zinc-600">Not installed</span></td>
+        <td className="px-4 py-3">
+          <Link href="/fleet/deploy" className="text-xs text-zinc-500 hover:text-zinc-300 underline">
+            Install CMS
+          </Link>
+        </td>
         <td className="px-4 py-3"><span className="text-xs text-zinc-600">-</span></td>
         <td className="px-4 py-3">
           {otherDeployments.length > 0 ? (
