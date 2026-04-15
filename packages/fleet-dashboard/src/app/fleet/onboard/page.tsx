@@ -76,6 +76,16 @@ export default function OnboardPage() {
   const [selectedRepo, setSelectedRepo] = useState<string>("");
   const [repoSearch, setRepoSearch] = useState("");
 
+  // Step 2: Detection
+  const [detecting, setDetecting] = useState(false);
+  const [detected, setDetected] = useState<{
+    hasCms: boolean;
+    cmsVersion: string | null;
+    detectedPlatform: string;
+    enabledModules: string[];
+    projectName: string | null;
+  } | null>(null);
+
   // Step 2 alt: Manual
   const [manualName, setManualName] = useState("");
   const [manualUrl, setManualUrl] = useState("");
@@ -111,6 +121,26 @@ export default function OnboardPage() {
     setLoadingRepos(false);
   }
 
+  async function detectCms(repoFullName: string) {
+    setDetecting(true);
+    try {
+      const res = await fetch(
+        `/api/github/detect?token=${encodeURIComponent(ghToken)}&repo=${encodeURIComponent(repoFullName)}`
+      );
+      const json = await res.json();
+      if (json.data) {
+        setDetected(json.data);
+        if (json.data.projectName) setProjectName(json.data.projectName);
+        if (json.data.detectedPlatform && json.data.detectedPlatform !== "other") {
+          setPlatform(json.data.detectedPlatform as PlatformType);
+        }
+      }
+    } catch {
+      // detection failed — non-critical
+    }
+    setDetecting(false);
+  }
+
   async function handleSubmit() {
     setSaving(true);
     setError(null);
@@ -132,7 +162,8 @@ export default function OnboardPage() {
           platform_type: platform,
           github_repo: repo?.full_name ?? null,
           github_default_branch: repo?.default_branch ?? "main",
-          cms_installed: false,
+          cms_installed: detected?.hasCms ?? false,
+          enabled_modules: detected?.enabledModules ?? [],
           onboarding_status: "complete",
           business_category: category || null,
           ownership_type: ownership,
@@ -281,6 +312,7 @@ export default function OnboardPage() {
                       setSelectedRepo(repo.full_name);
                       setProjectName(repo.name);
                       setProjectUrl(repo.html_url);
+                      detectCms(repo.full_name);
                     }}
                     className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
                       selectedRepo === repo.full_name
@@ -302,6 +334,35 @@ export default function OnboardPage() {
                 ))}
               </div>
             </>
+          )}
+
+          {/* Detection result */}
+          {detecting && (
+            <div className="flex items-center gap-2 text-sm text-zinc-500">
+              <Loader2 className="h-4 w-4 animate-spin" /> Detecting CMS...
+            </div>
+          )}
+          {detected && !detecting && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+              <div className="flex items-center gap-2 text-sm">
+                {detected.hasCms ? (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-400" />
+                    <span className="text-emerald-400">CMS detected</span>
+                    <span className="text-zinc-500">v{detected.cmsVersion}</span>
+                    {detected.enabledModules.length > 0 && (
+                      <span className="text-zinc-500">· {detected.enabledModules.length} modules</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="h-4 w-4 text-center text-zinc-600">—</span>
+                    <span className="text-zinc-500">No CMS installed</span>
+                    <span className="text-zinc-600">· {detected.detectedPlatform}</span>
+                  </>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}
