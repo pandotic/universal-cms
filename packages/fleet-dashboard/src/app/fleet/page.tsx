@@ -11,10 +11,13 @@ import {
   Briefcase,
   ExternalLink,
   Pin,
+  PinOff,
   ArrowUp,
   ChevronDown,
   ChevronRight,
   Plus,
+  X,
+  Check,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -129,10 +132,19 @@ export default function FleetDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   async function loadData() {
     try {
@@ -148,12 +160,55 @@ export default function FleetDashboardPage() {
   async function handleSync() {
     setSyncing(true);
     try {
-      await fetch("/api/deployments/sync", { method: "POST" });
+      const res = await fetch("/api/deployments/sync", { method: "POST" });
+      const json = await res.json();
+      const summary = json.data?.summary;
       await loadData();
+      if (summary) {
+        setToast({
+          message: `Synced ${summary.synced} of ${summary.total} properties. ${summary.unreachable > 0 ? `${summary.unreachable} unreachable.` : ""}`,
+          type: summary.unreachable > 0 ? "error" : "success",
+        });
+      }
     } catch {
-      // ignore
+      setToast({ message: "Sync failed — check network.", type: "error" });
     }
     setSyncing(false);
+  }
+
+  async function handleTogglePin(deploymentId: string, currentlyPinned: boolean) {
+    try {
+      await fetch(`/api/deployments/${deploymentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned: !currentlyPinned }),
+      });
+      await loadData();
+      setToast({ message: currentlyPinned ? "Version unpinned" : "Version pinned", type: "success" });
+    } catch {
+      setToast({ message: "Failed to update pin status", type: "error" });
+    }
+  }
+
+  async function handleRegisterPackage(propertyId: string, packageName: string, version: string, category: string) {
+    try {
+      await fetch("/api/deployments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: propertyId,
+          package_name: packageName,
+          package_category: category,
+          installed_version: version,
+          status: "active",
+        }),
+      });
+      await loadData();
+      setShowRegisterModal(false);
+      setToast({ message: `Registered ${packageName} v${version}`, type: "success" });
+    } catch {
+      setToast({ message: "Failed to register package", type: "error" });
+    }
   }
 
   if (loading) {
@@ -292,6 +347,32 @@ export default function FleetDashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div
+          className={`fixed right-4 top-20 z-50 flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg transition-all ${
+            toast.type === "success"
+              ? "border-emerald-500/20 bg-emerald-950 text-emerald-300"
+              : "border-red-500/20 bg-red-950 text-red-300"
+          }`}
+        >
+          {toast.type === "success" ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          {toast.message}
+          <button onClick={() => setToast(null)} className="ml-2 opacity-50 hover:opacity-100">
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+
+      {/* Register Package Modal */}
+      {showRegisterModal && (
+        <RegisterPackageModal
+          properties={data.properties}
+          onSubmit={handleRegisterPackage}
+          onClose={() => setShowRegisterModal(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -311,6 +392,15 @@ export default function FleetDashboardPage() {
             <option value="pandotic">Pandotic</option>
             <option value="client">Client</option>
           </select>
+          {activeTab === "deployments" && (
+            <button
+              onClick={() => setShowRegisterModal(true)}
+              className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+            >
+              <Plus className="h-4 w-4" />
+              Register Package
+            </button>
+          )}
           <button
             onClick={handleSync}
             disabled={syncing}
@@ -425,6 +515,7 @@ export default function FleetDashboardPage() {
                     otherDeployments={getDeployments(property.id).filter(
                       (d) => d.package_name !== "@pandotic/universal-cms"
                     )}
+                    onTogglePin={handleTogglePin}
                   />
                 )}
                 {activeTab === "skills" && (
@@ -467,9 +558,11 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
 function DeploymentsCols({
   cmsDeployment,
   otherDeployments,
+  onTogglePin,
 }: {
   cmsDeployment?: PackageDeployment;
   otherDeployments: PackageDeployment[];
+  onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -518,7 +611,17 @@ function DeploymentsCols({
               <ArrowUp className="h-3 w-3" />v{cmsDeployment.latest_version}
             </span>
           )}
-          {cmsDeployment.pinned && <Pin className="h-3 w-3 text-blue-400" />}
+          <button
+            onClick={() => onTogglePin(cmsDeployment.id, cmsDeployment.pinned)}
+            className={`rounded p-0.5 transition-colors ${
+              cmsDeployment.pinned
+                ? "text-blue-400 hover:text-blue-300"
+                : "text-zinc-600 hover:text-zinc-400"
+            }`}
+            title={cmsDeployment.pinned ? "Unpin version" : "Pin version"}
+          >
+            {cmsDeployment.pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
+          </button>
         </div>
       </td>
       <td className="px-4 py-3">
@@ -693,5 +796,128 @@ function BusinessCols({ property }: { property: Property }) {
         ) : <span className="text-xs text-zinc-600">-</span>}
       </td>
     </>
+  );
+}
+
+// ─── Register Package Modal ───────────────────────────────────────────────
+
+function RegisterPackageModal({
+  properties,
+  onSubmit,
+  onClose,
+}: {
+  properties: Property[];
+  onSubmit: (propertyId: string, packageName: string, version: string, category: string) => void;
+  onClose: () => void;
+}) {
+  const [propertyId, setPropertyId] = useState("");
+  const [packageName, setPackageName] = useState("@pandotic/universal-cms");
+  const [version, setVersion] = useState("");
+  const [category, setCategory] = useState("cms");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Register Package</h2>
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <p className="mt-1 text-sm text-zinc-500">
+          Manually register a package deployment for sites without a health endpoint.
+        </p>
+
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-zinc-400">Property</label>
+            <select
+              value={propertyId}
+              onChange={(e) => setPropertyId(e.target.value)}
+              className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+            >
+              <option value="">Select property...</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-medium text-zinc-400">Package Name</label>
+            <select
+              value={packageName}
+              onChange={(e) => {
+                setPackageName(e.target.value);
+                if (e.target.value === "@pandotic/universal-cms") setCategory("cms");
+                else if (e.target.value === "@pandotic/skill-library") setCategory("library");
+                else if (e.target.value === "@universal-cms/admin-ui") setCategory("ui");
+              }}
+              className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+            >
+              <option value="@pandotic/universal-cms">@pandotic/universal-cms</option>
+              <option value="@pandotic/skill-library">@pandotic/skill-library</option>
+              <option value="@universal-cms/admin-ui">@universal-cms/admin-ui</option>
+              <option value="custom">Custom package...</option>
+            </select>
+          </div>
+
+          {packageName === "custom" && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-zinc-400">Custom Package Name</label>
+              <input
+                type="text"
+                placeholder="@scope/package-name"
+                onChange={(e) => setPackageName(e.target.value)}
+                className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1 block text-xs font-medium text-zinc-400">Installed Version</label>
+            <input
+              type="text"
+              value={version}
+              onChange={(e) => setVersion(e.target.value)}
+              placeholder="0.1.0"
+              className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-medium text-zinc-400">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+            >
+              <option value="cms">CMS</option>
+              <option value="library">Library</option>
+              <option value="ui">UI</option>
+              <option value="tool">Tool</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit(propertyId, packageName, version, category)}
+            disabled={!propertyId || !packageName || !version}
+            className="rounded-md bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-50"
+          >
+            Register
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
