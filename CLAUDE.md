@@ -98,10 +98,7 @@ All migrations have been applied to the Pandotic Hub Supabase project (`rimbgolu
 - Separate Netlify site ("pandoticsite") with base directory `apps/pandotic-site`
 - **Netlify build command in UI** may override `apps/pandotic-site/netlify.toml` — if deploys fail with "Module not found" for cms-core imports, check the Netlify UI build command matches the toml or is cleared
 - The `package.json` `build` script includes `pnpm --filter @pandotic/universal-cms build` as a safeguard so cms-core is always built first regardless of what Netlify command runs
-- The `netlify.toml` uses `--filter @pandotic/pandotic-site...` (pnpm `...` suffix) to build all workspace deps in topological order
-
-### Open PR
-- **PR #22** (`claude/migrate-pandotic-site-cms-XG6FS` → `main`): Fixes pandotic-site Netlify build (builds cms-core first, 4GB heap). Verify deploy preview passes before merging.
+- The `netlify.toml` uses `--filter @pandotic/universal-cms build && --filter @pandotic/pandotic-site build` to build cms-core first
 
 ## Remaining Phases — TODO for Next Sessions
 
