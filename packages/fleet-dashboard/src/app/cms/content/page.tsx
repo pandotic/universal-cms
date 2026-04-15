@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getAllContentPages } from "@pandotic/universal-cms/data/content";
@@ -26,6 +27,12 @@ export default async function CMSContentPage() {
             Manage blog posts and general content pages
           </p>
         </div>
+        <Link
+          href="/cms/content/new"
+          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-200 transition-colors"
+        >
+          New Page
+        </Link>
       </div>
 
       {error && (
@@ -42,29 +49,37 @@ export default async function CMSContentPage() {
               <th className="text-left px-4 py-3 font-medium">Type</th>
               <th className="text-left px-4 py-3 font-medium">Status</th>
               <th className="text-left px-4 py-3 font-medium">Updated</th>
+              <th className="text-right px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {pages.length === 0 && !error && (
               <tr>
-                <td colSpan={4} className="px-4 py-12 text-center text-zinc-500">
-                  No content pages found. Content pages will appear here once the CMS tables are seeded.
+                <td colSpan={5} className="px-4 py-12 text-center text-zinc-500">
+                  No content pages found. Create your first page to get started.
                 </td>
               </tr>
             )}
             {pages.map((page) => (
               <tr key={page.id} className="hover:bg-zinc-900/50 transition-colors">
                 <td className="px-4 py-3">
-                  <span className="text-white font-medium">{page.title}</span>
+                  <Link
+                    href={`/cms/content/${page.id}`}
+                    className="text-white hover:text-blue-400 transition-colors font-medium"
+                  >
+                    {page.title}
+                  </Link>
                   <p className="text-zinc-500 text-xs mt-0.5">/{page.slug}</p>
                 </td>
-                <td className="px-4 py-3 text-zinc-400">{page.page_type}</td>
+                <td className="px-4 py-3 text-zinc-400 capitalize">{page.page_type}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                       page.status === "published"
                         ? "bg-green-900/30 text-green-400"
-                        : "bg-zinc-800 text-zinc-400"
+                        : page.status === "archived"
+                          ? "bg-red-900/30 text-red-400"
+                          : "bg-zinc-800 text-zinc-400"
                     }`}
                   >
                     {page.status}
@@ -72,6 +87,14 @@ export default async function CMSContentPage() {
                 </td>
                 <td className="px-4 py-3 text-zinc-500 text-xs">
                   {new Date(page.updated_at).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/cms/content/${page.id}`}
+                    className="text-zinc-400 hover:text-white text-xs transition-colors"
+                  >
+                    Edit
+                  </Link>
                 </td>
               </tr>
             ))}
