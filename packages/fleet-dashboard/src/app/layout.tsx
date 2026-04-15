@@ -49,10 +49,11 @@ export default function RootLayout({
                   ]}
                 />
                 <NavDropdown
-                  label="CMS"
+                  label="Content"
                   items={[
-                    { href: "/cms/projects", label: "Projects" },
-                    { href: "/cms/content", label: "Content Pages" },
+                    { href: "/cms/projects", label: "Portfolio / Case Studies" },
+                    { href: "/cms/content", label: "Pages & Blog" },
+                    { href: "https://pandotic.ai/admin", label: "Pandotic CMS Admin", external: true },
                   ]}
                 />
                 <NavDropdown
@@ -60,6 +61,8 @@ export default function RootLayout({
                   items={[
                     { href: "/groups", label: "Groups" },
                     { href: "/users", label: "Users" },
+                    { href: "/audit-log", label: "Audit Log" },
+                    { href: "/feature-flags", label: "Feature Flags" },
                   ]}
                 />
                 <UserNav />

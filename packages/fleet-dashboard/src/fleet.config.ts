@@ -6,8 +6,12 @@ export interface FleetSite {
 }
 
 export const fleet: FleetSite[] = [
-  // Add your deployed sites here:
-  // { name: "ESGsource", url: "https://esgsource.com", healthEndpoint: "/api/admin/health", environment: "production" },
+  {
+    name: "Pandotic",
+    url: "https://pandotic.ai",
+    healthEndpoint: "/api/admin/health",
+    environment: "production",
+  },
 ];
 
 // ─── API Key Registry ───────────────────────────────────────────────────────

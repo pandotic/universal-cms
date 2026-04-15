@@ -71,15 +71,17 @@ export function computeContentHash(content: string): string {
 }
 
 // ─── Category Mapping ─────────────────────────────────────────────────────
+// Maps manifest categories to valid skill_category enum values in the DB:
+// acquisition, retention, engagement, analytics, content_creation, brand_management, automation
 
 const CATEGORY_MAP: Record<string, string> = {
-  Documents: "documents",
-  "AI & Automation": "ai_automation",
-  "Developer Tools": "developer_tools",
-  "UI Components": "ui_components",
-  Mechanical: "knowledge_base",
-  Electrical: "knowledge_base",
-  Plumbing: "knowledge_base",
+  Documents: "content_creation",
+  "AI & Automation": "automation",
+  "Developer Tools": "automation",
+  "UI Components": "content_creation",
+  Mechanical: "automation",
+  Electrical: "automation",
+  Plumbing: "automation",
   General: "automation",
 };
 
@@ -167,7 +169,7 @@ export async function syncManifestToDb(client: SupabaseClient): Promise<{
           name: entry.name,
           slug: entry.id,
           description: entry.description,
-          platform: "claude_code",
+          platform: "cross_platform",
           category: mapCategory(entry.category),
           execution_mode: "manual",
           scope,
