@@ -438,6 +438,13 @@ export default function FleetDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/fleet/onboard"
+            className="flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
+          >
+            <Plus className="h-4 w-4" />
+            Add Project
+          </Link>
           <select
             value={ownerFilter}
             onChange={(e) => setOwnerFilter(e.target.value)}
