@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const sections = [
@@ -50,7 +51,14 @@ export default function HubHomePage() {
     <div className="space-y-16">
       {/* Hero */}
       <section className="pt-8 text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        <Image
+          src="/images/pandologo.avif"
+          alt="Pandotic Hub"
+          width={72}
+          height={72}
+          className="mx-auto rounded-full"
+        />
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
           Pandotic Hub
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-400">

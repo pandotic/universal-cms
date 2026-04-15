@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 import { UserNav } from "./user-nav";
@@ -23,7 +24,14 @@ export default function RootLayout({
         <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-14 items-center justify-between">
-              <Link href="/" className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/images/pandologo.avif"
+                  alt="Pandotic Hub"
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                />
                 <span className="text-lg font-semibold tracking-tight text-white">
                   Pandotic Hub
                 </span>

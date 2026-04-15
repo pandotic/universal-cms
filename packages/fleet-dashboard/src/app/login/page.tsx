@@ -1,6 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -21,6 +23,16 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [needsSetup, setNeedsSetup] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/setup/check")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.needsSetup) setNeedsSetup(true);
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,11 +59,28 @@ function LoginForm() {
     <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Pandotic Hub</h1>
+          <Image
+            src="/images/pandologo.avif"
+            alt="Pandotic Hub"
+            width={64}
+            height={64}
+            className="mx-auto rounded-full"
+          />
+          <h1 className="mt-4 text-2xl font-bold text-white">Pandotic Hub</h1>
           <p className="mt-1 text-sm text-zinc-500">
             Sign in to access the operations dashboard
           </p>
         </div>
+
+        {needsSetup && (
+          <Link
+            href="/setup"
+            className="block rounded-md border border-zinc-700 bg-zinc-900 p-3 text-center text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-800"
+          >
+            No admin account yet.{" "}
+            <span className="font-medium text-white">Set up your admin account</span>
+          </Link>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
