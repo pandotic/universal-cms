@@ -575,7 +575,7 @@ export default function FleetDashboardPage() {
                   />
                 )}
                 {activeTab === "skills" && (
-                  <SkillsCols counts={getSkillCounts(property.id)} />
+                  <SkillsCols propertySlug={property.slug} counts={getSkillCounts(property.id)} />
                 )}
                 {activeTab === "marketing" && (
                   <MarketingCols
@@ -598,8 +598,22 @@ export default function FleetDashboardPage() {
         </table>
 
         {filteredProperties.length === 0 && (
-          <div className="px-4 py-12 text-center text-zinc-500">
-            No properties match the current filter.
+          <div className="px-4 py-12 text-center">
+            {data.properties.length === 0 ? (
+              <div>
+                <Package className="mx-auto h-8 w-8 text-zinc-600" />
+                <p className="mt-3 text-sm font-medium text-zinc-400">No properties in the fleet yet</p>
+                <p className="mt-1 text-xs text-zinc-600">
+                  Add your first property in{" "}
+                  <Link href="/properties" className="text-zinc-400 underline hover:text-zinc-300">
+                    Properties
+                  </Link>{" "}
+                  to start tracking deployments, skills, and marketing.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-zinc-500">No properties match the current filter.</p>
+            )}
           </div>
         )}
       </div>
@@ -754,8 +768,9 @@ function VersionBadge({ deployment }: { deployment: PackageDeployment }) {
 
 // ─── Skills Columns ───────────────────────────────────────────────────────
 
-function SkillsCols({ counts }: { counts: { active: number; outdated: number; failed: number } }) {
+function SkillsCols({ propertySlug, counts }: { propertySlug: string; counts: { active: number; outdated: number; failed: number } }) {
   const hasSkills = counts.active > 0 || counts.outdated > 0 || counts.failed > 0;
+  const total = counts.active + counts.outdated + counts.failed;
 
   return (
     <>
@@ -766,24 +781,35 @@ function SkillsCols({ counts }: { counts: { active: number; outdated: number; fa
       </td>
       <td className="px-4 py-3 text-center">
         {counts.outdated > 0 ? (
-          <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500/10 px-2 text-xs font-medium text-amber-400">{counts.outdated}</span>
+          <Link href="/skills/matrix" className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500/10 px-2 text-xs font-medium text-amber-400 hover:bg-amber-500/20" title="View outdated skills">
+            {counts.outdated}
+          </Link>
         ) : <span className="text-xs text-zinc-600">0</span>}
       </td>
       <td className="px-4 py-3 text-center">
         {counts.failed > 0 ? (
-          <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-500/10 px-2 text-xs font-medium text-red-400">{counts.failed}</span>
+          <Link href="/skills/matrix" className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-500/10 px-2 text-xs font-medium text-red-400 hover:bg-red-500/20" title="View failed skills">
+            {counts.failed}
+          </Link>
         ) : <span className="text-xs text-zinc-600">0</span>}
       </td>
       <td className="px-4 py-3">
-        {hasSkills ? (
-          <Link href="/skills/matrix" className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200">
-            View matrix <ExternalLink className="h-3 w-3" />
-          </Link>
-        ) : (
-          <Link href="/skills/deploy" className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300">
-            Deploy skills <Plus className="h-3 w-3" />
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {hasSkills ? (
+            <Link href="/skills/matrix" className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200">
+              Matrix <ExternalLink className="h-3 w-3" />
+            </Link>
+          ) : (
+            <Link href="/skills/deploy" className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300">
+              Deploy <Plus className="h-3 w-3" />
+            </Link>
+          )}
+          {hasSkills && (
+            <Link href={`/properties/${propertySlug}`} className="text-xs text-zinc-600 hover:text-zinc-400">
+              Details
+            </Link>
+          )}
+        </div>
       </td>
     </>
   );
