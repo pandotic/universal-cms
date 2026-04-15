@@ -134,9 +134,12 @@ export default function FleetDashboardPage() {
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -151,6 +154,7 @@ export default function FleetDashboardPage() {
       const res = await fetch("/api/fleet/dashboard");
       const json = await res.json();
       setData(json.data);
+      setLastRefreshed(new Date());
     } catch {
       // empty state
     }
@@ -435,6 +439,11 @@ export default function FleetDashboardPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-white">Fleet Dashboard</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {data.properties.length} propert{data.properties.length !== 1 ? "ies" : "y"} across the fleet
+            {lastRefreshed && (
+              <span className="ml-2 text-zinc-600">
+                · updated {lastRefreshed.toLocaleTimeString()}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -540,6 +549,7 @@ export default function FleetDashboardPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400">Stage</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400">Domains</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400">LLC</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400">Notes</th>
                 </>
               )}
             </tr>
@@ -906,8 +916,15 @@ function MarketingCols({
         </div>
       </td>
       <td className="px-4 py-3">
-        {providers.length > 0 ? (
-          <span className="text-xs text-zinc-400">{providers.join(", ")}</span>
+        {services.length > 0 ? (
+          <InlineText
+            value={services[0].provider}
+            placeholder="Provider"
+            onSave={(val) => {
+              // Update all services for this property to the same provider
+              services.forEach((s) => onUpdateService(s.id, { provider: val || "internal" }));
+            }}
+          />
         ) : <span className="text-xs text-zinc-600">-</span>}
       </td>
       <td className="px-4 py-3">
@@ -1076,6 +1093,13 @@ function BusinessCols({
           value={property.llc_entity ?? ""}
           placeholder="LLC entity"
           onSave={(val) => onUpdate({ llc_entity: val || null })}
+        />
+      </td>
+      <td className="px-4 py-3">
+        <InlineText
+          value={property.business_notes ?? ""}
+          placeholder="Add notes..."
+          onSave={(val) => onUpdate({ business_notes: val || null })}
         />
       </td>
     </>
