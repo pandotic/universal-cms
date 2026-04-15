@@ -190,6 +190,48 @@ export default function FleetDashboardPage() {
     }
   }
 
+  async function handleAddMarketingService(propertyId: string, serviceType: string) {
+    try {
+      await fetch("/api/marketing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: propertyId,
+          service_type: serviceType,
+          status: "planned",
+          provider: "internal",
+        }),
+      });
+      await loadData();
+      setToast({ message: `Added ${SERVICE_LABELS[serviceType] ?? serviceType} service`, type: "success" });
+    } catch {
+      setToast({ message: "Failed to add service", type: "error" });
+    }
+  }
+
+  async function handleUpdateMarketingService(serviceId: string, updates: Record<string, string>) {
+    try {
+      await fetch(`/api/marketing/${serviceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      await loadData();
+    } catch {
+      setToast({ message: "Failed to update service", type: "error" });
+    }
+  }
+
+  async function handleDeleteMarketingService(serviceId: string) {
+    try {
+      await fetch(`/api/marketing/${serviceId}`, { method: "DELETE" });
+      await loadData();
+      setToast({ message: "Service removed", type: "success" });
+    } catch {
+      setToast({ message: "Failed to remove service", type: "error" });
+    }
+  }
+
   async function handleRegisterPackage(propertyId: string, packageName: string, version: string, category: string) {
     try {
       await fetch("/api/deployments", {
@@ -522,7 +564,13 @@ export default function FleetDashboardPage() {
                   <SkillsCols counts={getSkillCounts(property.id)} />
                 )}
                 {activeTab === "marketing" && (
-                  <MarketingCols services={getMarketingServices(property.id)} />
+                  <MarketingCols
+                    propertyId={property.id}
+                    services={getMarketingServices(property.id)}
+                    onAddService={handleAddMarketingService}
+                    onUpdateService={handleUpdateMarketingService}
+                    onDeleteService={handleDeleteMarketingService}
+                  />
                 )}
                 {activeTab === "business" && (
                   <BusinessCols property={property} />
@@ -726,26 +774,86 @@ function SkillsCols({ counts }: { counts: { active: number; outdated: number; fa
 
 // ─── Marketing Columns ────────────────────────────────────────────────────
 
-function MarketingCols({ services }: { services: MarketingService[] }) {
+const STATUS_CYCLE: Record<string, string> = {
+  planned: "active",
+  active: "paused",
+  paused: "active",
+  completed: "planned",
+};
+
+const ALL_SERVICE_TYPES = ["seo", "content", "social", "paid_ads", "email", "analytics", "branding", "pr"] as const;
+
+function MarketingCols({
+  propertyId,
+  services,
+  onAddService,
+  onUpdateService,
+  onDeleteService,
+}: {
+  propertyId: string;
+  services: MarketingService[];
+  onAddService: (propertyId: string, serviceType: string) => void;
+  onUpdateService: (serviceId: string, updates: Record<string, string>) => void;
+  onDeleteService: (serviceId: string) => void;
+}) {
+  const [showAdd, setShowAdd] = useState(false);
   const activeServices = services.filter((s) => s.status === "active");
   const providers = [...new Set(services.map((s) => s.provider))];
+  const existingTypes = new Set(services.map((s) => s.service_type));
+  const availableTypes = ALL_SERVICE_TYPES.filter((t) => !existingTypes.has(t));
 
   return (
     <>
       <td className="px-4 py-3">
-        {services.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {services.map((s) => (
-              <span
-                key={s.id}
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_COLORS[s.status] ?? STATUS_COLORS.planned}`}
-                title={`${SERVICE_LABELS[s.service_type] ?? s.service_type}: ${s.status}`}
+        <div className="flex flex-wrap items-center gap-1">
+          {services.map((s) => (
+            <span
+              key={s.id}
+              className={`group inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset cursor-pointer ${STATUS_COLORS[s.status] ?? STATUS_COLORS.planned}`}
+              title={`Click to change status (${s.status} → ${STATUS_CYCLE[s.status] ?? "planned"})`}
+              onClick={() => onUpdateService(s.id, { status: STATUS_CYCLE[s.status] ?? "planned" })}
+            >
+              {SERVICE_LABELS[s.service_type] ?? s.service_type}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteService(s.id);
+                }}
+                className="hidden group-hover:inline-flex -mr-0.5 ml-0.5 rounded-full p-0.5 hover:bg-white/10"
+                title="Remove service"
               >
-                {SERVICE_LABELS[s.service_type] ?? s.service_type}
-              </span>
-            ))}
-          </div>
-        ) : <span className="text-xs text-zinc-600">No services</span>}
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </span>
+          ))}
+          {availableTypes.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowAdd(!showAdd)}
+                className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-dashed border-zinc-700 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400"
+                title="Add service"
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+              {showAdd && (
+                <div className="absolute left-0 top-7 z-20 rounded-md border border-zinc-700 bg-zinc-800 py-1 shadow-lg">
+                  {availableTypes.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => {
+                        onAddService(propertyId, t);
+                        setShowAdd(false);
+                      }}
+                      className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-700"
+                    >
+                      {SERVICE_LABELS[t] ?? t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </td>
       <td className="px-4 py-3">
         {providers.length > 0 ? (
