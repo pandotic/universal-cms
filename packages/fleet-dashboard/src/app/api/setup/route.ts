@@ -21,19 +21,28 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
-    // Guard: check that no admin exists yet
-    const { count: hubAdminCount } = await supabase
+    // Guard: check that no admin exists in hub_users
+    const { count: hubAdminCount, error: hubCheckError } = await supabase
       .from("hub_users")
       .select("*", { count: "exact", head: true })
       .eq("hub_role", "super_admin");
 
+    if (!hubCheckError && (hubAdminCount ?? 0) > 0) {
+      return NextResponse.json(
+        { error: "An admin account already exists. Use the login page instead." },
+        { status: 403 }
+      );
+    }
+
+    // Also check user_roles if the table exists
     const { count: roleAdminCount } = await supabase
       .from("user_roles")
       .select("*", { count: "exact", head: true })
       .eq("role_type", "platform_admin")
       .eq("is_active", true);
 
-    if ((hubAdminCount ?? 0) > 0 || (roleAdminCount ?? 0) > 0) {
+    // roleAdminCount will be null if the table doesn't exist — that's fine
+    if ((roleAdminCount ?? 0) > 0) {
       return NextResponse.json(
         { error: "An admin account already exists. Use the login page instead." },
         { status: 403 }
@@ -73,24 +82,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Also bootstrap platform_admin in user_roles if the table exists
-    try {
-      await supabase.from("user_roles").insert({
-        user_id: authUserId,
-        role_type: "platform_admin",
-        granted_by: authUserId,
-        is_active: true,
-      });
-    } catch {
-      // user_roles table may not exist — not critical
-    }
+    // This is non-critical — ignore errors (table may not exist)
+    await supabase.from("user_roles").insert({
+      user_id: authUserId,
+      role_type: "platform_admin",
+      granted_by: authUserId,
+      is_active: true,
+    });
 
     return NextResponse.json({
       success: true,
       message: "Admin account created successfully",
     });
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "An unexpected error occurred";
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
+      { error: message },
       { status: 500 }
     );
   }
