@@ -250,6 +250,31 @@ export default function FleetDashboardPage() {
     }
   }
 
+  async function handleUpgrade(deploymentId: string, propertyId: string) {
+    const ghToken = typeof window !== "undefined" ? localStorage.getItem("gh_token") : null;
+    if (!ghToken) {
+      setToast({ message: "GitHub token required — connect via /fleet/onboard first", type: "error" });
+      return;
+    }
+    try {
+      const res = await fetch("/api/fleet/upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyIds: [propertyId], ghToken }),
+      });
+      const json = await res.json();
+      const result = json.data?.results?.[0];
+      if (result?.status === "upgraded") {
+        await loadData();
+        setToast({ message: `Upgrade PR created`, type: "success" });
+      } else {
+        setToast({ message: result?.error ?? "Upgrade failed", type: "error" });
+      }
+    } catch {
+      setToast({ message: "Upgrade failed", type: "error" });
+    }
+  }
+
   async function handleRegisterPackage(propertyId: string, packageName: string, version: string, category: string) {
     try {
       await fetch("/api/deployments", {
@@ -584,11 +609,13 @@ export default function FleetDashboardPage() {
 
                 {activeTab === "deployments" && (
                   <DeploymentsCols
+                    propertyId={property.id}
                     cmsDeployment={getCmsDeployment(property.id)}
                     otherDeployments={getDeployments(property.id).filter(
                       (d) => d.package_name !== "@pandotic/universal-cms"
                     )}
                     onTogglePin={handleTogglePin}
+                    onUpgrade={handleUpgrade}
                   />
                 )}
                 {activeTab === "skills" && (
@@ -652,13 +679,17 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
 // ─── Deployments Columns ──────────────────────────────────────────────────
 
 function DeploymentsCols({
+  propertyId,
   cmsDeployment,
   otherDeployments,
   onTogglePin,
+  onUpgrade,
 }: {
+  propertyId: string;
   cmsDeployment?: PackageDeployment;
   otherDeployments: PackageDeployment[];
   onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
+  onUpgrade: (deploymentId: string, propertyId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -707,9 +738,19 @@ function DeploymentsCols({
             v{cmsDeployment.installed_version ?? "?"}
           </span>
           {isOutdated && (
-            <span className="flex items-center gap-0.5 text-xs text-amber-400">
-              <ArrowUp className="h-3 w-3" />v{cmsDeployment.latest_version}
-            </span>
+            <>
+              <span className="flex items-center gap-0.5 text-xs text-amber-400">
+                <ArrowUp className="h-3 w-3" />v{cmsDeployment.latest_version}
+              </span>
+              {!cmsDeployment.pinned && (
+                <button
+                  onClick={() => onUpgrade(cmsDeployment.id, propertyId)}
+                  className="rounded bg-amber-500/10 px-1.5 py-0.5 text-xs font-medium text-amber-400 hover:bg-amber-500/20"
+                >
+                  Upgrade
+                </button>
+              )}
+            </>
           )}
           <button
             onClick={() => onTogglePin(cmsDeployment.id, cmsDeployment.pinned)}
