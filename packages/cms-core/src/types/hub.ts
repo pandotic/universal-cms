@@ -24,6 +24,10 @@ export type OwnershipType = "personal" | "pandotic" | "client";
 
 export type BusinessStage = "idea" | "development" | "active" | "maintenance" | "sunset";
 
+export type PlatformType = "nextjs_supabase" | "wordpress" | "static" | "mindpal" | "external" | "other";
+
+export type OnboardingStatus = "pending" | "connecting" | "configuring" | "complete";
+
 export interface HubProperty {
   id: string;
   name: string;
@@ -49,6 +53,13 @@ export interface HubProperty {
   domain_notes: string | null;
   llc_entity: string | null;
   business_notes: string | null;
+  // Platform & onboarding
+  platform_type: PlatformType;
+  github_repo: string | null;
+  github_default_branch: string;
+  netlify_site_id: string | null;
+  cms_installed: boolean;
+  onboarding_status: OnboardingStatus;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +141,7 @@ export interface PropertyFilters {
   ownershipType?: OwnershipType;
   businessStage?: BusinessStage;
   businessCategory?: BusinessCategory;
+  platformType?: PlatformType;
 }
 
 export interface ActivityFilters {

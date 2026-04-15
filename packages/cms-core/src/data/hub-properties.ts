@@ -25,6 +25,8 @@ export async function listProperties(
     query = query.eq("business_stage", filters.businessStage);
   if (filters?.businessCategory)
     query = query.eq("business_category", filters.businessCategory);
+  if (filters?.platformType)
+    query = query.eq("platform_type", filters.platformType);
 
   // Filter by group: fetch property IDs from hub_group_properties, then filter
   if (filters?.groupId) {
