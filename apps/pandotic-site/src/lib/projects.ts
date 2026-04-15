@@ -174,7 +174,7 @@ export async function getProjectDescription(slug: string): Promise<string> {
           .select("content")
           .eq("project_id", project.id)
           .eq("section_type", "portfolio")
-          .single();
+          .single() as { data: { content: string } | null };
         if (data) {
           const portfolio = parsePortfolio(data.content);
           return portfolio.summary;
