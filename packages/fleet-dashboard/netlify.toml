@@ -1,5 +1,5 @@
 [build]
-  command = "cd ../.. && pnpm install && pnpm --filter @pandotic/fleet-dashboard build"
+  command = "cd ../.. && pnpm install && pnpm --filter @universal-cms/admin-core build && pnpm --filter @universal-cms/admin-ui build && pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/skill-library build && pnpm --filter @pandotic/fleet-dashboard build"
   publish = ".next"
 
 [build.environment]
