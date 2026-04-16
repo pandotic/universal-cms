@@ -250,6 +250,81 @@
       "import": "./dist/data/hub-social.js",
       "types": "./dist/data/hub-social.d.ts",
       "development": "./src/data/hub-social.ts"
+    },
+    "./types/hub-brand-assets": {
+      "import": "./dist/types/hub-brand-assets.js",
+      "types": "./dist/types/hub-brand-assets.d.ts",
+      "development": "./src/types/hub-brand-assets.ts"
+    },
+    "./types/hub-content-pipeline": {
+      "import": "./dist/types/hub-content-pipeline.js",
+      "types": "./dist/types/hub-content-pipeline.d.ts",
+      "development": "./src/types/hub-content-pipeline.ts"
+    },
+    "./types/hub-brand-setup": {
+      "import": "./dist/types/hub-brand-setup.js",
+      "types": "./dist/types/hub-brand-setup.d.ts",
+      "development": "./src/types/hub-brand-setup.ts"
+    },
+    "./types/hub-qa": {
+      "import": "./dist/types/hub-qa.js",
+      "types": "./dist/types/hub-qa.d.ts",
+      "development": "./src/types/hub-qa.ts"
+    },
+    "./types/hub-link-building": {
+      "import": "./dist/types/hub-link-building.js",
+      "types": "./dist/types/hub-link-building.d.ts",
+      "development": "./src/types/hub-link-building.ts"
+    },
+    "./types/hub-marketing-ops": {
+      "import": "./dist/types/hub-marketing-ops.js",
+      "types": "./dist/types/hub-marketing-ops.d.ts",
+      "development": "./src/types/hub-marketing-ops.ts"
+    },
+    "./types/hub-playbooks": {
+      "import": "./dist/types/hub-playbooks.js",
+      "types": "./dist/types/hub-playbooks.d.ts",
+      "development": "./src/types/hub-playbooks.ts"
+    },
+    "./data/hub-brand-assets": {
+      "import": "./dist/data/hub-brand-assets.js",
+      "types": "./dist/data/hub-brand-assets.d.ts",
+      "development": "./src/data/hub-brand-assets.ts"
+    },
+    "./data/hub-content-pipeline": {
+      "import": "./dist/data/hub-content-pipeline.js",
+      "types": "./dist/data/hub-content-pipeline.d.ts",
+      "development": "./src/data/hub-content-pipeline.ts"
+    },
+    "./data/hub-brand-setup": {
+      "import": "./dist/data/hub-brand-setup.js",
+      "types": "./dist/data/hub-brand-setup.d.ts",
+      "development": "./src/data/hub-brand-setup.ts"
+    },
+    "./data/hub-qa": {
+      "import": "./dist/data/hub-qa.js",
+      "types": "./dist/data/hub-qa.d.ts",
+      "development": "./src/data/hub-qa.ts"
+    },
+    "./data/hub-link-building": {
+      "import": "./dist/data/hub-link-building.js",
+      "types": "./dist/data/hub-link-building.d.ts",
+      "development": "./src/data/hub-link-building.ts"
+    },
+    "./data/hub-marketing-ops": {
+      "import": "./dist/data/hub-marketing-ops.js",
+      "types": "./dist/data/hub-marketing-ops.d.ts",
+      "development": "./src/data/hub-marketing-ops.ts"
+    },
+    "./data/hub-playbooks": {
+      "import": "./dist/data/hub-playbooks.js",
+      "types": "./dist/data/hub-playbooks.d.ts",
+      "development": "./src/data/hub-playbooks.ts"
+    },
+    "./data/hub-skill-contract": {
+      "import": "./dist/data/hub-skill-contract.js",
+      "types": "./dist/data/hub-skill-contract.d.ts",
+      "development": "./src/data/hub-skill-contract.ts"
     }
   },
   "files": [
