@@ -274,8 +274,6 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@universal-cms/admin-core": "workspace:*",
-    "@universal-cms/admin-ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-label": "^2.1.0",
@@ -336,6 +334,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pandotic/universal-cms"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "license": "MIT",
   "author": "Pandotic"
