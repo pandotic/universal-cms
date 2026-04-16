@@ -52,6 +52,16 @@ export default function RootLayout({
                   ]}
                 />
                 <NavDropdown
+                  label="Marketing"
+                  items={[
+                    { href: "/marketing-ops", label: "Dashboard" },
+                    { href: "/marketing-ops/brands", label: "Brands" },
+                    { href: "/marketing-ops/pipeline", label: "Content Pipeline" },
+                    { href: "/marketing-ops/link-building", label: "Link Building" },
+                    { href: "/marketing-ops/qa", label: "QA & Reviews" },
+                  ]}
+                />
+                <NavDropdown
                   label="Content"
                   items={[
                     { href: "/cms/projects", label: "Portfolio / Case Studies" },
