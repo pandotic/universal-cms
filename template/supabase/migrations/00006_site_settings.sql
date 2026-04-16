@@ -3,7 +3,7 @@
 -- =============================================================================
 -- site_settings
 -- =============================================================================
-CREATE TABLE site_settings (
+CREATE TABLE IF NOT EXISTS site_settings (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key        TEXT UNIQUE NOT NULL,
   value      JSONB NOT NULL DEFAULT '{}',
@@ -12,6 +12,7 @@ CREATE TABLE site_settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_site_settings_updated_at ON site_settings;
 CREATE TRIGGER trg_site_settings_updated_at
   BEFORE UPDATE ON site_settings
   FOR EACH ROW
@@ -23,22 +24,26 @@ CREATE TRIGGER trg_site_settings_updated_at
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 
 -- Settings are readable by everyone (public analytics IDs, site name, etc.)
+DROP POLICY IF EXISTS site_settings_select_public ON site_settings;
 CREATE POLICY site_settings_select_public
   ON site_settings FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS site_settings_insert_admin ON site_settings;
 CREATE POLICY site_settings_insert_admin
   ON site_settings FOR INSERT
   TO authenticated
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS site_settings_update_admin ON site_settings;
 CREATE POLICY site_settings_update_admin
   ON site_settings FOR UPDATE
   TO authenticated
   USING (has_role('admin'))
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS site_settings_delete_admin ON site_settings;
 CREATE POLICY site_settings_delete_admin
   ON site_settings FOR DELETE
   TO authenticated
@@ -53,4 +58,5 @@ INSERT INTO site_settings (key, value, group_name) VALUES
   ('site_description', '"The definitive source for ESG software ratings, reviews, and career resources."'::jsonb, 'general'),
   ('analytics_providers', '[]'::jsonb, 'integrations'),
   ('social_handles', '{"twitter": "", "linkedin": "", "youtube": ""}'::jsonb, 'social'),
-  ('legal_disclosure', '""'::jsonb, 'legal');
+  ('legal_disclosure', '""'::jsonb, 'legal')
+ON CONFLICT (key) DO NOTHING;

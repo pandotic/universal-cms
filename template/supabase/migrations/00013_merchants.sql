@@ -3,12 +3,14 @@
 -- =============================================================================
 -- Enums
 -- =============================================================================
-CREATE TYPE merchant_status AS ENUM ('active', 'inactive', 'pending');
+DO $$ BEGIN
+  CREATE TYPE merchant_status AS ENUM ('active', 'inactive', 'pending');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================================================
 -- merchants
 -- =============================================================================
-CREATE TABLE merchants (
+CREATE TABLE IF NOT EXISTS merchants (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug             TEXT UNIQUE NOT NULL,
   name             TEXT NOT NULL,
@@ -26,6 +28,7 @@ CREATE TABLE merchants (
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_merchants_updated_at ON merchants;
 CREATE TRIGGER trg_merchants_updated_at
   BEFORE UPDATE ON merchants
   FOR EACH ROW
@@ -34,7 +37,7 @@ CREATE TRIGGER trg_merchants_updated_at
 -- =============================================================================
 -- merchant_collections
 -- =============================================================================
-CREATE TABLE merchant_collections (
+CREATE TABLE IF NOT EXISTS merchant_collections (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   merchant_id UUID NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
   slug        TEXT UNIQUE NOT NULL,
@@ -47,6 +50,7 @@ CREATE TABLE merchant_collections (
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_merchant_collections_updated_at ON merchant_collections;
 CREATE TRIGGER trg_merchant_collections_updated_at
   BEFORE UPDATE ON merchant_collections
   FOR EACH ROW
@@ -55,11 +59,11 @@ CREATE TRIGGER trg_merchant_collections_updated_at
 -- =============================================================================
 -- Indexes
 -- =============================================================================
-CREATE INDEX idx_merchants_slug ON merchants (slug);
-CREATE INDEX idx_merchants_status ON merchants (status);
-CREATE INDEX idx_merchant_collections_merchant ON merchant_collections (merchant_id);
-CREATE INDEX idx_merchant_collections_slug ON merchant_collections (slug);
-CREATE INDEX idx_merchant_collections_featured ON merchant_collections (is_featured) WHERE is_featured = TRUE;
+CREATE INDEX IF NOT EXISTS idx_merchants_slug ON merchants (slug);
+CREATE INDEX IF NOT EXISTS idx_merchants_status ON merchants (status);
+CREATE INDEX IF NOT EXISTS idx_merchant_collections_merchant ON merchant_collections (merchant_id);
+CREATE INDEX IF NOT EXISTS idx_merchant_collections_slug ON merchant_collections (slug);
+CREATE INDEX IF NOT EXISTS idx_merchant_collections_featured ON merchant_collections (is_featured) WHERE is_featured = TRUE;
 
 -- =============================================================================
 -- RLS
@@ -68,34 +72,40 @@ ALTER TABLE merchants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE merchant_collections ENABLE ROW LEVEL SECURITY;
 
 -- Active merchants readable by all
+DROP POLICY IF EXISTS merchants_select_active ON merchants;
 CREATE POLICY merchants_select_active
   ON merchants FOR SELECT
   TO anon, authenticated
   USING (status = 'active');
 
 -- Editors/admins can see all merchants
+DROP POLICY IF EXISTS merchants_select_editorial ON merchants;
 CREATE POLICY merchants_select_editorial
   ON merchants FOR SELECT
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchants_insert_editorial ON merchants;
 CREATE POLICY merchants_insert_editorial
   ON merchants FOR INSERT
   TO authenticated
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchants_update_editorial ON merchants;
 CREATE POLICY merchants_update_editorial
   ON merchants FOR UPDATE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'))
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchants_delete_editorial ON merchants;
 CREATE POLICY merchants_delete_editorial
   ON merchants FOR DELETE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
 -- Collections of active merchants readable by all
+DROP POLICY IF EXISTS merchant_collections_select_active ON merchant_collections;
 CREATE POLICY merchant_collections_select_active
   ON merchant_collections FOR SELECT
   TO anon, authenticated
@@ -108,22 +118,26 @@ CREATE POLICY merchant_collections_select_active
   );
 
 -- Editors/admins can see all collections
+DROP POLICY IF EXISTS merchant_collections_select_editorial ON merchant_collections;
 CREATE POLICY merchant_collections_select_editorial
   ON merchant_collections FOR SELECT
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchant_collections_insert_editorial ON merchant_collections;
 CREATE POLICY merchant_collections_insert_editorial
   ON merchant_collections FOR INSERT
   TO authenticated
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchant_collections_update_editorial ON merchant_collections;
 CREATE POLICY merchant_collections_update_editorial
   ON merchant_collections FOR UPDATE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'))
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS merchant_collections_delete_editorial ON merchant_collections;
 CREATE POLICY merchant_collections_delete_editorial
   ON merchant_collections FOR DELETE
   TO authenticated

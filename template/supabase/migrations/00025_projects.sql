@@ -49,10 +49,12 @@ CREATE INDEX IF NOT EXISTS idx_sections_project ON project_sections(project_id);
 CREATE INDEX IF NOT EXISTS idx_sections_type ON project_sections(section_type);
 
 -- Updated_at triggers (reuse update_updated_at_column if it exists from earlier migrations)
+DROP TRIGGER IF EXISTS trg_projects_updated_at ON projects;
 CREATE TRIGGER trg_projects_updated_at
   BEFORE UPDATE ON projects
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trg_project_sections_updated_at ON project_sections;
 CREATE TRIGGER trg_project_sections_updated_at
   BEFORE UPDATE ON project_sections
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -62,11 +64,13 @@ ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_sections ENABLE ROW LEVEL SECURITY;
 
 -- Public read access for published projects
+DROP POLICY IF EXISTS projects_select_published ON projects;
 CREATE POLICY projects_select_published ON projects
   FOR SELECT
   TO anon, authenticated
   USING (status = 'published');
 
+DROP POLICY IF EXISTS project_sections_select_published ON project_sections;
 CREATE POLICY project_sections_select_published ON project_sections
   FOR SELECT
   TO anon, authenticated
@@ -79,31 +83,39 @@ CREATE POLICY project_sections_select_published ON project_sections
   );
 
 -- Admin full read (drafts too)
+DROP POLICY IF EXISTS projects_select_admin ON projects;
 CREATE POLICY projects_select_admin ON projects
   FOR SELECT
   TO authenticated
   USING (has_role('admin') OR has_role('editor'));
 
+DROP POLICY IF EXISTS project_sections_select_admin ON project_sections;
 CREATE POLICY project_sections_select_admin ON project_sections
   FOR SELECT
   TO authenticated
   USING (has_role('admin') OR has_role('editor'));
 
 -- Admin write
+DROP POLICY IF EXISTS projects_insert ON projects;
 CREATE POLICY projects_insert ON projects
   FOR INSERT TO authenticated WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS projects_update ON projects;
 CREATE POLICY projects_update ON projects
   FOR UPDATE TO authenticated USING (has_role('admin'));
 
+DROP POLICY IF EXISTS projects_delete ON projects;
 CREATE POLICY projects_delete ON projects
   FOR DELETE TO authenticated USING (has_role('admin'));
 
+DROP POLICY IF EXISTS project_sections_insert ON project_sections;
 CREATE POLICY project_sections_insert ON project_sections
   FOR INSERT TO authenticated WITH CHECK (has_role('admin') OR has_role('editor'));
 
+DROP POLICY IF EXISTS project_sections_update ON project_sections;
 CREATE POLICY project_sections_update ON project_sections
   FOR UPDATE TO authenticated USING (has_role('admin') OR has_role('editor'));
 
+DROP POLICY IF EXISTS project_sections_delete ON project_sections;
 CREATE POLICY project_sections_delete ON project_sections
   FOR DELETE TO authenticated USING (has_role('admin'));

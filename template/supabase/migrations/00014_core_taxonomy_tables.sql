@@ -130,10 +130,15 @@ CREATE OR REPLACE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS entities_updated_at ON entities;
 CREATE TRIGGER entities_updated_at BEFORE UPDATE ON entities FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS frameworks_updated_at ON frameworks;
 CREATE TRIGGER frameworks_updated_at BEFORE UPDATE ON frameworks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS glossary_terms_updated_at ON glossary_terms;
 CREATE TRIGGER glossary_terms_updated_at BEFORE UPDATE ON glossary_terms FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS categories_updated_at ON categories;
 CREATE TRIGGER categories_updated_at BEFORE UPDATE ON categories FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS category_content_updated_at ON category_content;
 CREATE TRIGGER category_content_updated_at BEFORE UPDATE ON category_content FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ── RLS Policies ──
@@ -146,19 +151,33 @@ ALTER TABLE entity_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE entity_frameworks ENABLE ROW LEVEL SECURITY;
 
 -- Public read for published content
+DROP POLICY IF EXISTS entities_public_read ON entities;
 CREATE POLICY entities_public_read ON entities FOR SELECT USING (status = 'published');
+DROP POLICY IF EXISTS frameworks_public_read ON frameworks;
 CREATE POLICY frameworks_public_read ON frameworks FOR SELECT USING (true);
+DROP POLICY IF EXISTS glossary_public_read ON glossary_terms;
 CREATE POLICY glossary_public_read ON glossary_terms FOR SELECT USING (true);
+DROP POLICY IF EXISTS categories_public_read ON categories;
 CREATE POLICY categories_public_read ON categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS category_content_public_read ON category_content;
 CREATE POLICY category_content_public_read ON category_content FOR SELECT USING (true);
+DROP POLICY IF EXISTS entity_categories_public_read ON entity_categories;
 CREATE POLICY entity_categories_public_read ON entity_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS entity_frameworks_public_read ON entity_frameworks;
 CREATE POLICY entity_frameworks_public_read ON entity_frameworks FOR SELECT USING (true);
 
 -- Admin full access (uses has_role function from migration 00003)
+DROP POLICY IF EXISTS entities_admin_all ON entities;
 CREATE POLICY entities_admin_all ON entities FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS frameworks_admin_all ON frameworks;
 CREATE POLICY frameworks_admin_all ON frameworks FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS glossary_admin_all ON glossary_terms;
 CREATE POLICY glossary_admin_all ON glossary_terms FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS categories_admin_all ON categories;
 CREATE POLICY categories_admin_all ON categories FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS category_content_admin_all ON category_content;
 CREATE POLICY category_content_admin_all ON category_content FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS entity_categories_admin_all ON entity_categories;
 CREATE POLICY entity_categories_admin_all ON entity_categories FOR ALL USING (has_role('admin'));
+DROP POLICY IF EXISTS entity_frameworks_admin_all ON entity_frameworks;
 CREATE POLICY entity_frameworks_admin_all ON entity_frameworks FOR ALL USING (has_role('admin'));

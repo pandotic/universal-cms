@@ -35,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_link_suggestions_score ON link_suggestions(releva
 
 ALTER TABLE internal_links ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS internal_links_admin_all ON internal_links;
 CREATE POLICY internal_links_admin_all ON internal_links
   FOR ALL TO authenticated
   USING (has_role('admin'))
@@ -42,6 +43,7 @@ CREATE POLICY internal_links_admin_all ON internal_links
 
 ALTER TABLE link_suggestions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS link_suggestions_admin_all ON link_suggestions;
 CREATE POLICY link_suggestions_admin_all ON link_suggestions
   FOR ALL TO authenticated
   USING (has_role('admin'))

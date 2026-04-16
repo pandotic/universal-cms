@@ -22,6 +22,8 @@ CREATE INDEX IF NOT EXISTS idx_error_log_resolved ON error_log(resolved_at) WHER
 
 ALTER TABLE error_log ENABLE ROW LEVEL SECURITY;
 -- Public can insert (for client-side errors) but not read
+DROP POLICY IF EXISTS error_log_insert ON error_log;
 CREATE POLICY error_log_insert ON error_log FOR INSERT TO anon, authenticated WITH CHECK (true);
 -- Admins can read, update, delete
+DROP POLICY IF EXISTS error_log_admin ON error_log;
 CREATE POLICY error_log_admin ON error_log FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
