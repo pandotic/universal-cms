@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -124,6 +124,19 @@ const OWNERSHIP_LABELS: Record<string, string> = {
 // ─── Page ─────────────────────────────────────────────────────────────────
 
 export default function FleetDashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-white" />
+        <p className="mt-4 text-sm text-zinc-500">Loading fleet dashboard...</p>
+      </div>
+    }>
+      <FleetDashboardContent />
+    </Suspense>
+  );
+}
+
+function FleetDashboardContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get("tab") as TabId) || "deployments";
 
