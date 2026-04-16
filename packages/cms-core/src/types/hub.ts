@@ -28,6 +28,22 @@ export type PlatformType = "nextjs_supabase" | "wordpress" | "static" | "mindpal
 
 export type OnboardingStatus = "pending" | "connecting" | "configuring" | "complete";
 
+// ─── Marketing Extensions ─────────────────────────────────────────────────
+
+export type RelationshipType =
+  | "gbi_personal"
+  | "pandotic_studio"
+  | "pandotic_studio_product"
+  | "pandotic_client"
+  | "standalone"
+  | "local_service";
+
+export type SiteProfile =
+  | "marketing_only"
+  | "marketing_and_cms"
+  | "app_only"
+  | "local_service";
+
 export interface HubProperty {
   id: string;
   name: string;
@@ -60,6 +76,16 @@ export interface HubProperty {
   netlify_site_id: string | null;
   cms_installed: boolean;
   onboarding_status: OnboardingStatus;
+  // Marketing extensions
+  relationship_type: RelationshipType | null;
+  parent_property_id: string | null;
+  site_profile: SiteProfile | null;
+  auto_pilot_enabled: boolean;
+  kill_switch: boolean;
+  analytics_provider: string | null;
+  analytics_site_id: string | null;
+  content_pending_review_count: number;
+  agent_errors_24h_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -142,6 +168,8 @@ export interface PropertyFilters {
   businessStage?: BusinessStage;
   businessCategory?: BusinessCategory;
   platformType?: PlatformType;
+  relationshipType?: RelationshipType;
+  siteProfile?: SiteProfile;
 }
 
 export interface ActivityFilters {

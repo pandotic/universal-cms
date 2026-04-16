@@ -3,8 +3,8 @@ import type {
   PlaybookConfig,
   PlaybookType,
   SetupTaskTemplate,
-} from "../types/hub-playbooks";
-import { relationshipTypeToPlaybook } from "../types/hub-playbooks";
+} from "../types/hub-marketing-playbooks";
+import { relationshipTypeToPlaybook } from "../types/hub-marketing-playbooks";
 
 const PLAYBOOKS: Record<PlaybookType, PlaybookConfig> = {
   pandotic_studio: {
@@ -87,12 +87,12 @@ const PLAYBOOKS: Record<PlaybookType, PlaybookConfig> = {
   },
 };
 
-export function getPlaybookForProperty(property: HubProperty): PlaybookConfig {
+export function getMarketingPlaybookForProperty(property: HubProperty): PlaybookConfig {
   const playbookType = relationshipTypeToPlaybook(property.relationship_type);
   return PLAYBOOKS[playbookType];
 }
 
-export function getPlaybookByType(type: PlaybookType): PlaybookConfig {
+export function getMarketingPlaybookByType(type: PlaybookType): PlaybookConfig {
   return PLAYBOOKS[type];
 }
 
