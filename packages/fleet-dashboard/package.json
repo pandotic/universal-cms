@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@pandotic/skill-library": "workspace:*",
     "@pandotic/universal-cms": "workspace:*",
     "@supabase/ssr": "^0.10.0",

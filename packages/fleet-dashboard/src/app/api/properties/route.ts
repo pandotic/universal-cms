@@ -54,6 +54,20 @@ export async function POST(request: NextRequest) {
       status: body.status ?? "active",
       last_deploy_at: body.last_deploy_at ?? null,
       ssl_expires_at: body.ssl_expires_at ?? null,
+      business_category: body.business_category ?? null,
+      ownership_type: body.ownership_type ?? "personal",
+      client_name: body.client_name ?? null,
+      business_stage: body.business_stage ?? "development",
+      domains: body.domains ?? [],
+      domain_notes: body.domain_notes ?? null,
+      llc_entity: body.llc_entity ?? null,
+      business_notes: body.business_notes ?? null,
+      platform_type: body.platform_type ?? "nextjs_supabase",
+      github_repo: body.github_repo ?? null,
+      github_default_branch: body.github_default_branch ?? "main",
+      netlify_site_id: body.netlify_site_id ?? null,
+      cms_installed: body.cms_installed ?? false,
+      onboarding_status: body.onboarding_status ?? "pending",
     });
 
     // Log activity

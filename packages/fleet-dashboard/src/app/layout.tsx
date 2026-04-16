@@ -5,6 +5,8 @@ import "./globals.css";
 import { UserNav } from "./user-nav";
 import { NavDropdown } from "./nav-dropdown";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     default: "Pandotic Hub",
@@ -56,6 +58,12 @@ export default function RootLayout({
                     { href: "/cms/content", label: "Pages & Blog" },
                     { href: "/social", label: "Social" },
                     { href: "https://pandotic.ai/admin", label: "Pandotic CMS Admin", external: true },
+                  ]}
+                />
+                <NavDropdown
+                  label="Tools"
+                  items={[
+                    { href: "/tools/pmf-evaluator", label: "PMF Evaluator" },
                   ]}
                 />
                 <NavDropdown
