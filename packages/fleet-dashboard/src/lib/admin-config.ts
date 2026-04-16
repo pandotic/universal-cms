@@ -18,6 +18,8 @@ export interface AdminConfig {
     // Hub management modules
     properties: boolean;
     groups: boolean;
+    agents: boolean;
+    social: boolean;
 
     // Admin features
     featureFlags: boolean;
@@ -52,6 +54,8 @@ export const fleetAdminConfig: AdminConfig = {
     // Hub: all enabled for master admin
     properties: true,
     groups: true,
+    agents: true,
+    social: true,
 
     // Admin: all enabled for visibility
     featureFlags: true,
@@ -84,6 +88,8 @@ export const createMinimalAdminConfig = (): AdminConfig => ({
     organizations: true,
     properties: false,
     groups: false,
+    agents: false,
+    social: false,
     featureFlags: false,
     auditLog: false,
     analytics: false,
@@ -101,6 +107,8 @@ export const createStandardAdminConfig = (): AdminConfig => ({
     organizations: true,
     properties: true,
     groups: true,
+    agents: false,
+    social: false,
     featureFlags: true,
     auditLog: true,
     analytics: false,
@@ -118,6 +126,8 @@ export const createEnterpriseAdminConfig = (): AdminConfig => ({
     organizations: true,
     properties: true,
     groups: true,
+    agents: true,
+    social: true,
     featureFlags: true,
     auditLog: true,
     analytics: true,

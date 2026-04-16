@@ -46,6 +46,7 @@ export default function RootLayout({
                     { href: "/modules", label: "Modules" },
                     { href: "/apis", label: "APIs & AI" },
                     { href: "/skills", label: "Skills" },
+                    { href: "/agents", label: "Agents" },
                   ]}
                 />
                 <NavDropdown
@@ -53,6 +54,7 @@ export default function RootLayout({
                   items={[
                     { href: "/cms/projects", label: "Portfolio / Case Studies" },
                     { href: "/cms/content", label: "Pages & Blog" },
+                    { href: "/social", label: "Social" },
                     { href: "https://pandotic.ai/admin", label: "Pandotic CMS Admin", external: true },
                   ]}
                 />
