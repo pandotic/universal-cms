@@ -108,7 +108,11 @@ export default function PipelinePage() {
       ) : (
         <div className="divide-y divide-zinc-800/50 rounded-lg border border-zinc-800 bg-zinc-900">
           {items.map(item => (
-            <div key={item.id} className="flex items-center justify-between px-4 py-3 hover:bg-zinc-800/30">
+            <Link
+              key={item.id}
+              href={`/marketing-ops/pipeline/${item.id}`}
+              className="flex items-center justify-between px-4 py-3 hover:bg-zinc-800/30"
+            >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-zinc-200">{item.title || item.body.slice(0, 80)}</p>
                 <div className="mt-1 flex flex-wrap gap-1.5">
@@ -128,7 +132,7 @@ export default function PipelinePage() {
                 )}
                 <p className="text-xs text-zinc-600">{new Date(item.created_at).toLocaleDateString()}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
