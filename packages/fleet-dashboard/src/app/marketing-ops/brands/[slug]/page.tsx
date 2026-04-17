@@ -169,8 +169,8 @@ export default function BrandDetailPage() {
         ))}
       </div>
 
-      {activeTab === 'overview' && <OverviewTab property={property} setupProgress={setupProgress} />}
-      {activeTab === 'setup' && <SetupTab tasks={setupTasks} progress={setupProgress} propertyId={property.id} />}
+      {activeTab === 'overview' && <OverviewTab property={property} setupProgress={setupProgress} onPropertyUpdate={(updates) => setProperty(prev => prev ? { ...prev, ...updates } : prev)} />}
+      {activeTab === 'setup' && <SetupTab tasks={setupTasks} progress={setupProgress} propertyId={property.id} relationshipType={property.relationship_type} onTasksChange={setSetupTasks} />}
       {activeTab === 'assets' && <AssetsTab assets={assets} />}
       {activeTab === 'pipeline' && <PipelineTab propertyId={property.id} />}
       {activeTab === 'agents' && <AgentsTab propertySlug={property.slug} />}
@@ -178,7 +178,22 @@ export default function BrandDetailPage() {
   );
 }
 
-function OverviewTab({ property, setupProgress }: { property: Property; setupProgress: SetupProgress | null }) {
+function OverviewTab({ property, setupProgress, onPropertyUpdate }: { property: Property; setupProgress: SetupProgress | null; onPropertyUpdate: (updates: Partial<Property>) => void }) {
+  const [saving, setSaving] = useState(false);
+
+  const updateField = async (field: string, value: any) => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/properties`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: property.id, [field]: value }),
+      });
+      if (res.ok) onPropertyUpdate({ [field]: value } as any);
+    } catch { /* silent */ }
+    setSaving(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -187,13 +202,72 @@ function OverviewTab({ property, setupProgress }: { property: Property; setupPro
         <Card label="Pending Review" value={property.content_pending_review_count ?? 0} />
         <Card label="Agent Errors (24h)" value={property.agent_errors_24h_count ?? 0} />
       </div>
-      {setupProgress && (
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+        <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-zinc-500">Marketing Settings</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-xs text-zinc-500">Relationship Type</label>
+            <select
+              value={property.relationship_type ?? ''}
+              onChange={e => updateField('relationship_type', e.target.value || null)}
+              disabled={saving}
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200"
+            >
+              <option value="">Not set</option>
+              <option value="gbi_personal">GBI Personal</option>
+              <option value="pandotic_studio">Pandotic Studio</option>
+              <option value="pandotic_studio_product">Pandotic Studio Product</option>
+              <option value="pandotic_client">Pandotic Client</option>
+              <option value="standalone">Standalone</option>
+              <option value="local_service">Local Service</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-500">Site Profile</label>
+            <select
+              value={property.site_profile ?? ''}
+              onChange={e => updateField('site_profile', e.target.value || null)}
+              disabled={saving}
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200"
+            >
+              <option value="">Not set</option>
+              <option value="marketing_only">Marketing Only</option>
+              <option value="marketing_and_cms">Marketing + CMS</option>
+              <option value="app_only">App Only</option>
+              <option value="local_service">Local Service</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="text-xs text-zinc-500">Auto-Pilot</label>
+            <button
+              onClick={() => updateField('auto_pilot_enabled', !property.auto_pilot_enabled)}
+              disabled={saving}
+              className={`rounded px-3 py-1 text-xs font-medium transition-colors ${property.auto_pilot_enabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}
+            >
+              {property.auto_pilot_enabled ? 'Enabled' : 'Disabled'}
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="text-xs text-zinc-500">Kill Switch</label>
+            <button
+              onClick={() => updateField('kill_switch', !property.kill_switch)}
+              disabled={saving}
+              className={`rounded px-3 py-1 text-xs font-medium transition-colors ${property.kill_switch ? 'bg-red-500/20 text-red-400' : 'bg-zinc-800 text-zinc-500'}`}
+            >
+              {property.kill_switch ? 'ACTIVE — All agents stopped' : 'Off'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {setupProgress && setupProgress.total > 0 && (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
           <h3 className="mb-3 text-sm font-medium text-white">Setup Progress</h3>
           <div className="mb-2 h-2 overflow-hidden rounded-full bg-zinc-800">
             <div
               className="h-full rounded-full bg-emerald-500 transition-all"
-              style={{ width: `${setupProgress.total > 0 ? (setupProgress.completed / setupProgress.total) * 100 : 0}%` }}
+              style={{ width: `${(setupProgress.completed / setupProgress.total) * 100}%` }}
             />
           </div>
           <p className="text-xs text-zinc-500">{setupProgress.completed} of {setupProgress.total} tasks completed</p>
@@ -210,7 +284,8 @@ function OverviewTab({ property, setupProgress }: { property: Property; setupPro
   );
 }
 
-function SetupTab({ tasks, progress, propertyId }: { tasks: SetupTask[]; progress: SetupProgress | null; propertyId: string }) {
+function SetupTab({ tasks, progress, propertyId, relationshipType, onTasksChange }: { tasks: SetupTask[]; progress: SetupProgress | null; propertyId: string; relationshipType: string | null; onTasksChange: (tasks: SetupTask[]) => void }) {
+  const [seeding, setSeeding] = useState(false);
   const categories = [...new Set(tasks.map(t => t.category))];
 
   const statusColors: Record<string, string> = {
@@ -221,10 +296,67 @@ function SetupTab({ tasks, progress, propertyId }: { tasks: SetupTask[]; progres
     blocked: 'text-red-400',
   };
 
+  const seedTasks = async () => {
+    if (!relationshipType) return;
+    setSeeding(true);
+    try {
+      const playbookRes = await fetch(`/api/brand-setup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'seed', property_id: propertyId, relationship_type: relationshipType }),
+      });
+      if (playbookRes.ok) {
+        const listRes = await fetch(`/api/brand-setup?propertyId=${propertyId}`);
+        if (listRes.ok) {
+          const json = await listRes.json();
+          onTasksChange(json.data ?? []);
+        }
+      }
+    } catch { /* silent */ }
+    setSeeding(false);
+  };
+
+  const markComplete = async (taskId: string) => {
+    try {
+      const res = await fetch('/api/brand-setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'complete', id: taskId }),
+      });
+      if (res.ok) {
+        onTasksChange(tasks.map(t => t.id === taskId ? { ...t, status: 'completed', completed_at: new Date().toISOString() } : t));
+      }
+    } catch { /* silent */ }
+  };
+
+  const markStatus = async (taskId: string, status: string) => {
+    try {
+      const res = await fetch('/api/brand-setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', id: taskId, updates: { status } }),
+      });
+      if (res.ok) {
+        onTasksChange(tasks.map(t => t.id === taskId ? { ...t, status } : t));
+      }
+    } catch { /* silent */ }
+  };
+
   if (tasks.length === 0) {
     return (
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8 text-center">
-        <p className="text-zinc-400">No setup tasks yet. Seed default tasks for this brand type to get started.</p>
+        <p className="text-zinc-400">No setup tasks yet.</p>
+        {relationshipType ? (
+          <button
+            onClick={seedTasks}
+            disabled={seeding}
+            className="mt-3 rounded-lg border border-zinc-700 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-200 disabled:opacity-50"
+          >
+            {seeding ? 'Seeding...' : `Seed default tasks for ${relationshipType.replace(/_/g, ' ')}`}
+          </button>
+        ) : (
+          <p className="mt-2 text-sm text-zinc-500">Set a relationship type on the Overview tab first, then seed default tasks.</p>
+        )}
       </div>
     );
   }
@@ -238,9 +370,13 @@ function SetupTab({ tasks, progress, propertyId }: { tasks: SetupTask[]; progres
             {tasks.filter(t => t.category === cat).map(task => (
               <div key={task.id} className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm ${statusColors[task.status] ?? 'text-zinc-400'}`}>
+                  <button
+                    onClick={() => task.status !== 'completed' ? markComplete(task.id) : markStatus(task.id, 'pending')}
+                    className={`text-sm ${statusColors[task.status] ?? 'text-zinc-400'} hover:text-white`}
+                    title={task.status === 'completed' ? 'Mark incomplete' : 'Mark complete'}
+                  >
                     {task.status === 'completed' ? '✓' : task.status === 'blocked' ? '✗' : '○'}
-                  </span>
+                  </button>
                   <div>
                     <p className={`text-sm ${task.status === 'completed' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
                       {task.task_name}
@@ -252,11 +388,18 @@ function SetupTab({ tasks, progress, propertyId }: { tasks: SetupTask[]; progres
                     </div>
                   </div>
                 </div>
-                {task.result_url && (
-                  <a href={task.result_url} target="_blank" rel="noopener" className="text-xs text-zinc-500 hover:text-white">
-                    View &rarr;
-                  </a>
-                )}
+                <div className="flex items-center gap-2">
+                  {task.status !== 'completed' && task.status !== 'skipped' && (
+                    <button onClick={() => markStatus(task.id, 'skipped')} className="text-xs text-zinc-600 hover:text-zinc-400">
+                      skip
+                    </button>
+                  )}
+                  {task.result_url && (
+                    <a href={task.result_url} target="_blank" rel="noopener" className="text-xs text-zinc-500 hover:text-white">
+                      View &rarr;
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>
