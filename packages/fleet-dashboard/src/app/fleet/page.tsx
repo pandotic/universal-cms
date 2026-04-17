@@ -143,6 +143,8 @@ function FleetDashboardContent() {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -166,10 +168,16 @@ function FleetDashboardContent() {
     try {
       const res = await fetch("/api/fleet/dashboard");
       const json = await res.json();
-      setData(json.data);
-      setLastRefreshed(new Date());
-    } catch {
-      // empty state
+      if (!res.ok) {
+        setLoadError(json.error ?? `Request failed (HTTP ${res.status})`);
+      } else {
+        setData(json.data);
+        setWarnings(Array.isArray(json.warnings) ? json.warnings : []);
+        setLoadError(null);
+        setLastRefreshed(new Date());
+      }
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Network error");
     }
     setLoading(false);
   }
@@ -320,10 +328,30 @@ function FleetDashboardContent() {
 
   if (!data) {
     return (
-      <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-6 text-center">
-        <p className="text-sm font-medium text-red-400">
-          Failed to load fleet data
-        </p>
+      <div className="space-y-4">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-6">
+          <p className="text-sm font-medium text-red-400">
+            Failed to load fleet data
+          </p>
+          {loadError && (
+            <p className="mt-2 break-all text-xs text-red-300/80">{loadError}</p>
+          )}
+          <p className="mt-3 text-xs text-zinc-500">
+            Common causes: Supabase env vars not set in{" "}
+            <code className="font-mono">packages/fleet-dashboard/.env.local</code>,
+            migrations 00100–00103 not applied to the Hub project, or the signed-in
+            user has no row in <code className="font-mono">hub_users</code>.
+          </p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              loadData();
+            }}
+            className="mt-4 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -469,6 +497,20 @@ function FleetDashboardContent() {
           onSubmit={handleRegisterPackage}
           onClose={() => setShowRegisterModal(false)}
         />
+      )}
+
+      {/* Partial-data warnings (e.g. optional migrations not applied) */}
+      {warnings.length > 0 && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-300/90">
+          <p className="font-medium">
+            Some fleet data couldn&apos;t be loaded — showing what&apos;s available.
+          </p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-300/70">
+            {warnings.map((w, i) => (
+              <li key={i} className="break-all">{w}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Header */}
