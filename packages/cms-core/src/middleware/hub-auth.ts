@@ -38,8 +38,22 @@ export async function requireHubRole(
       .maybeSingle();
 
     if (userError) {
+      // Surface the Postgres error code/message so callers (and the UI) can
+      // distinguish a real failure (42P17 recursion, 42P01 missing table,
+      // PGRST301 auth, etc.) from a missing hub_users row.
+      const err = userError as {
+        message?: string;
+        code?: string;
+        details?: string;
+        hint?: string;
+      };
       return NextResponse.json(
-        { error: "Failed to check hub user" },
+        {
+          error: "Failed to check hub user",
+          detail: err.message ?? String(userError),
+          code: err.code,
+          hint: err.hint,
+        },
         { status: 500 }
       );
     }
