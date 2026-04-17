@@ -1,5 +1,63 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point (as of April 17, 2026, session close)
+
+**Stage 0 of the 10-site rollout is DONE and merged to main** (PR #39, commit
+`ec94847`). Full plan lives at
+`/root/.claude/plans/i-need-to-start-hazy-quokka.md`.
+
+### What landed in PR #39 (`feat(stage-0): idempotent migrations + GH Packages publish wiring`)
+
+- All 27 `template/supabase/migrations/*.sql` are now idempotent (IF NOT EXISTS
+  / DROP-IF-EXISTS+CREATE / ON CONFLICT). Safe to apply to a DB that already
+  has overlapping schema.
+- `hub-admin` + `types/admin` added to `@pandotic/universal-cms` exports in both
+  `package.json` and `tsup.config.ts`.
+- Removed vestigial `@universal-cms/admin-core` and `@universal-cms/admin-ui`
+  workspace deps from `cms-core` (zero actual imports; would've broken external
+  `pnpm install`).
+- `publishConfig` points `@pandotic/universal-cms` at
+  `https://npm.pkg.github.com` with `access: restricted`.
+- `.github/workflows/release.yml` rewired to target GitHub Packages using the
+  built-in `GITHUB_TOKEN` (no extra secrets).
+- New `packages/cms-core/README.md` for external consumers.
+- New `PUBLISHING.md` covering publish flow + per-consumer `.npmrc` +
+  `NODE_AUTH_TOKEN` setup (local / Netlify / Actions).
+- `packages/fleet-dashboard/.env.example` completed (SERVICE_ROLE_KEY,
+  APP_PASSWORD, optional AGENT_WEBHOOK_SECRET / ANTHROPIC_API_KEY / GitHub OAuth).
+
+### 🚨 Unresolved at session close — check FIRST next session
+
+1. **Release workflow did not open a "Version Packages" PR.** After merging
+   PR #39, the changesets action should have opened a PR bumping
+   `@pandotic/universal-cms` based on `.changeset/initial-release.md`. As of
+   session close, no such PR exists. Investigate at
+   https://github.com/pandotic/universal-cms/actions/workflows/release.yml —
+   look for errors about `packages: write` permission, changesets action
+   failures, or GITHUB_TOKEN / NODE_AUTH_TOKEN auth. Fix before anything else
+   can move forward.
+
+2. **Parallel-session PRs #40 and #41 both introduce migration `00110_*.sql`**
+   — they will collide. Needs renumbering on one of them before either merges.
+   - PR #40 `claude/plan-skill-onboarding-8drJN` — 00110–00117 + cms-core data
+   - PR #41 `claude/redesign-navigation-saas-B7hZT` — 00110_playbooks.sql
+
+### When publish is unblocked → Stage 1
+
+1. Publish `@pandotic/universal-cms@0.1.0` to GitHub Packages (fix step 1 above,
+   merge the Version Packages PR).
+2. Stage 1 greenfield pilot — new empty repo consuming the package. A ready-to-
+   paste prompt for the new site's Claude Code session is in the chat
+   transcript of this session (asks that session to scaffold Next.js 16 +
+   `.npmrc` + `.env.example` + `src/cms.config.ts` + `src/middleware.ts` stubs,
+   leave `supabase/migrations/` empty for us to fill, don't install the
+   package until it's published).
+3. Register pilot in Hub via `/properties` → Create; verify version sync at
+   `/fleet`.
+4. Only then proceed to Stage 2 (first of the 10 production sites).
+
+---
+
 ## Local Development Environment
 
 **Owner:** Dan Golden (`dangolden`)
