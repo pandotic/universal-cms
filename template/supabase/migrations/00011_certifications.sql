@@ -3,14 +3,16 @@
 -- =============================================================================
 -- Enums
 -- =============================================================================
-CREATE TYPE certification_rule_type AS ENUM (
-  'score_threshold', 'attribute_match', 'manual_override', 'tag_required'
-);
+DO $$ BEGIN
+  CREATE TYPE certification_rule_type AS ENUM (
+    'score_threshold', 'attribute_match', 'manual_override', 'tag_required'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================================================
 -- cms_certifications
 -- =============================================================================
-CREATE TABLE cms_certifications (
+CREATE TABLE IF NOT EXISTS cms_certifications (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug          TEXT UNIQUE NOT NULL,
   name          TEXT NOT NULL,
@@ -23,6 +25,7 @@ CREATE TABLE cms_certifications (
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_cms_certifications_updated_at ON cms_certifications;
 CREATE TRIGGER trg_cms_certifications_updated_at
   BEFORE UPDATE ON cms_certifications
   FOR EACH ROW
@@ -31,7 +34,7 @@ CREATE TRIGGER trg_cms_certifications_updated_at
 -- =============================================================================
 -- certification_rules
 -- =============================================================================
-CREATE TABLE certification_rules (
+CREATE TABLE IF NOT EXISTS certification_rules (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   certification_id UUID NOT NULL REFERENCES cms_certifications(id) ON DELETE CASCADE,
   rule_type        certification_rule_type NOT NULL,
@@ -42,7 +45,7 @@ CREATE TABLE certification_rules (
 -- =============================================================================
 -- entity_certifications
 -- =============================================================================
-CREATE TABLE entity_certifications (
+CREATE TABLE IF NOT EXISTS entity_certifications (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_type      TEXT NOT NULL,
   entity_id        TEXT NOT NULL,
@@ -57,10 +60,10 @@ CREATE TABLE entity_certifications (
 -- =============================================================================
 -- Indexes
 -- =============================================================================
-CREATE INDEX idx_cms_certifications_slug ON cms_certifications (slug);
-CREATE INDEX idx_entity_certifications_entity ON entity_certifications (entity_type, entity_id);
-CREATE INDEX idx_entity_certifications_cert ON entity_certifications (certification_id);
-CREATE INDEX idx_certification_rules_cert ON certification_rules (certification_id);
+CREATE INDEX IF NOT EXISTS idx_cms_certifications_slug ON cms_certifications (slug);
+CREATE INDEX IF NOT EXISTS idx_entity_certifications_entity ON entity_certifications (entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_entity_certifications_cert ON entity_certifications (certification_id);
+CREATE INDEX IF NOT EXISTS idx_certification_rules_cert ON certification_rules (certification_id);
 
 -- =============================================================================
 -- RLS
@@ -70,66 +73,78 @@ ALTER TABLE certification_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE entity_certifications ENABLE ROW LEVEL SECURITY;
 
 -- Certifications are readable by everyone
+DROP POLICY IF EXISTS cms_certifications_select_public ON cms_certifications;
 CREATE POLICY cms_certifications_select_public
   ON cms_certifications FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS cms_certifications_insert_admin ON cms_certifications;
 CREATE POLICY cms_certifications_insert_admin
   ON cms_certifications FOR INSERT
   TO authenticated
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS cms_certifications_update_admin ON cms_certifications;
 CREATE POLICY cms_certifications_update_admin
   ON cms_certifications FOR UPDATE
   TO authenticated
   USING (has_role('admin'))
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS cms_certifications_delete_admin ON cms_certifications;
 CREATE POLICY cms_certifications_delete_admin
   ON cms_certifications FOR DELETE
   TO authenticated
   USING (has_role('admin'));
 
 -- Certification rules readable by everyone, manageable by admin
+DROP POLICY IF EXISTS certification_rules_select_public ON certification_rules;
 CREATE POLICY certification_rules_select_public
   ON certification_rules FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS certification_rules_insert_admin ON certification_rules;
 CREATE POLICY certification_rules_insert_admin
   ON certification_rules FOR INSERT
   TO authenticated
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS certification_rules_update_admin ON certification_rules;
 CREATE POLICY certification_rules_update_admin
   ON certification_rules FOR UPDATE
   TO authenticated
   USING (has_role('admin'))
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS certification_rules_delete_admin ON certification_rules;
 CREATE POLICY certification_rules_delete_admin
   ON certification_rules FOR DELETE
   TO authenticated
   USING (has_role('admin'));
 
 -- Entity certifications readable by everyone, manageable by admin
+DROP POLICY IF EXISTS entity_certifications_select_public ON entity_certifications;
 CREATE POLICY entity_certifications_select_public
   ON entity_certifications FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS entity_certifications_insert_admin ON entity_certifications;
 CREATE POLICY entity_certifications_insert_admin
   ON entity_certifications FOR INSERT
   TO authenticated
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS entity_certifications_update_admin ON entity_certifications;
 CREATE POLICY entity_certifications_update_admin
   ON entity_certifications FOR UPDATE
   TO authenticated
   USING (has_role('admin'))
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS entity_certifications_delete_admin ON entity_certifications;
 CREATE POLICY entity_certifications_delete_admin
   ON entity_certifications FOR DELETE
   TO authenticated

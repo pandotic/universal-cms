@@ -1,5 +1,5 @@
 -- platforms: one row per entity we track ratings for
-CREATE TABLE platforms (
+CREATE TABLE IF NOT EXISTS platforms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -9,17 +9,19 @@ CREATE TABLE platforms (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_platforms_slug ON platforms (slug);
-CREATE INDEX idx_platforms_vertical ON platforms (vertical);
+CREATE INDEX IF NOT EXISTS idx_platforms_slug ON platforms (slug);
+CREATE INDEX IF NOT EXISTS idx_platforms_vertical ON platforms (vertical);
 
 -- review_sources: which review platforms we track for each entity
-CREATE TYPE review_source_name AS ENUM (
-  'capterra', 'g2', 'getapp', 'software-advice',
-  'trustpilot', 'apple-app-store', 'google-play-store',
-  'gartner-peer-insights'
-);
+DO $$ BEGIN
+  CREATE TYPE review_source_name AS ENUM (
+    'capterra', 'g2', 'getapp', 'software-advice',
+    'trustpilot', 'apple-app-store', 'google-play-store',
+    'gartner-peer-insights'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE review_sources (
+CREATE TABLE IF NOT EXISTS review_sources (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   platform_id UUID NOT NULL REFERENCES platforms(id) ON DELETE CASCADE,
   source_name review_source_name NOT NULL,
@@ -30,7 +32,7 @@ CREATE TABLE review_sources (
 );
 
 -- rating_history_logs: append-only snapshots
-CREATE TABLE rating_history_logs (
+CREATE TABLE IF NOT EXISTS rating_history_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   platform_id UUID NOT NULL REFERENCES platforms(id) ON DELETE CASCADE,
   source_name review_source_name NOT NULL,
@@ -41,6 +43,6 @@ CREATE TABLE rating_history_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_rating_history_platform ON rating_history_logs (platform_id);
-CREATE INDEX idx_rating_history_quarter ON rating_history_logs (quarter_label);
-CREATE INDEX idx_rating_history_snapshot ON rating_history_logs (platform_id, source_name, snapshot_date DESC);
+CREATE INDEX IF NOT EXISTS idx_rating_history_platform ON rating_history_logs (platform_id);
+CREATE INDEX IF NOT EXISTS idx_rating_history_quarter ON rating_history_logs (quarter_label);
+CREATE INDEX IF NOT EXISTS idx_rating_history_snapshot ON rating_history_logs (platform_id, source_name, snapshot_date DESC);

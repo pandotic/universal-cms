@@ -110,19 +110,31 @@ ALTER TABLE esg_resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE entity_source_map ENABLE ROW LEVEL SECURITY;
 
 -- Public read access
+DROP POLICY IF EXISTS assessment_industries_select ON assessment_industries;
 CREATE POLICY assessment_industries_select ON assessment_industries FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS assessment_regions_select ON assessment_regions;
 CREATE POLICY assessment_regions_select ON assessment_regions FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS assessment_questions_select ON assessment_questions;
 CREATE POLICY assessment_questions_select ON assessment_questions FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS esg_recommendations_select ON esg_recommendations;
 CREATE POLICY esg_recommendations_select ON esg_recommendations FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS esg_resources_select ON esg_resources;
 CREATE POLICY esg_resources_select ON esg_resources FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS entity_source_map_select ON entity_source_map;
 CREATE POLICY entity_source_map_select ON entity_source_map FOR SELECT TO anon, authenticated USING (true);
 
 -- Admin write access
+DROP POLICY IF EXISTS assessment_industries_admin ON assessment_industries;
 CREATE POLICY assessment_industries_admin ON assessment_industries FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
+DROP POLICY IF EXISTS assessment_regions_admin ON assessment_regions;
 CREATE POLICY assessment_regions_admin ON assessment_regions FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
+DROP POLICY IF EXISTS assessment_questions_admin ON assessment_questions;
 CREATE POLICY assessment_questions_admin ON assessment_questions FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
+DROP POLICY IF EXISTS esg_recommendations_admin ON esg_recommendations;
 CREATE POLICY esg_recommendations_admin ON esg_recommendations FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
+DROP POLICY IF EXISTS esg_resources_admin ON esg_resources;
 CREATE POLICY esg_resources_admin ON esg_resources FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
+DROP POLICY IF EXISTS entity_source_map_admin ON entity_source_map;
 CREATE POLICY entity_source_map_admin ON entity_source_map FOR ALL TO authenticated USING (has_role('admin')) WITH CHECK (has_role('admin'));
 
 -- =============================================================================

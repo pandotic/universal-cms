@@ -7,15 +7,28 @@ export const metadata: Metadata = {
   title: "CMS — Projects",
 };
 
+function isMissingTable(message: string) {
+  return (
+    message.includes("does not exist") ||
+    message.includes("schema cache") ||
+    message.includes("PGRST205")
+  );
+}
+
 export default async function CMSProjectsPage() {
   const supabase = await createClient();
   let projects: Awaited<ReturnType<typeof getAllProjects>> = [];
   let error: string | null = null;
+  let missingTable = false;
 
   try {
     projects = await getAllProjects(supabase);
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to load projects";
+    const message = e instanceof Error ? e.message : "Failed to load projects";
+    missingTable = isMissingTable(message);
+    error = missingTable
+      ? "The projects table isn't available in this Supabase project. Apply migration 00107_projects to enable portfolio management."
+      : message;
   }
 
   return (
@@ -36,8 +49,18 @@ export default async function CMSProjectsPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-900/20 p-4 mb-6">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div
+          className={`rounded-lg border p-4 mb-6 ${
+            missingTable
+              ? "border-amber-800 bg-amber-900/20"
+              : "border-red-800 bg-red-900/20"
+          }`}
+        >
+          <p
+            className={`text-sm ${missingTable ? "text-amber-300" : "text-red-400"}`}
+          >
+            {error}
+          </p>
         </div>
       )}
 

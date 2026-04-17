@@ -16,13 +16,35 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
-    const [properties, packageDeployments, marketingServices, skillDeployments] =
-      await Promise.all([
-        listProperties(supabase),
-        listPackageDeployments(supabase),
-        listMarketingServices(supabase),
-        listDeploymentMatrix(supabase),
-      ]);
+    // Tolerate missing tables — optional modules (package deployments,
+    // marketing, skills) might not have their migrations applied yet.
+    // Properties is required; everything else degrades to an empty list.
+    const settled = await Promise.allSettled([
+      listProperties(supabase),
+      listPackageDeployments(supabase),
+      listMarketingServices(supabase),
+      listDeploymentMatrix(supabase),
+    ]);
+
+    const warnings: string[] = [];
+    const pickOrEmpty = <T>(
+      result: PromiseSettledResult<T[]>,
+      label: string,
+    ): T[] => {
+      if (result.status === "fulfilled") return result.value;
+      warnings.push(
+        `${label}: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`,
+      );
+      return [];
+    };
+
+    if (settled[0].status === "rejected") {
+      return apiError(settled[0].reason);
+    }
+    const properties = settled[0].value;
+    const packageDeployments = pickOrEmpty(settled[1], "packageDeployments");
+    const marketingServices = pickOrEmpty(settled[2], "marketingServices");
+    const skillDeployments = pickOrEmpty(settled[3], "skillDeployments");
 
     // Compute skill counts per property
     const skillCountMap = new Map<
@@ -64,6 +86,7 @@ export async function GET(request: NextRequest) {
         marketingServices,
         skillCounts,
       },
+      warnings: warnings.length > 0 ? warnings : undefined,
     });
   } catch (e) {
     return apiError(e);

@@ -3,12 +3,14 @@
 -- =============================================================================
 -- Enums
 -- =============================================================================
-CREATE TYPE listicle_status AS ENUM ('draft', 'published', 'archived');
+DO $$ BEGIN
+  CREATE TYPE listicle_status AS ENUM ('draft', 'published', 'archived');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================================================
 -- listicles
 -- =============================================================================
-CREATE TABLE listicles (
+CREATE TABLE IF NOT EXISTS listicles (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug            TEXT UNIQUE NOT NULL,
   title           TEXT NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE listicles (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_listicles_updated_at ON listicles;
 CREATE TRIGGER trg_listicles_updated_at
   BEFORE UPDATE ON listicles
   FOR EACH ROW
@@ -32,7 +35,7 @@ CREATE TRIGGER trg_listicles_updated_at
 -- =============================================================================
 -- listicle_items
 -- =============================================================================
-CREATE TABLE listicle_items (
+CREATE TABLE IF NOT EXISTS listicle_items (
   id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   listicle_id        UUID NOT NULL REFERENCES listicles(id) ON DELETE CASCADE,
   entity_id          TEXT,
@@ -48,6 +51,7 @@ CREATE TABLE listicle_items (
   updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_listicle_items_updated_at ON listicle_items;
 CREATE TRIGGER trg_listicle_items_updated_at
   BEFORE UPDATE ON listicle_items
   FOR EACH ROW
@@ -56,10 +60,10 @@ CREATE TRIGGER trg_listicle_items_updated_at
 -- =============================================================================
 -- Indexes
 -- =============================================================================
-CREATE INDEX idx_listicles_slug ON listicles (slug);
-CREATE INDEX idx_listicles_status ON listicles (status);
-CREATE INDEX idx_listicle_items_listicle_id ON listicle_items (listicle_id);
-CREATE INDEX idx_listicle_items_position ON listicle_items (listicle_id, position);
+CREATE INDEX IF NOT EXISTS idx_listicles_slug ON listicles (slug);
+CREATE INDEX IF NOT EXISTS idx_listicles_status ON listicles (status);
+CREATE INDEX IF NOT EXISTS idx_listicle_items_listicle_id ON listicle_items (listicle_id);
+CREATE INDEX IF NOT EXISTS idx_listicle_items_position ON listicle_items (listicle_id, position);
 
 -- =============================================================================
 -- RLS
@@ -68,34 +72,40 @@ ALTER TABLE listicles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE listicle_items ENABLE ROW LEVEL SECURITY;
 
 -- Published listicles readable by all
+DROP POLICY IF EXISTS listicles_select_published ON listicles;
 CREATE POLICY listicles_select_published
   ON listicles FOR SELECT
   TO anon, authenticated
   USING (status = 'published');
 
 -- Editors/admins can see all listicles
+DROP POLICY IF EXISTS listicles_select_editorial ON listicles;
 CREATE POLICY listicles_select_editorial
   ON listicles FOR SELECT
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicles_insert_editorial ON listicles;
 CREATE POLICY listicles_insert_editorial
   ON listicles FOR INSERT
   TO authenticated
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicles_update_editorial ON listicles;
 CREATE POLICY listicles_update_editorial
   ON listicles FOR UPDATE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'))
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicles_delete_editorial ON listicles;
 CREATE POLICY listicles_delete_editorial
   ON listicles FOR DELETE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
 -- Items of published listicles readable by all
+DROP POLICY IF EXISTS listicle_items_select_published ON listicle_items;
 CREATE POLICY listicle_items_select_published
   ON listicle_items FOR SELECT
   TO anon, authenticated
@@ -108,22 +118,26 @@ CREATE POLICY listicle_items_select_published
   );
 
 -- Editors/admins can see all items
+DROP POLICY IF EXISTS listicle_items_select_editorial ON listicle_items;
 CREATE POLICY listicle_items_select_editorial
   ON listicle_items FOR SELECT
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicle_items_insert_editorial ON listicle_items;
 CREATE POLICY listicle_items_insert_editorial
   ON listicle_items FOR INSERT
   TO authenticated
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicle_items_update_editorial ON listicle_items;
 CREATE POLICY listicle_items_update_editorial
   ON listicle_items FOR UPDATE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'))
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
+DROP POLICY IF EXISTS listicle_items_delete_editorial ON listicle_items;
 CREATE POLICY listicle_items_delete_editorial
   ON listicle_items FOR DELETE
   TO authenticated
