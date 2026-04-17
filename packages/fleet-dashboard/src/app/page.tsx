@@ -1,145 +1,35 @@
-import Image from "next/image";
 import Link from "next/link";
-
-const sections = [
-  {
-    title: "Fleet Management",
-    href: "/fleet",
-    description: "Monitor all deployed sites in real-time. See versions, health status, enabled modules, and uptime across your entire portfolio.",
-    stat: "Sites",
-    icon: "globe",
-  },
-  {
-    title: "Module Matrix",
-    href: "/modules",
-    description: "Visualize which CMS modules are deployed to which sites. Track feature rollout across your fleet.",
-    stat: "Modules",
-    icon: "grid",
-  },
-  {
-    title: "Skill Library",
-    href: "/skills",
-    description: "Browse, upload, and deploy reusable AI skills across your fleet. Track deployment versions with the Fleet Matrix.",
-    stat: "Skills",
-    icon: "zap",
-  },
-  {
-    title: "API Usage",
-    href: "/api-usage",
-    description: "Track API consumption across all apps — AI tokens, Supabase calls, third-party APIs. See costs per site and per provider.",
-    stat: "Costs",
-    icon: "activity",
-  },
-  {
-    title: "API Keys",
-    href: "/api-keys",
-    description: "Registry of all API keys in use across projects. Know what keys are active, which vendor they belong to, and where they're deployed.",
-    stat: "Keys",
-    icon: "key",
-  },
-  {
-    title: "Audit & Reconciliation",
-    href: "/audit",
-    description: "Compare self-reported API usage against vendor invoices. Catch billing discrepancies and optimize spend.",
-    stat: "Savings",
-    icon: "shield",
-  },
-];
+import { PropertyMatrix } from "./home/property-matrix";
 
 export default function HubHomePage() {
   return (
-    <div className="space-y-16">
-      {/* Hero */}
-      <section className="pt-8 text-center">
-        <Image
-          src="/images/pandologo.avif"
-          alt="Pandotic Hub"
-          width={72}
-          height={72}
-          className="mx-auto rounded-full"
-        />
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Pandotic Hub
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-400">
-          Operations dashboard for all Pandotic sites and apps. Monitor fleet health,
-          track API spend, manage keys, and audit costs — all in one place.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Fleet Overview
+          </h1>
+          <p className="mt-1 text-sm text-zinc-400">
+            Every property across every role — switch tabs to see the same sites through a different hat.
+          </p>
+        </div>
+        <div className="flex gap-2">
           <Link
-            href="/fleet"
-            className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200"
+            href="/skills/deploy"
+            className="rounded-md bg-violet-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-400"
           >
-            View Fleet
+            Deploy a skill
           </Link>
           <Link
-            href="/api-usage"
-            className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+            href="/fleet/onboard"
+            className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800"
           >
-            API Dashboard
+            Add property
           </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Feature Cards */}
-      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            className="group rounded-lg border border-zinc-800 bg-zinc-900 p-6 transition-all hover:border-zinc-700 hover:bg-zinc-800/50"
-          >
-            <h2 className="text-lg font-semibold text-white group-hover:text-zinc-100">
-              {s.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              {s.description}
-            </p>
-          </Link>
-        ))}
-      </section>
-
-      {/* What's Inside */}
-      <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-8">
-        <h2 className="text-xl font-semibold text-white">
-          What is Pandotic Hub?
-        </h2>
-        <div className="mt-4 grid gap-6 text-sm leading-relaxed text-zinc-400 sm:grid-cols-2">
-          <div>
-            <h3 className="mb-2 font-medium text-zinc-300">Universal CMS</h3>
-            <p>
-              A modular, config-driven CMS built on Next.js + Supabase. 30 toggleable modules
-              covering content, directories, SEO, engagement, forms, and system tools. Published
-              as <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs font-mono text-zinc-300">@pandotic/universal-cms</code> on
-              npm with version-pinned deployments.
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-2 font-medium text-zinc-300">Fleet Dashboard</h3>
-            <p>
-              Real-time health monitoring for every deployed site. Each site exposes
-              a <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs font-mono text-zinc-300">/api/admin/health</code> endpoint
-              reporting version, modules, and uptime. The hub aggregates all of them.
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-2 font-medium text-zinc-300">API Cost Tracking</h3>
-            <p>
-              Each deployed app self-reports API usage (AI tokens, database calls, third-party
-              APIs) back to the hub. Roll up costs per site, per provider, per month to see
-              exactly where money is being spent.
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-2 font-medium text-zinc-300">Key Management & Audit</h3>
-            <p>
-              Central registry of all API keys across projects. Compare self-reported usage
-              against vendor invoices to catch billing discrepancies, orphaned keys, and
-              optimization opportunities.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PropertyMatrix />
     </div>
   );
 }
