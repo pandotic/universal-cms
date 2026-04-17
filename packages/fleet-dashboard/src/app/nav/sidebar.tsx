@@ -4,34 +4,37 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Globe,
-  Zap,
-  FileText,
-  Bot,
-  KeyRound,
-  Wrench,
-  Users,
-  ClipboardList,
-  Flag,
   BarChart3,
-  ShoppingBag,
+  Bot,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Flag,
+  Globe,
+  KeyRound,
+  LayoutDashboard,
+  Menu,
   Share2,
+  ShoppingBag,
+  Users,
+  Wrench,
   X,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
-type NavLink = {
+interface NavLink {
   href: string;
   label: string;
   icon: LucideIcon;
-  badge?: string | number;
-};
+}
 
-type NavGroup = {
+interface NavGroup {
   label: string;
   links: NavLink[];
-};
+}
 
 const GROUPS: NavGroup[] = [
   {
@@ -55,7 +58,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "Content",
     links: [
-      { href: "/cms/projects", label: "Projects", icon: FileText },
+      { href: "/cms/projects", label: "Projects", icon: Briefcase },
       { href: "/cms/content", label: "Pages & Blog", icon: FileText },
       { href: "/social", label: "Social", icon: Share2 },
     ],
@@ -84,14 +87,16 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function Sidebar({
-  open,
-  onClose,
-}: {
+interface Props {
   open: boolean;
+  collapsed: boolean;
   onClose: () => void;
-}) {
+  onToggleCollapse: () => void;
+}
+
+export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
   const pathname = usePathname();
+  const width = collapsed ? "w-14" : "w-64";
 
   return (
     <>
@@ -103,38 +108,47 @@ export function Sidebar({
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-800 bg-zinc-950 transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex ${width} flex-col border-r border-zinc-800 bg-zinc-950 transition-[width,transform] duration-200 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-14 items-center justify-between border-b border-zinc-800 px-4">
-          <Link href="/" className="flex items-center gap-2" onClick={onClose}>
-            <Image
-              src="/images/pandologo.avif"
-              alt="Pandotic Hub"
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
-            <span className="text-sm font-semibold tracking-tight text-white">
-              Pandotic Hub
-            </span>
-          </Link>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white lg:hidden"
-            aria-label="Close navigation"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        {/* Logo */}
+        <div className="flex h-14 items-center border-b border-zinc-800 px-3">
+          {collapsed ? (
+            <button onClick={onToggleCollapse} className="flex w-full items-center justify-center rounded-md p-1 hover:bg-zinc-800" title="Expand sidebar">
+              <Image src="/images/pandologo.avif" alt="Hub" width={24} height={24} className="rounded-full" />
+            </button>
+          ) : (
+            <div className="flex w-full items-center justify-between">
+              <Link href="/" className="flex items-center gap-2" onClick={onClose}>
+                <Image src="/images/pandologo.avif" alt="Pandotic Hub" width={24} height={24} className="rounded-full" />
+                <span className="text-sm font-semibold tracking-tight text-white">Pandotic Hub</span>
+              </Link>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={onToggleCollapse}
+                  className="hidden rounded-md p-1 text-zinc-500 hover:bg-zinc-800 hover:text-white lg:block"
+                  title="Collapse sidebar"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button onClick={onClose} className="rounded-md p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white lg:hidden" aria-label="Close">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
           {GROUPS.map((group) => (
             <div key={group.label} className="mb-4">
-              <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                {group.label}
-              </div>
+              {!collapsed && (
+                <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                  {group.label}
+                </div>
+              )}
               <ul className="space-y-0.5">
                 {group.links.map((link) => {
                   const active = isActive(pathname, link.href);
@@ -144,38 +158,40 @@ export function Sidebar({
                       <Link
                         href={link.href}
                         onClick={onClose}
+                        title={collapsed ? link.label : undefined}
                         className={`flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
+                          collapsed ? "justify-center px-2" : ""
+                        } ${
                           active
                             ? "bg-zinc-800 text-white"
                             : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
                         }`}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
-                        <span className="flex-1 truncate">{link.label}</span>
-                        {link.badge !== undefined && (
-                          <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 ring-1 ring-inset ring-amber-500/30">
-                            {link.badge}
-                          </span>
-                        )}
+                        {!collapsed && <span className="truncate">{link.label}</span>}
                       </Link>
                     </li>
                   );
                 })}
               </ul>
+              {collapsed && <div className="my-2 border-t border-zinc-800/60" />}
             </div>
           ))}
         </nav>
 
-        <div className="border-t border-zinc-800 p-3">
-          <Link
-            href="/tools/pmf-evaluator"
-            onClick={onClose}
-            className="flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-          >
-            <Wrench className="h-3.5 w-3.5" />
-            PMF Evaluator
-          </Link>
-        </div>
+        {/* Footer */}
+        {!collapsed && (
+          <div className="border-t border-zinc-800 p-3">
+            <Link
+              href="/tools/pmf-evaluator"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
+            >
+              <Wrench className="h-3.5 w-3.5" />
+              PMF Evaluator
+            </Link>
+          </div>
+        )}
       </aside>
     </>
   );
