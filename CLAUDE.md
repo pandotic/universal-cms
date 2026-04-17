@@ -1,5 +1,9 @@
 # Universal CMS — Project Context for Claude
 
+## Active Roadmaps
+
+- **Marketing Ops Module:** See `MARKETING_OPS_ROADMAP.md` for the full remaining-work plan. Schema + UI foundation is shipped on branch `claude/plan-skill-onboarding-8drJN`; execution layer (22 agents, brand seeding, external integrations) is the next phase.
+
 ## Local Development Environment
 
 **Owner:** Dan Golden (`dangolden`)
