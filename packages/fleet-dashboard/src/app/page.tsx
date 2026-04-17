@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { PropertyMatrix } from "./home/property-matrix";
 import { MatrixSkeleton } from "./home/matrix-skeleton";
+import { ActivityFeed } from "./home/activity-feed";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default function HubHomePage() {
   return (
@@ -29,9 +31,19 @@ export default function HubHomePage() {
         </div>
       </div>
 
-      <Suspense fallback={<MatrixSkeleton />}>
-        <PropertyMatrix />
-      </Suspense>
+      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+        <ErrorBoundary>
+          <Suspense fallback={<MatrixSkeleton />}>
+            <PropertyMatrix />
+          </Suspense>
+        </ErrorBoundary>
+
+        <aside className="space-y-4">
+          <ErrorBoundary>
+            <ActivityFeed />
+          </ErrorBoundary>
+        </aside>
+      </div>
     </div>
   );
 }

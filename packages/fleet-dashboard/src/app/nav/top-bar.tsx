@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { UserMenu } from "./user-menu";
+import { NotificationsBell } from "./notifications";
 
 interface Props {
   onOpenSidebar: () => void;
@@ -58,12 +59,7 @@ export function TopBar({ onOpenSidebar, onOpenPalette, healthSummary }: Props) {
           </div>
         )}
 
-        <button
-          className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4 w-4" />
-        </button>
+        <NotificationsBell />
 
         <UserMenu />
       </div>
