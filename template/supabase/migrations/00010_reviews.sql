@@ -3,12 +3,14 @@
 -- =============================================================================
 -- Enums
 -- =============================================================================
-CREATE TYPE review_status AS ENUM ('pending', 'approved', 'rejected', 'flagged');
+DO $$ BEGIN
+  CREATE TYPE review_status AS ENUM ('pending', 'approved', 'rejected', 'flagged');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================================================
 -- cms_reviews
 -- =============================================================================
-CREATE TABLE cms_reviews (
+CREATE TABLE IF NOT EXISTS cms_reviews (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_type   TEXT NOT NULL,
   entity_id     TEXT NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE cms_reviews (
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_cms_reviews_updated_at ON cms_reviews;
 CREATE TRIGGER trg_cms_reviews_updated_at
   BEFORE UPDATE ON cms_reviews
   FOR EACH ROW
@@ -32,7 +35,7 @@ CREATE TRIGGER trg_cms_reviews_updated_at
 -- =============================================================================
 -- review_votes
 -- =============================================================================
-CREATE TABLE review_votes (
+CREATE TABLE IF NOT EXISTS review_votes (
   id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   review_id UUID NOT NULL REFERENCES cms_reviews(id) ON DELETE CASCADE,
   user_id   UUID REFERENCES profiles(id) ON DELETE SET NULL,
@@ -44,7 +47,7 @@ CREATE TABLE review_votes (
 -- =============================================================================
 -- reviews_public view
 -- =============================================================================
-CREATE VIEW reviews_public AS
+CREATE OR REPLACE VIEW reviews_public AS
   SELECT
     id,
     entity_type,
@@ -62,10 +65,10 @@ CREATE VIEW reviews_public AS
 -- =============================================================================
 -- Indexes
 -- =============================================================================
-CREATE INDEX idx_cms_reviews_entity ON cms_reviews (entity_type, entity_id);
-CREATE INDEX idx_cms_reviews_status ON cms_reviews (status);
-CREATE INDEX idx_cms_reviews_user_id ON cms_reviews (user_id);
-CREATE INDEX idx_review_votes_review_id ON review_votes (review_id);
+CREATE INDEX IF NOT EXISTS idx_cms_reviews_entity ON cms_reviews (entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_cms_reviews_status ON cms_reviews (status);
+CREATE INDEX IF NOT EXISTS idx_cms_reviews_user_id ON cms_reviews (user_id);
+CREATE INDEX IF NOT EXISTS idx_review_votes_review_id ON review_votes (review_id);
 
 -- =============================================================================
 -- RLS
@@ -74,24 +77,28 @@ ALTER TABLE cms_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE review_votes ENABLE ROW LEVEL SECURITY;
 
 -- Approved reviews are readable by everyone (via direct table access too)
+DROP POLICY IF EXISTS cms_reviews_select_approved ON cms_reviews;
 CREATE POLICY cms_reviews_select_approved
   ON cms_reviews FOR SELECT
   TO anon, authenticated
   USING (status = 'approved');
 
 -- Editors/admins can read all reviews (including pending, rejected, flagged)
+DROP POLICY IF EXISTS cms_reviews_select_editorial ON cms_reviews;
 CREATE POLICY cms_reviews_select_editorial
   ON cms_reviews FOR SELECT
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
 -- Authenticated users can submit reviews
+DROP POLICY IF EXISTS cms_reviews_insert_authenticated ON cms_reviews;
 CREATE POLICY cms_reviews_insert_authenticated
   ON cms_reviews FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
 -- Editors/admins can update reviews (moderation)
+DROP POLICY IF EXISTS cms_reviews_update_editorial ON cms_reviews;
 CREATE POLICY cms_reviews_update_editorial
   ON cms_reviews FOR UPDATE
   TO authenticated
@@ -99,24 +106,28 @@ CREATE POLICY cms_reviews_update_editorial
   WITH CHECK (has_role('editor') OR has_role('admin'));
 
 -- Editors/admins can delete reviews
+DROP POLICY IF EXISTS cms_reviews_delete_editorial ON cms_reviews;
 CREATE POLICY cms_reviews_delete_editorial
   ON cms_reviews FOR DELETE
   TO authenticated
   USING (has_role('editor') OR has_role('admin'));
 
 -- Votes: readable by all
+DROP POLICY IF EXISTS review_votes_select_public ON review_votes;
 CREATE POLICY review_votes_select_public
   ON review_votes FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Votes: authenticated users can insert
+DROP POLICY IF EXISTS review_votes_insert_authenticated ON review_votes;
 CREATE POLICY review_votes_insert_authenticated
   ON review_votes FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
 -- Votes: users can delete their own votes
+DROP POLICY IF EXISTS review_votes_delete_own ON review_votes;
 CREATE POLICY review_votes_delete_own
   ON review_votes FOR DELETE
   TO authenticated

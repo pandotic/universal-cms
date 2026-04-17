@@ -56,17 +56,22 @@ ALTER TABLE redirects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE not_found_log ENABLE ROW LEVEL SECURITY;
 
 -- link_checks: admin ALL only
+DROP POLICY IF EXISTS link_checks_admin ON link_checks;
 CREATE POLICY link_checks_admin ON link_checks FOR ALL TO authenticated
   USING (has_role('admin')) WITH CHECK (has_role('admin'));
 
 -- redirects: public SELECT (needed for middleware), admin ALL
+DROP POLICY IF EXISTS redirects_public_select ON redirects;
 CREATE POLICY redirects_public_select ON redirects FOR SELECT TO anon, authenticated
   USING (true);
+DROP POLICY IF EXISTS redirects_admin ON redirects;
 CREATE POLICY redirects_admin ON redirects FOR ALL TO authenticated
   USING (has_role('admin')) WITH CHECK (has_role('admin'));
 
 -- not_found_log: public INSERT, admin ALL
+DROP POLICY IF EXISTS not_found_log_insert ON not_found_log;
 CREATE POLICY not_found_log_insert ON not_found_log FOR INSERT TO anon, authenticated
   WITH CHECK (true);
+DROP POLICY IF EXISTS not_found_log_admin ON not_found_log;
 CREATE POLICY not_found_log_admin ON not_found_log FOR ALL TO authenticated
   USING (has_role('admin')) WITH CHECK (has_role('admin'));

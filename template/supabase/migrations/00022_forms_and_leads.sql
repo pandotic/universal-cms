@@ -4,16 +4,18 @@
 -- ============================================================================
 
 -- ---------- Enums ----------
-CREATE TYPE form_type AS ENUM ('contact', 'lead', 'newsletter', 'cta', 'custom');
-CREATE TYPE form_field_type AS ENUM (
-  'text', 'email', 'textarea', 'select', 'checkbox', 'radio', 'number', 'tel', 'url', 'hidden'
-);
-CREATE TYPE form_status AS ENUM ('draft', 'active', 'archived');
-CREATE TYPE submission_status AS ENUM ('new', 'read', 'archived', 'spam');
-CREATE TYPE cta_block_status AS ENUM ('draft', 'active', 'archived');
+DO $$ BEGIN CREATE TYPE form_type AS ENUM ('contact', 'lead', 'newsletter', 'cta', 'custom'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE form_field_type AS ENUM (
+    'text', 'email', 'textarea', 'select', 'checkbox', 'radio', 'number', 'tel', 'url', 'hidden'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE form_status AS ENUM ('draft', 'active', 'archived'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE submission_status AS ENUM ('new', 'read', 'archived', 'spam'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE cta_block_status AS ENUM ('draft', 'active', 'archived'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ---------- Forms ----------
-CREATE TABLE forms (
+CREATE TABLE IF NOT EXISTS forms (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name            TEXT NOT NULL,
   slug            TEXT UNIQUE NOT NULL,
@@ -30,11 +32,11 @@ CREATE TABLE forms (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_forms_slug ON forms(slug);
-CREATE INDEX idx_forms_status ON forms(status);
+CREATE INDEX IF NOT EXISTS idx_forms_slug ON forms(slug);
+CREATE INDEX IF NOT EXISTS idx_forms_status ON forms(status);
 
 -- ---------- Form Submissions ----------
-CREATE TABLE form_submissions (
+CREATE TABLE IF NOT EXISTS form_submissions (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   form_id         UUID NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
   data            JSONB NOT NULL DEFAULT '{}',
@@ -45,12 +47,12 @@ CREATE TABLE form_submissions (
   submitted_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_form_submissions_form ON form_submissions(form_id);
-CREATE INDEX idx_form_submissions_status ON form_submissions(status);
-CREATE INDEX idx_form_submissions_submitted ON form_submissions(submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_form_submissions_form ON form_submissions(form_id);
+CREATE INDEX IF NOT EXISTS idx_form_submissions_status ON form_submissions(status);
+CREATE INDEX IF NOT EXISTS idx_form_submissions_submitted ON form_submissions(submitted_at DESC);
 
 -- ---------- CTA Blocks ----------
-CREATE TABLE cta_blocks (
+CREATE TABLE IF NOT EXISTS cta_blocks (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name            TEXT NOT NULL,
   slug            TEXT UNIQUE NOT NULL,
@@ -73,9 +75,9 @@ CREATE TABLE cta_blocks (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_cta_blocks_slug ON cta_blocks(slug);
-CREATE INDEX idx_cta_blocks_placement ON cta_blocks(placement);
-CREATE INDEX idx_cta_blocks_status ON cta_blocks(status);
+CREATE INDEX IF NOT EXISTS idx_cta_blocks_slug ON cta_blocks(slug);
+CREATE INDEX IF NOT EXISTS idx_cta_blocks_placement ON cta_blocks(placement);
+CREATE INDEX IF NOT EXISTS idx_cta_blocks_status ON cta_blocks(status);
 
 -- ---------- Trigger: auto-update updated_at ----------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -110,6 +112,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_form_submission_count ON form_submissions;
 CREATE TRIGGER trg_form_submission_count
   AFTER INSERT ON form_submissions
   FOR EACH ROW EXECUTE FUNCTION increment_form_submission_count();
@@ -120,30 +123,36 @@ ALTER TABLE form_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cta_blocks ENABLE ROW LEVEL SECURITY;
 
 -- Forms: admins can CRUD, public can read active forms
+DROP POLICY IF EXISTS forms_public_read ON forms;
 CREATE POLICY forms_public_read ON forms
   FOR SELECT TO anon, authenticated
   USING (status = 'active');
 
+DROP POLICY IF EXISTS forms_admin_all ON forms;
 CREATE POLICY forms_admin_all ON forms
   FOR ALL TO authenticated
   USING (has_role(auth.uid(), 'admin'))
   WITH CHECK (has_role(auth.uid(), 'admin'));
 
 -- Form submissions: public can insert, admins can read/manage
+DROP POLICY IF EXISTS submissions_public_insert ON form_submissions;
 CREATE POLICY submissions_public_insert ON form_submissions
   FOR INSERT TO anon, authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS submissions_admin_all ON form_submissions;
 CREATE POLICY submissions_admin_all ON form_submissions
   FOR ALL TO authenticated
   USING (has_role(auth.uid(), 'admin'))
   WITH CHECK (has_role(auth.uid(), 'admin'));
 
 -- CTA blocks: admins can CRUD, public can read active blocks
+DROP POLICY IF EXISTS cta_blocks_public_read ON cta_blocks;
 CREATE POLICY cta_blocks_public_read ON cta_blocks
   FOR SELECT TO anon, authenticated
   USING (status = 'active');
 
+DROP POLICY IF EXISTS cta_blocks_admin_all ON cta_blocks;
 CREATE POLICY cta_blocks_admin_all ON cta_blocks
   FOR ALL TO authenticated
   USING (has_role(auth.uid(), 'admin'))
@@ -180,4 +189,5 @@ INSERT INTO cta_blocks (name, slug, placement, heading, subheading, primary_butt
   'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80',
   'active',
   2
-);
+)
+ON CONFLICT (slug) DO NOTHING;

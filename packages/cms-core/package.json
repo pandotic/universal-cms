@@ -191,6 +191,16 @@
       "types": "./dist/data/hub-groups.d.ts",
       "development": "./src/data/hub-groups.ts"
     },
+    "./types/admin": {
+      "import": "./dist/types/admin.js",
+      "types": "./dist/types/admin.d.ts",
+      "development": "./src/types/admin.ts"
+    },
+    "./data/hub-admin": {
+      "import": "./dist/data/hub-admin.js",
+      "types": "./dist/data/hub-admin.d.ts",
+      "development": "./src/data/hub-admin.ts"
+    },
     "./types/projects": {
       "import": "./dist/types/projects.js",
       "types": "./dist/types/projects.d.ts",
@@ -264,8 +274,6 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@universal-cms/admin-core": "workspace:*",
-    "@universal-cms/admin-ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-label": "^2.1.0",
@@ -326,6 +334,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pandotic/universal-cms"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "license": "MIT",
   "author": "Pandotic"
