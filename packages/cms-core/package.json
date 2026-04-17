@@ -260,6 +260,16 @@
       "import": "./dist/data/hub-social.js",
       "types": "./dist/data/hub-social.d.ts",
       "development": "./src/data/hub-social.ts"
+    },
+    "./types/playbooks": {
+      "import": "./dist/types/playbooks.js",
+      "types": "./dist/types/playbooks.d.ts",
+      "development": "./src/types/playbooks.ts"
+    },
+    "./data/hub-playbooks": {
+      "import": "./dist/data/hub-playbooks.js",
+      "types": "./dist/data/hub-playbooks.d.ts",
+      "development": "./src/data/hub-playbooks.ts"
     }
   },
   "files": [

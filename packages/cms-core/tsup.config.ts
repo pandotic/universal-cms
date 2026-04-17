@@ -53,6 +53,8 @@ export default defineConfig({
     "types/social": "src/types/social.ts",
     "data/hub-agents": "src/data/hub-agents.ts",
     "data/hub-social": "src/data/hub-social.ts",
+    "types/playbooks": "src/types/playbooks.ts",
+    "data/hub-playbooks": "src/data/hub-playbooks.ts",
   },
   format: ["esm"],
   dts: true,
