@@ -14,7 +14,7 @@ import type {
 } from "../types/social";
 
 const BRIEFS_TABLE = "hub_brand_voice_briefs";
-const SOCIAL_CONTENT_TABLE = "hub_social_content";
+const SOCIAL_CONTENT_TABLE = "hub_content_pipeline";
 
 // ─── Brand Voice Briefs ────────────────────────────────────────────────────
 

@@ -14,8 +14,11 @@ import {
   Globe,
   KeyRound,
   LayoutDashboard,
+  Link2,
   ListChecks,
+  Megaphone,
   Share2,
+  ShieldCheck,
   ShoppingBag,
   Users,
   Wrench,
@@ -53,6 +56,16 @@ const GROUPS: NavGroup[] = [
       { href: "/playbooks", label: "Playbooks", icon: ListChecks },
       { href: "/modules", label: "Modules", icon: Wrench },
       { href: "/deployments", label: "Deployments", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "Marketing",
+    links: [
+      { href: "/marketing-ops", label: "Dashboard", icon: Megaphone },
+      { href: "/marketing-ops/brands", label: "Brands", icon: Globe },
+      { href: "/marketing-ops/pipeline", label: "Content Pipeline", icon: ListChecks },
+      { href: "/marketing-ops/link-building", label: "Link Building", icon: Link2 },
+      { href: "/marketing-ops/qa", label: "QA & Reviews", icon: ShieldCheck },
     ],
   },
   {
