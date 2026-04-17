@@ -92,11 +92,34 @@ export interface HubProperty {
 
 export type HubPropertyInsert = Omit<
   HubProperty,
-  "id" | "created_at" | "updated_at" | "health_status" | "ssl_valid" | "metadata"
+  | "id"
+  | "created_at"
+  | "updated_at"
+  | "health_status"
+  | "ssl_valid"
+  | "metadata"
+  | "relationship_type"
+  | "parent_property_id"
+  | "site_profile"
+  | "auto_pilot_enabled"
+  | "kill_switch"
+  | "analytics_provider"
+  | "analytics_site_id"
+  | "content_pending_review_count"
+  | "agent_errors_24h_count"
 > & {
   health_status?: HealthStatus;
   ssl_valid?: boolean;
   metadata?: Record<string, unknown>;
+  relationship_type?: RelationshipType | null;
+  parent_property_id?: string | null;
+  site_profile?: SiteProfile | null;
+  auto_pilot_enabled?: boolean;
+  kill_switch?: boolean;
+  analytics_provider?: string | null;
+  analytics_site_id?: string | null;
+  content_pending_review_count?: number;
+  agent_errors_24h_count?: number;
 };
 
 export type HubPropertyUpdate = Partial<

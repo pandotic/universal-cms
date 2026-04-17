@@ -54,7 +54,11 @@ export async function POST(request: NextRequest) {
       const playbookType = relationshipTypeToPlaybook(body.relationship_type);
       const templates = getDefaultSetupTasksForPlaybook(playbookType);
       const tasks = templates.map(t => ({
-        ...t,
+        category: t.category as any,
+        task_name: t.task_name,
+        platform: t.platform,
+        tier: t.tier,
+        execution_mode: t.execution_mode,
         property_id: body.property_id,
         status: "pending" as const,
         completed_at: null,

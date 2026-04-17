@@ -57,8 +57,39 @@ export interface BrandVoiceBrief {
 
 export type BrandVoiceBriefInsert = Omit<
   BrandVoiceBrief,
-  "id" | "created_at" | "updated_at"
->;
+  | "id"
+  | "created_at"
+  | "updated_at"
+  | "voice_attributes"
+  | "tone_variations"
+  | "vocabulary"
+  | "sentence_patterns"
+  | "anti_examples"
+  | "humor_guidelines"
+  | "corrections_journal"
+  | "primary_color"
+  | "accent_color"
+  | "logo_url"
+  | "font_family"
+  | "photo_style_guide"
+  | "photo_mood_keywords"
+  | "use_ai_generation"
+> & {
+  voice_attributes?: string[];
+  tone_variations?: Record<string, unknown>;
+  vocabulary?: Record<string, unknown>;
+  sentence_patterns?: Record<string, unknown>;
+  anti_examples?: Record<string, unknown>[];
+  humor_guidelines?: string | null;
+  corrections_journal?: Record<string, unknown>[];
+  primary_color?: string | null;
+  accent_color?: string | null;
+  logo_url?: string | null;
+  font_family?: string | null;
+  photo_style_guide?: string | null;
+  photo_mood_keywords?: string[] | null;
+  use_ai_generation?: boolean;
+};
 
 export type BrandVoiceBriefUpdate = Partial<
   Omit<BrandVoiceBrief, "id" | "property_id" | "created_by" | "created_at">
