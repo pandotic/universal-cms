@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
-  BarChart3, Bot, Briefcase, ClipboardList, ExternalLink,
-  FileText, Flag, Globe, KeyRound, LayoutDashboard,
+  BarChart3, Bot, Briefcase, ClipboardList,
+  FileText, Flag, Globe, KeyRound, LayoutDashboard, ListChecks,
   Rocket, Search, Share2, ShoppingBag, Users, Wrench, Zap,
 } from "lucide-react";
 
@@ -23,6 +23,7 @@ const ROUTES = [
   { href: "/skills", label: "Skills", icon: Zap, group: "Pages" },
   { href: "/skill-store", label: "Skill Store", icon: ShoppingBag, group: "Pages" },
   { href: "/agents", label: "Agents", icon: Bot, group: "Pages" },
+  { href: "/playbooks", label: "Playbooks", icon: ListChecks, group: "Pages" },
   { href: "/modules", label: "Modules", icon: Wrench, group: "Pages" },
   { href: "/deployments", label: "Deployments", icon: ClipboardList, group: "Pages" },
   { href: "/cms/projects", label: "Projects", icon: Briefcase, group: "Pages" },
