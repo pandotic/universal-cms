@@ -8,7 +8,10 @@ import {
   updateSetupTask,
   completeSetupTask,
   getSetupProgress,
+  seedDefaultSetupTasks,
 } from "@pandotic/universal-cms/data/hub-brand-setup";
+import { getDefaultSetupTasksForPlaybook } from "@pandotic/universal-cms/data/hub-playbooks";
+import { relationshipTypeToPlaybook } from "@pandotic/universal-cms/types/hub-playbooks";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,6 +49,22 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
     const body = await request.json();
+
+    if (body.action === "seed") {
+      const playbookType = relationshipTypeToPlaybook(body.relationship_type);
+      const templates = getDefaultSetupTasksForPlaybook(playbookType);
+      const tasks = templates.map(t => ({
+        ...t,
+        property_id: body.property_id,
+        status: "pending" as const,
+        completed_at: null,
+        completed_by: null,
+        result_url: null,
+        notes: null,
+      }));
+      const seeded = await seedDefaultSetupTasks(supabase, body.property_id, tasks);
+      return NextResponse.json({ data: seeded }, { status: 201 });
+    }
 
     if (body.action === "complete") {
       const task = await completeSetupTask(supabase, body.id, body.result_url, body.completed_by);

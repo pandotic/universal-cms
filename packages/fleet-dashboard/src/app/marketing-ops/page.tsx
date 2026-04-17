@@ -119,6 +119,62 @@ export default function MarketingOpsPage() {
         </div>
       </div>
 
+      {(() => {
+        const needsAttention = activeBrands.filter(b =>
+          (b.content_pending_review_count ?? 0) > 0 ||
+          (b.agent_errors_24h_count ?? 0) > 0 ||
+          b.kill_switch
+        );
+        const unconfigured = activeBrands.filter(b => !b.relationship_type);
+        const issues = [...needsAttention, ...unconfigured.filter(b => !needsAttention.includes(b))];
+
+        if (issues.length === 0) return null;
+
+        return (
+          <div>
+            <h2 className="mb-3 text-lg font-medium text-white">Needs Attention</h2>
+            <div className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-left text-xs uppercase tracking-wider text-zinc-500">
+                    <th className="px-4 pb-3 pt-3">Brand</th>
+                    <th className="px-4 pb-3 pt-3">Issue</th>
+                    <th className="px-4 pb-3 pt-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  {issues.map(brand => {
+                    const issueList: string[] = [];
+                    if (brand.kill_switch) issueList.push('Kill switch active');
+                    if ((brand.agent_errors_24h_count ?? 0) > 0) issueList.push(`${brand.agent_errors_24h_count} agent errors`);
+                    if ((brand.content_pending_review_count ?? 0) > 0) issueList.push(`${brand.content_pending_review_count} pending reviews`);
+                    if (!brand.relationship_type) issueList.push('No relationship type set');
+
+                    return (
+                      <tr key={brand.id} className="hover:bg-zinc-800/30">
+                        <td className="px-4 py-2.5 font-medium text-zinc-200">{brand.name}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex flex-wrap gap-1.5">
+                            {issueList.map(issue => (
+                              <span key={issue} className={`rounded px-2 py-0.5 text-xs ${issue.includes('Kill') || issue.includes('error') ? 'bg-red-500/20 text-red-400' : issue.includes('pending') ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-700 text-zinc-400'}`}>
+                                {issue}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <Link href={`/marketing-ops/brands/${brand.slug}`} className="text-xs text-zinc-500 hover:text-white">Fix &rarr;</Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <QuickLink href="/marketing-ops/pipeline" label="Content Pipeline" desc="Review and approve content across all brands" />
         <QuickLink href="/marketing-ops/link-building" label="Link Building" desc="Track directory submissions and backlinks" />

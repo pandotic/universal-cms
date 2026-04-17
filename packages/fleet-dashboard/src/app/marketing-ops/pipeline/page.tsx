@@ -38,17 +38,30 @@ const channelColors: Record<string, string> = {
   newsletter: 'bg-cyan-500/20 text-cyan-400',
 };
 
+interface Property {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export default function PipelinePage() {
   const [items, setItems] = useState<PipelineItem[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
+  const [brandFilter, setBrandFilter] = useState<string>('all');
+
+  useEffect(() => {
+    fetch('/api/properties').then(r => r.json()).then(j => setProperties(j.data ?? [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function load() {
       const params = new URLSearchParams({ limit: '50' });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (channelFilter !== 'all') params.set('channel', channelFilter);
+      if (brandFilter !== 'all') params.set('propertyId', brandFilter);
 
       try {
         const res = await fetch(`/api/content-pipeline?${params}`);
@@ -60,7 +73,7 @@ export default function PipelinePage() {
       setLoading(false);
     }
     load();
-  }, [statusFilter, channelFilter]);
+  }, [statusFilter, channelFilter, brandFilter]);
 
   return (
     <div className="space-y-6">
@@ -95,6 +108,16 @@ export default function PipelinePage() {
           <option value="press">Press</option>
           <option value="newsletter">Newsletter</option>
         </select>
+        <select
+          value={brandFilter}
+          onChange={e => { setBrandFilter(e.target.value); setLoading(true); }}
+          className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300"
+        >
+          <option value="all">All brands</option>
+          {properties.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
       </div>
 
       {loading ? (
@@ -114,8 +137,19 @@ export default function PipelinePage() {
               className="flex items-center justify-between px-4 py-3 hover:bg-zinc-800/30"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-zinc-200">{item.title || item.body.slice(0, 80)}</p>
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-sm text-zinc-200">{item.title || item.body.slice(0, 80)}</p>
+                  {item.qa_confidence !== null && (
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-xs ${item.qa_confidence >= 0.85 ? 'bg-emerald-500/20 text-emerald-400' : item.qa_confidence >= 0.6 ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'}`}>
+                      {Math.round(item.qa_confidence * 100)}%
+                    </span>
+                  )}
+                </div>
                 <div className="mt-1 flex flex-wrap gap-1.5">
+                  {(() => {
+                    const prop = properties.find(p => p.id === item.property_id);
+                    return prop ? <span className="text-xs text-zinc-400">{prop.name}</span> : null;
+                  })()}
                   <span className={`rounded px-2 py-0.5 text-xs ${channelColors[item.channel] ?? 'bg-zinc-700 text-zinc-400'}`}>
                     {item.channel}
                   </span>
@@ -127,9 +161,6 @@ export default function PipelinePage() {
                 </div>
               </div>
               <div className="ml-4 shrink-0 text-right">
-                {item.qa_confidence !== null && (
-                  <p className="text-xs text-zinc-500">{Math.round(item.qa_confidence * 100)}% confidence</p>
-                )}
                 <p className="text-xs text-zinc-600">{new Date(item.created_at).toLocaleDateString()}</p>
               </div>
             </Link>
