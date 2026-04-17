@@ -7,7 +7,10 @@ import { AttentionStrip } from "./attention-strip";
 import { MatrixFilters } from "./matrix-filters";
 import { PropertyPeek } from "./property-peek";
 import { PropertyRow, SortableTh } from "./property-row";
+import { PropertyCards } from "./property-cards";
 import { BulkBar } from "./bulk-bar";
+import { BulkActionDialog } from "./bulk-action-dialog";
+import { SavedViews } from "./saved-views";
 import { sortProperties } from "./matrix-utils";
 import type { ByPropertyIndex, DashboardData, Density, Lens, OwnerFilter, Property, SortConfig } from "./types";
 
@@ -161,11 +164,27 @@ export function PropertyMatrix() {
     return <MatrixSkeleton />;
   }
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
     <div className="space-y-5">
+      {/* a11y live region for selection count */}
+      <div aria-live="polite" aria-atomic className="sr-only">
+        {selected.size > 0 ? `${selected.size} properties selected` : ""}
+      </div>
+
       <AttentionStrip {...attention} />
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <SavedViews
+          currentLens={lens}
+          currentOwner={owner}
+          currentQuery={query}
+          onApply={(v) => { setLens(v.lens); setOwner(v.owner); setQuery(v.query); }}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <MatrixFilters
           lens={lens} onLensChange={setLens}
           owner={owner} onOwnerChange={setOwner}
@@ -180,25 +199,38 @@ export function PropertyMatrix() {
             onClick={fetchData}
             disabled={loading}
             className="rounded p-1 hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-40"
-            title="Refresh"
+            title="Refresh data"
+            aria-label="Refresh fleet data"
           >
-            <RefreshCcw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCcw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden />
           </button>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+      {/* Mobile card view (< md) / desktop table view (>= md) */}
+      <div className="md:hidden">
+        <PropertyCards
+          properties={filteredProperties}
+          selected={selected}
+          onToggle={toggleRow}
+          onPeek={setPeekId}
+          lens={lens}
+          index={byProperty!}
+        />
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 md:block">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" role="grid" aria-label="Fleet properties">
             <thead className="bg-zinc-950/60">
               <tr>
-                <th className="w-10 px-3 py-2.5">
+                <th className="w-10 px-3 py-2.5" scope="col">
                   <input
                     type="checkbox"
                     checked={filteredProperties.length > 0 && selected.size === filteredProperties.length}
                     onChange={toggleAll}
                     className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-800 accent-violet-500"
-                    aria-label="Select all"
+                    aria-label={selected.size === filteredProperties.length ? "Deselect all" : "Select all"}
                   />
                 </th>
                 <SortableTh label="Property" sortKey="name" currentSort={sort} onSort={handleSort} />
@@ -251,12 +283,15 @@ export function PropertyMatrix() {
           count={selected.size}
           selectedIds={Array.from(selected)}
           onClear={() => setSelected(new Set())}
-          onDeploySkill={() => {
-            const ids = Array.from(selected).join(",");
-            router.push(`/skills/deploy?properties=${encodeURIComponent(ids)}`);
-          }}
+          onDeploySkill={() => setDialogOpen(true)}
         />
       )}
+
+      <BulkActionDialog
+        open={dialogOpen}
+        selectedIds={Array.from(selected)}
+        onClose={() => setDialogOpen(false)}
+      />
     </div>
   );
 }

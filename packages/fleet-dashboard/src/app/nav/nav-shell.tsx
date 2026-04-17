@@ -39,7 +39,7 @@ export function NavShell({ children }: { children: React.ReactNode }) {
           onOpenPalette={() => setPaletteOpen(true)}
         />
         <Breadcrumbs />
-        <main className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main id="main-content" className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
