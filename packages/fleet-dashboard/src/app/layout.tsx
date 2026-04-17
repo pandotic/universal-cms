@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NavShell } from "./nav/nav-shell";
+import { PageHelpPanel } from "@/components/page-help/PageHelpPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <NavShell>{children}</NavShell>
+        <PageHelpPanel />
       </body>
     </html>
   );
