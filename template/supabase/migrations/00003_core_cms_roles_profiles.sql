@@ -15,7 +15,7 @@ $$ LANGUAGE plpgsql;
 -- =============================================================================
 -- profiles
 -- =============================================================================
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id         UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email      TEXT NOT NULL,
   display_name TEXT,
@@ -24,6 +24,7 @@ CREATE TABLE profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS trg_profiles_updated_at ON profiles;
 CREATE TRIGGER trg_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW
@@ -32,7 +33,7 @@ CREATE TRIGGER trg_profiles_updated_at
 -- =============================================================================
 -- user_roles
 -- =============================================================================
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   role       TEXT NOT NULL CHECK (role IN ('admin', 'editor', 'moderator')),
@@ -61,22 +62,26 @@ $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 -- =============================================================================
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS profiles_select_authenticated ON profiles;
 CREATE POLICY profiles_select_authenticated
   ON profiles FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS profiles_update_self ON profiles;
 CREATE POLICY profiles_update_self
   ON profiles FOR UPDATE
   TO authenticated
   USING (id = auth.uid() OR has_role('admin'))
   WITH CHECK (id = auth.uid() OR has_role('admin'));
 
+DROP POLICY IF EXISTS profiles_insert_self ON profiles;
 CREATE POLICY profiles_insert_self
   ON profiles FOR INSERT
   TO authenticated
   WITH CHECK (id = auth.uid());
 
+DROP POLICY IF EXISTS profiles_delete_admin ON profiles;
 CREATE POLICY profiles_delete_admin
   ON profiles FOR DELETE
   TO authenticated
@@ -87,22 +92,26 @@ CREATE POLICY profiles_delete_admin
 -- =============================================================================
 ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS user_roles_select_authenticated ON user_roles;
 CREATE POLICY user_roles_select_authenticated
   ON user_roles FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS user_roles_insert_admin ON user_roles;
 CREATE POLICY user_roles_insert_admin
   ON user_roles FOR INSERT
   TO authenticated
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS user_roles_update_admin ON user_roles;
 CREATE POLICY user_roles_update_admin
   ON user_roles FOR UPDATE
   TO authenticated
   USING (has_role('admin'))
   WITH CHECK (has_role('admin'));
 
+DROP POLICY IF EXISTS user_roles_delete_admin ON user_roles;
 CREATE POLICY user_roles_delete_admin
   ON user_roles FOR DELETE
   TO authenticated

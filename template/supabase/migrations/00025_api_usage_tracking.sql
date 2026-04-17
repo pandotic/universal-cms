@@ -62,22 +62,28 @@ ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE api_audit ENABLE ROW LEVEL SECURITY;
 
 -- Service role can do everything (used by the app backend)
+DROP POLICY IF EXISTS "Service role full access on api_usage" ON api_usage;
 CREATE POLICY "Service role full access on api_usage" ON api_usage
   FOR ALL USING (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "Service role full access on api_keys" ON api_keys;
 CREATE POLICY "Service role full access on api_keys" ON api_keys
   FOR ALL USING (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "Service role full access on api_audit" ON api_audit;
 CREATE POLICY "Service role full access on api_audit" ON api_audit
   FOR ALL USING (auth.role() = 'service_role');
 
 -- Admins can read via authenticated role
+DROP POLICY IF EXISTS "Admin read api_usage" ON api_usage;
 CREATE POLICY "Admin read api_usage" ON api_usage
   FOR SELECT USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin'))
   );
+DROP POLICY IF EXISTS "Admin read api_keys" ON api_keys;
 CREATE POLICY "Admin read api_keys" ON api_keys
   FOR SELECT USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin'))
   );
+DROP POLICY IF EXISTS "Admin manage api_audit" ON api_audit;
 CREATE POLICY "Admin manage api_audit" ON api_audit
   FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin'))

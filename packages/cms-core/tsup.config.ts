@@ -39,6 +39,8 @@ export default defineConfig({
     "data/hub-users": "src/data/hub-users.ts",
     "data/hub-activity": "src/data/hub-activity.ts",
     "data/hub-groups": "src/data/hub-groups.ts",
+    "types/admin": "src/types/admin.ts",
+    "data/hub-admin": "src/data/hub-admin.ts",
     "types/projects": "src/types/projects.ts",
     "data/projects": "src/data/projects.ts",
     "data/project-parsers": "src/data/project-parsers.ts",

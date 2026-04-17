@@ -59,10 +59,12 @@ CREATE INDEX IF NOT EXISTS idx_keyword_registry_page ON keyword_registry(assigne
 ALTER TABLE keyword_registry ENABLE ROW LEVEL SECURITY;
 
 -- Public can read
+DROP POLICY IF EXISTS keyword_registry_public_read ON keyword_registry;
 CREATE POLICY keyword_registry_public_read ON keyword_registry
   FOR SELECT USING (true);
 
 -- Admins have full access
+DROP POLICY IF EXISTS keyword_registry_admin_all ON keyword_registry;
 CREATE POLICY keyword_registry_admin_all ON keyword_registry
   FOR ALL TO authenticated
   USING (has_role('admin'))
