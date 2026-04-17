@@ -10,8 +10,8 @@ import {
   getSetupProgress,
   seedDefaultSetupTasks,
 } from "@pandotic/universal-cms/data/hub-brand-setup";
-import { getDefaultSetupTasksForPlaybook } from "@pandotic/universal-cms/data/hub-playbooks";
-import { relationshipTypeToPlaybook } from "@pandotic/universal-cms/types/hub-playbooks";
+import { getDefaultSetupTasksForPlaybook } from "@pandotic/universal-cms/data/hub-marketing-playbooks";
+import { relationshipTypeToPlaybook } from "@pandotic/universal-cms/types/hub-marketing-playbooks";
 
 export async function GET(request: NextRequest) {
   try {

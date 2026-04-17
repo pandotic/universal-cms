@@ -1,202 +1,152 @@
-import type { HubProperty } from "../types/hub";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
-  PlaybookConfig,
-  PlaybookType,
-  SetupTaskTemplate,
-} from "../types/hub-playbooks";
-import { relationshipTypeToPlaybook } from "../types/hub-playbooks";
+  HubPlaybookRun,
+  HubPlaybookRunStep,
+  HubPlaybookTemplate,
+  HubPlaybookTemplateStep,
+  PlaybookRunWithProgress,
+  PlaybookStatus,
+} from "../types/playbooks";
 
-const PLAYBOOKS: Record<PlaybookType, PlaybookConfig> = {
-  pandotic_studio: {
-    type: "pandotic_studio",
-    enabledDepartments: ["marketing_director", "content_creative", "distribution_growth", "relationships", "email", "research", "operations"],
-    contentTypes: ["blog", "social", "press", "newsletter", "case_study"],
-    crossPromotion: true,
-    brandIsolation: false,
-    pressStrategy: "national",
-    socialStrategy: "own_handles",
-    linkBuildingTiers: ["tier_1", "tier_2", "tier_3"],
-    featuredComEnabled: true,
-    newsletterEnabled: true,
-    podcastBookingEnabled: true,
-  },
-  pandotic_studio_product: {
-    type: "pandotic_studio_product",
-    enabledDepartments: ["marketing_director", "content_creative", "distribution_growth", "relationships", "email", "operations"],
-    contentTypes: ["blog", "social", "press", "newsletter", "landing_page"],
-    crossPromotion: true,
-    brandIsolation: false,
-    pressStrategy: "studio_attribution",
-    socialStrategy: "own_handles",
-    linkBuildingTiers: ["tier_1", "tier_2", "tier_3"],
-    featuredComEnabled: true,
-    newsletterEnabled: true,
-    podcastBookingEnabled: true,
-  },
-  gbi_personal: {
-    type: "gbi_personal",
-    enabledDepartments: ["marketing_director", "content_creative", "distribution_growth", "relationships", "email", "research", "operations"],
-    contentTypes: ["blog", "social", "press", "newsletter", "featured_pitch", "guest_post"],
-    crossPromotion: false,
-    brandIsolation: true,
-    pressStrategy: "national",
-    socialStrategy: "own_handles",
-    linkBuildingTiers: ["tier_1", "tier_2", "tier_3"],
-    featuredComEnabled: true,
-    newsletterEnabled: true,
-    podcastBookingEnabled: true,
-  },
-  pandotic_client: {
-    type: "pandotic_client",
-    enabledDepartments: ["marketing_director", "content_creative"],
-    contentTypes: ["case_study", "press"],
-    crossPromotion: false,
-    brandIsolation: true,
-    pressStrategy: "studio_attribution",
-    socialStrategy: "skip",
-    linkBuildingTiers: [],
-    featuredComEnabled: false,
-    newsletterEnabled: false,
-    podcastBookingEnabled: false,
-  },
-  local_service: {
-    type: "local_service",
-    enabledDepartments: ["marketing_director", "content_creative", "distribution_growth", "operations"],
-    contentTypes: ["blog", "social", "press"],
-    crossPromotion: false,
-    brandIsolation: false,
-    pressStrategy: "local",
-    socialStrategy: "own_handles",
-    linkBuildingTiers: ["tier_1", "tier_2"],
-    featuredComEnabled: false,
-    newsletterEnabled: false,
-    podcastBookingEnabled: false,
-  },
-  standalone: {
-    type: "standalone",
-    enabledDepartments: ["marketing_director", "content_creative", "distribution_growth", "relationships", "email", "operations"],
-    contentTypes: ["blog", "social", "press", "newsletter", "featured_pitch"],
-    crossPromotion: false,
-    brandIsolation: true,
-    pressStrategy: "national",
-    socialStrategy: "own_handles",
-    linkBuildingTiers: ["tier_1", "tier_2", "tier_3"],
-    featuredComEnabled: true,
-    newsletterEnabled: true,
-    podcastBookingEnabled: true,
-  },
-};
+// ─── Templates ──────────────────────────────────────────────────────────────
 
-export function getPlaybookForProperty(property: HubProperty): PlaybookConfig {
-  const playbookType = relationshipTypeToPlaybook(property.relationship_type);
-  return PLAYBOOKS[playbookType];
+export async function listPlaybookTemplates(
+  client: SupabaseClient,
+): Promise<HubPlaybookTemplate[]> {
+  const { data, error } = await client
+    .from("hub_playbook_templates")
+    .select("*")
+    .order("category")
+    .order("name");
+  if (error) throw error;
+  return data ?? [];
 }
 
-export function getPlaybookByType(type: PlaybookType): PlaybookConfig {
-  return PLAYBOOKS[type];
+export async function getPlaybookTemplate(
+  client: SupabaseClient,
+  slug: string,
+): Promise<HubPlaybookTemplate & { steps: HubPlaybookTemplateStep[] }> {
+  const { data, error } = await client
+    .from("hub_playbook_templates")
+    .select("*, steps:hub_playbook_template_steps(*)")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  return { ...data, steps: (data.steps as HubPlaybookTemplateStep[]).sort((a, b) => a.position - b.position) };
 }
 
-const TIER_1_SOCIAL_PROFILES: SetupTaskTemplate[] = [
-  { category: "social_profiles", task_name: "Create LinkedIn Company Page", platform: "linkedin", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Twitter/X Account", platform: "twitter", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Facebook Business Page", platform: "facebook", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create YouTube Channel", platform: "youtube", tier: "tier_1", execution_mode: "semi_automated" },
-];
+// ─── Runs ────────────────────────────────────────────────────────────────────
 
-const TIER_2_SOCIAL_PROFILES: SetupTaskTemplate[] = [
-  { category: "social_profiles", task_name: "Create Crunchbase Profile", platform: "crunchbase", tier: "tier_2", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Instagram Business Account", platform: "instagram", tier: "tier_2", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Pinterest Business Account", platform: "pinterest", tier: "tier_2", execution_mode: "semi_automated" },
-];
+export async function listPlaybookRuns(
+  client: SupabaseClient,
+  filters?: { propertyId?: string; status?: PlaybookStatus },
+): Promise<HubPlaybookRun[]> {
+  let q = client.from("hub_playbook_runs").select("*");
+  if (filters?.propertyId) q = q.eq("property_id", filters.propertyId);
+  if (filters?.status) q = q.eq("status", filters.status);
+  const { data, error } = await q.order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
 
-const TIER_3_SOCIAL_PROFILES: SetupTaskTemplate[] = [
-  { category: "social_profiles", task_name: "Create Medium Publication", platform: "medium", tier: "tier_3", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Threads Account", platform: "threads", tier: "tier_3", execution_mode: "semi_automated" },
-  { category: "social_profiles", task_name: "Create Bluesky Account", platform: "bluesky", tier: "tier_3", execution_mode: "semi_automated" },
-];
+export async function getPlaybookRunWithProgress(
+  client: SupabaseClient,
+  runId: string,
+): Promise<PlaybookRunWithProgress> {
+  const { data, error } = await client
+    .from("hub_playbook_runs")
+    .select(`
+      *,
+      template:hub_playbook_templates(*),
+      steps:hub_playbook_run_steps(
+        *,
+        template_step:hub_playbook_template_steps(*)
+      )
+    `)
+    .eq("id", runId)
+    .single();
+  if (error) throw error;
+  const steps = (data.steps ?? []) as PlaybookRunWithProgress["steps"];
+  const required = steps.filter((s) => s.template_step.required);
+  const done = required.filter((s) => s.status === "completed").length;
+  return {
+    ...data,
+    template: data.template as HubPlaybookTemplate,
+    steps,
+    progress: required.length > 0 ? Math.round((done / required.length) * 100) : 0,
+  };
+}
 
-const BRAND_IDENTITY_TASKS: SetupTaskTemplate[] = [
-  { category: "brand_identity", task_name: "Create Brand Voice Brief", platform: null, tier: "tier_1", execution_mode: "manual" },
-  { category: "brand_identity", task_name: "Generate Brand Assets (descriptions, bios, boilerplate)", platform: null, tier: "tier_1", execution_mode: "automated" },
-  { category: "brand_identity", task_name: "Set Up Brand Kit in Canva", platform: "canva", tier: "tier_1", execution_mode: "manual" },
-  { category: "brand_identity", task_name: "Create Templated.io Templates", platform: "templated", tier: "tier_2", execution_mode: "manual" },
-];
+export async function startPlaybookRun(
+  client: SupabaseClient,
+  templateId: string,
+  propertyId: string,
+  startedBy: string,
+): Promise<HubPlaybookRun> {
+  // Get template steps
+  const { data: templateSteps, error: stepsErr } = await client
+    .from("hub_playbook_template_steps")
+    .select("id")
+    .eq("template_id", templateId)
+    .order("position");
+  if (stepsErr) throw stepsErr;
 
-const LEGAL_TASKS: SetupTaskTemplate[] = [
-  { category: "legal", task_name: "Generate Privacy Policy", platform: "termly", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "legal", task_name: "Generate Terms of Service", platform: "termly", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "legal", task_name: "Set Up Cookie Consent Banner", platform: null, tier: "tier_1", execution_mode: "semi_automated" },
-];
+  const { data: run, error: runErr } = await client
+    .from("hub_playbook_runs")
+    .insert({
+      template_id: templateId,
+      property_id: propertyId,
+      status: "in_progress",
+      started_by: startedBy,
+      started_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  if (runErr) throw runErr;
 
-const ANALYTICS_TASKS: SetupTaskTemplate[] = [
-  { category: "analytics", task_name: "Set Up Site Analytics", platform: "rybbit", tier: "tier_1", execution_mode: "manual" },
-  { category: "analytics", task_name: "Register with Google Search Console", platform: "google", tier: "tier_1", execution_mode: "manual" },
-  { category: "analytics", task_name: "Register with Bing Webmaster Tools", platform: "bing", tier: "tier_2", execution_mode: "manual" },
-];
-
-const EMAIL_TASKS: SetupTaskTemplate[] = [
-  { category: "email_platform", task_name: "Set Up Email Platform (Beehiiv)", platform: "beehiiv", tier: "tier_1", execution_mode: "manual" },
-  { category: "email_platform", task_name: "Create Welcome Email Sequence", platform: null, tier: "tier_2", execution_mode: "automated" },
-  { category: "email_platform", task_name: "Create Lead Magnet", platform: null, tier: "tier_2", execution_mode: "manual" },
-];
-
-const PRESS_KIT_TASKS: SetupTaskTemplate[] = [
-  { category: "press_kit", task_name: "Create Press Kit Page", platform: null, tier: "tier_2", execution_mode: "automated" },
-  { category: "press_kit", task_name: "Generate JSON-LD Schema", platform: null, tier: "tier_1", execution_mode: "automated" },
-];
-
-const REVIEW_SITE_TASKS_SAAS: SetupTaskTemplate[] = [
-  { category: "review_sites", task_name: "Claim G2 Profile", platform: "g2", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "review_sites", task_name: "Claim Capterra Profile", platform: "capterra", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "review_sites", task_name: "Claim TrustPilot Profile", platform: "trustpilot", tier: "tier_2", execution_mode: "semi_automated" },
-];
-
-const REVIEW_SITE_TASKS_LOCAL: SetupTaskTemplate[] = [
-  { category: "review_sites", task_name: "Set Up Google Business Profile", platform: "google", tier: "tier_1", execution_mode: "manual" },
-  { category: "review_sites", task_name: "Claim Yelp Profile", platform: "yelp", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "review_sites", task_name: "Claim BBB Profile", platform: "bbb", tier: "tier_1", execution_mode: "semi_automated" },
-  { category: "review_sites", task_name: "Claim Angi Profile", platform: "angi", tier: "tier_2", execution_mode: "semi_automated" },
-  { category: "review_sites", task_name: "Claim Thumbtack Profile", platform: "thumbtack", tier: "tier_2", execution_mode: "semi_automated" },
-];
-
-const DIRECTORY_TASKS: SetupTaskTemplate[] = [
-  { category: "directories", task_name: "Submit to General Directories (Hotfrog, Manta)", platform: null, tier: "tier_2", execution_mode: "semi_automated" },
-  { category: "directories", task_name: "Submit to Industry-Specific Directories", platform: null, tier: "tier_2", execution_mode: "semi_automated" },
-];
-
-export function getDefaultSetupTasksForPlaybook(
-  playbookType: PlaybookType
-): SetupTaskTemplate[] {
-  const tasks: SetupTaskTemplate[] = [
-    ...BRAND_IDENTITY_TASKS,
-    ...TIER_1_SOCIAL_PROFILES,
-    ...LEGAL_TASKS,
-    ...ANALYTICS_TASKS,
-    ...PRESS_KIT_TASKS,
-  ];
-
-  if (playbookType === "pandotic_client") {
-    return tasks.filter((t) => t.category === "brand_identity");
+  if (templateSteps && templateSteps.length > 0) {
+    const { error: stepInsertErr } = await client.from("hub_playbook_run_steps").insert(
+      templateSteps.map((s) => ({
+        run_id: run.id,
+        template_step_id: s.id,
+        status: "not_started",
+      })),
+    );
+    if (stepInsertErr) throw stepInsertErr;
   }
 
-  tasks.push(...TIER_2_SOCIAL_PROFILES);
-  tasks.push(...TIER_3_SOCIAL_PROFILES);
-  tasks.push(...DIRECTORY_TASKS);
+  return run;
+}
 
-  const playbook = PLAYBOOKS[playbookType];
+export async function completePlaybookStep(
+  client: SupabaseClient,
+  runStepId: string,
+  completedBy: string,
+  notes?: string,
+): Promise<void> {
+  const { error } = await client
+    .from("hub_playbook_run_steps")
+    .update({
+      status: "completed",
+      completed_by: completedBy,
+      completed_at: new Date().toISOString(),
+      notes: notes ?? null,
+    })
+    .eq("id", runStepId);
+  if (error) throw error;
+}
 
-  if (playbook.newsletterEnabled) {
-    tasks.push(...EMAIL_TASKS);
-  }
-
-  if (playbookType === "local_service") {
-    tasks.push(...REVIEW_SITE_TASKS_LOCAL);
-  } else if (
-    playbookType === "pandotic_studio_product" ||
-    playbookType === "pandotic_studio"
-  ) {
-    tasks.push(...REVIEW_SITE_TASKS_SAAS);
-  }
-
-  return tasks;
+export async function updatePlaybookRunStatus(
+  client: SupabaseClient,
+  runId: string,
+  status: PlaybookStatus,
+): Promise<void> {
+  const { error } = await client
+    .from("hub_playbook_runs")
+    .update({
+      status,
+      ...(status === "completed" ? { completed_at: new Date().toISOString() } : {}),
+    })
+    .eq("id", runId);
+  if (error) throw error;
 }
