@@ -86,14 +86,14 @@ create policy "authenticated read playbook templates"
 
 create policy "super_admin manage playbook templates"
   on hub_playbook_templates for all to authenticated
-  using (exists (select 1 from hub_users where auth_user_id = auth.uid() and role = 'super_admin'));
+  using (exists (select 1 from hub_users where auth_user_id = auth.uid() and hub_role = 'super_admin'));
 
 create policy "authenticated read template steps"
   on hub_playbook_template_steps for select to authenticated using (true);
 
 create policy "super_admin manage template steps"
   on hub_playbook_template_steps for all to authenticated
-  using (exists (select 1 from hub_users where auth_user_id = auth.uid() and role = 'super_admin'));
+  using (exists (select 1 from hub_users where auth_user_id = auth.uid() and hub_role = 'super_admin'));
 
 create policy "authenticated read playbook runs"
   on hub_playbook_runs for select to authenticated using (true);
