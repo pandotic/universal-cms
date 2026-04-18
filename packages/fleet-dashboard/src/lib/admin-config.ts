@@ -21,6 +21,13 @@ export interface AdminConfig {
     agents: boolean;
     social: boolean;
 
+    // Marketing ops modules
+    marketing: boolean;
+    contentPipeline: boolean;
+    linkBuilding: boolean;
+    brandAssets: boolean;
+    qaReviews: boolean;
+
     // Admin features
     featureFlags: boolean;
     auditLog: boolean;
@@ -57,6 +64,13 @@ export const fleetAdminConfig: AdminConfig = {
     agents: true,
     social: true,
 
+    // Marketing ops: all enabled for master admin
+    marketing: true,
+    contentPipeline: true,
+    linkBuilding: true,
+    brandAssets: true,
+    qaReviews: true,
+
     // Admin: all enabled for visibility
     featureFlags: true,
     auditLog: true,
@@ -90,6 +104,11 @@ export const createMinimalAdminConfig = (): AdminConfig => ({
     groups: false,
     agents: false,
     social: false,
+    marketing: false,
+    contentPipeline: false,
+    linkBuilding: false,
+    brandAssets: false,
+    qaReviews: false,
     featureFlags: false,
     auditLog: false,
     analytics: false,
@@ -109,6 +128,11 @@ export const createStandardAdminConfig = (): AdminConfig => ({
     groups: true,
     agents: false,
     social: false,
+    marketing: false,
+    contentPipeline: false,
+    linkBuilding: false,
+    brandAssets: false,
+    qaReviews: false,
     featureFlags: true,
     auditLog: true,
     analytics: false,
@@ -128,6 +152,11 @@ export const createEnterpriseAdminConfig = (): AdminConfig => ({
     groups: true,
     agents: true,
     social: true,
+    marketing: true,
+    contentPipeline: true,
+    linkBuilding: true,
+    brandAssets: true,
+    qaReviews: true,
     featureFlags: true,
     auditLog: true,
     analytics: true,

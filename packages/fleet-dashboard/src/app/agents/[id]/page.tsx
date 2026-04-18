@@ -10,7 +10,7 @@ interface Property {
   slug: string;
 }
 
-const AGENT_TYPE_LABELS: Record<AgentType, string> = {
+const AGENT_TYPE_LABELS: Partial<Record<AgentType, string>> = {
   seo_audit: "SEO Audit",
   broken_links: "Broken Links",
   dependency_update: "Dependency Update",
@@ -19,7 +19,7 @@ const AGENT_TYPE_LABELS: Record<AgentType, string> = {
   custom: "Custom",
 };
 
-const AGENT_TYPE_COLORS: Record<AgentType, string> = {
+const AGENT_TYPE_COLORS: Partial<Record<AgentType, string>> = {
   seo_audit: "bg-blue-500/10 text-blue-400 ring-blue-500/20",
   broken_links: "bg-red-500/10 text-red-400 ring-red-500/20",
   dependency_update: "bg-amber-500/10 text-amber-400 ring-amber-500/20",

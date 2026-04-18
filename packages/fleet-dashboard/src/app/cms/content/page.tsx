@@ -7,15 +7,28 @@ export const metadata: Metadata = {
   title: "CMS — Content Pages",
 };
 
+function isMissingTable(message: string) {
+  return (
+    message.includes("does not exist") ||
+    message.includes("schema cache") ||
+    message.includes("PGRST205")
+  );
+}
+
 export default async function CMSContentPage() {
   const supabase = await createClient();
   let pages: Awaited<ReturnType<typeof getAllContentPages>> = [];
   let error: string | null = null;
+  let missingTable = false;
 
   try {
     pages = await getAllContentPages(supabase);
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to load content pages";
+    const message = e instanceof Error ? e.message : "Failed to load content pages";
+    missingTable = isMissingTable(message);
+    error = missingTable
+      ? "The content_pages table isn't available in this Supabase project. Apply the content_pages migration or manage content in the site-specific CMS."
+      : message;
   }
 
   return (
@@ -36,8 +49,32 @@ export default async function CMSContentPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-900/20 p-4 mb-6">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div
+          className={`rounded-lg border p-4 mb-6 ${
+            missingTable
+              ? "border-amber-800 bg-amber-900/20"
+              : "border-red-800 bg-red-900/20"
+          }`}
+        >
+          <p
+            className={`text-sm ${missingTable ? "text-amber-300" : "text-red-400"}`}
+          >
+            {error}
+          </p>
+          {missingTable && (
+            <p className="mt-2 text-xs text-amber-300/70">
+              Looking for per-site content? Use the external{" "}
+              <a
+                href="https://pandotic.ai/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-200"
+              >
+                Pandotic CMS Admin
+              </a>
+              .
+            </p>
+          )}
         </div>
       )}
 

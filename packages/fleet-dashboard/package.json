@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.102.1",
     "@universal-cms/admin-core": "workspace:*",
     "@universal-cms/admin-ui": "workspace:*",
+    "cmdk": "^1.1.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.408.0",
     "next": "^16.1.6",
