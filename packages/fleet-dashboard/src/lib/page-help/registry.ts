@@ -526,6 +526,185 @@ export const pageHelp: Record<string, PageHelp> = {
     howToUse: ["Follow each remediation step.", "Re-run the check to clear the warning."],
     builtWith: { apiRoutes: ["/api/setup/check"] },
   },
+
+  "/marketing-ops": {
+    title: "Marketing Ops — Overview",
+    purpose:
+      "Virtual marketing department dashboard. Surfaces brand health, pending reviews, kill switches, and agent errors at a glance.",
+    howToUse: [
+      "Scan the alerts strip for brands needing attention.",
+      "Click a brand card to drill into its detail page.",
+      "Jump to sub-pages via the tab nav (Brands, Pipeline, Link Building, QA).",
+    ],
+    builtWith: {
+      apiRoutes: ["/api/properties"],
+      auth: "Authenticated Hub user.",
+      relatedPages: [
+        "/marketing-ops/brands",
+        "/marketing-ops/pipeline",
+        "/marketing-ops/link-building",
+        "/marketing-ops/qa",
+      ],
+    },
+  },
+
+  "/marketing-ops/brands": {
+    title: "Brands",
+    purpose:
+      "Tabular view of every brand with health, auto-pilot status, pending review count, and errors.",
+    howToUse: [
+      "Filter by business stage (active / all / parking lot) and relationship type.",
+      "Click a row to open that brand's detail page.",
+    ],
+    builtWith: {
+      tables: ["hub_properties"],
+      apiRoutes: ["/api/properties"],
+      auth: "Authenticated Hub user.",
+      relatedPages: ["/marketing-ops/brands/[slug]"],
+    },
+  },
+
+  "/marketing-ops/brands/[slug]": {
+    title: "Brand Detail",
+    purpose:
+      "Comprehensive brand hub — toggle auto-pilot, manage setup tasks, review assets, and watch the pipeline for a single brand.",
+    howToUse: [
+      "Toggle auto-pilot or the kill switch via the top controls.",
+      "Set relationship type and site profile.",
+      "Work through setup tasks; mark them complete or request revisions.",
+      "Review brand assets (descriptions, bios, NAP) and recent pipeline content.",
+    ],
+    builtWith: {
+      tables: ["hub_properties", "hub_brand_assets", "hub_brand_setup_tasks", "hub_content_pipeline"],
+      apiRoutes: [
+        "/api/properties (GET, PUT)",
+        "/api/brand-assets (GET)",
+        "/api/brand-setup (GET, POST)",
+        "/api/content-pipeline (GET)",
+      ],
+      auth: "Authenticated Hub user.",
+      relatedPages: ["/marketing-ops/brands", "/properties/[slug]/agents"],
+    },
+  },
+
+  "/marketing-ops/link-building": {
+    title: "Link Building",
+    purpose:
+      "Track directory submission opportunities per brand, plus Featured.com outbound pitches and inbound submissions.",
+    howToUse: [
+      "Filter opportunities by priority tier.",
+      "Add a new opportunity via the create form.",
+      "Advance a submission through queued → submitted → live.",
+    ],
+    builtWith: {
+      apiRoutes: [
+        "/api/link-building/opportunities (GET, POST)",
+        "/api/link-building/submissions (GET)",
+        "/api/link-building/featured (GET)",
+        "/api/properties (GET)",
+      ],
+      auth: "Authenticated Hub user.",
+    },
+  },
+
+  "/marketing-ops/pipeline": {
+    title: "Content Pipeline",
+    purpose:
+      "Cross-brand content pipeline view — every draft, QA item, and scheduled post in one list.",
+    howToUse: [
+      "Filter by status (needs review / drafted / approved / published).",
+      "Filter by channel (social, blog, email, press, newsletter) or brand.",
+      "Click a row to open the pipeline item for review.",
+    ],
+    builtWith: {
+      tables: ["hub_content_pipeline"],
+      apiRoutes: ["/api/content-pipeline", "/api/properties"],
+      dataFunctions: ["listContentPipelineItems (cms-core/data/hub-content-pipeline)"],
+      auth: "Authenticated Hub user.",
+      relatedPages: ["/marketing-ops/pipeline/[id]"],
+    },
+  },
+
+  "/marketing-ops/pipeline/[id]": {
+    title: "Pipeline Item",
+    purpose:
+      "Editor and workflow for a single content item. Review QA output, edit, transition status, and request revisions.",
+    howToUse: [
+      "Edit title/body inline.",
+      "Advance status: drafted → qa_review → needs_human_review → approved → scheduled → published.",
+      "Request revisions with notes — they flow back to the agent.",
+      "Read QA confidence score and suggested fixes.",
+    ],
+    builtWith: {
+      tables: ["hub_content_pipeline", "hub_qa_reviews"],
+      apiRoutes: [
+        "/api/content-pipeline/[id] (GET, PUT)",
+        "/api/qa-reviews (GET)",
+      ],
+      auth: "Authenticated Hub user.",
+      relatedPages: ["/marketing-ops/pipeline"],
+    },
+  },
+
+  "/marketing-ops/qa": {
+    title: "QA & Auto-pilot",
+    purpose:
+      "Per-brand QA dashboard. Tune auto-pilot thresholds and review the human-feedback learning log.",
+    howToUse: [
+      "Pick a brand to view its QA metrics.",
+      "Enable or disable auto-pilot per content type.",
+      "Adjust confidence threshold (0.0–1.0) and daily limits.",
+      "Scan the learning log for human agreements vs. overrides.",
+    ],
+    builtWith: {
+      apiRoutes: [
+        "/api/autopilot (GET, POST)",
+        "/api/qa-learning (GET)",
+        "/api/properties (GET)",
+      ],
+      auth: "Authenticated Hub user.",
+    },
+  },
+
+  "/playbooks": {
+    title: "Playbooks",
+    purpose:
+      "Catalog of guided operational playbooks (onboarding, upgrades, audits). Kick off a new run against a property.",
+    howToUse: [
+      "Review active runs in the 'In progress' strip.",
+      "Browse templates by category.",
+      "Enter a property ID and start a new run.",
+    ],
+    builtWith: {
+      tables: ["hub_playbook_templates", "hub_playbook_runs"],
+      apiRoutes: ["/api/playbooks (GET)", "/api/playbooks/runs (POST)"],
+      dataFunctions: [
+        "listPlaybookTemplates (cms-core/data/hub-playbooks)",
+        "listPlaybookRuns (cms-core/data/hub-playbooks)",
+      ],
+      auth: "requireHubRole (super_admin, group_admin, member, viewer).",
+      relatedPages: ["/playbooks/runs/[runId]"],
+    },
+  },
+
+  "/playbooks/runs/[runId]": {
+    title: "Playbook Run",
+    purpose:
+      "Step-by-step progress tracker for one playbook run. Shows the checklist and overall completion.",
+    howToUse: [
+      "Mark steps complete as you finish them.",
+      "Read each step's description/icon to know whether it's a deploy, upgrade, agent run, or manual task.",
+    ],
+    builtWith: {
+      tables: ["hub_playbook_runs", "hub_playbook_run_steps"],
+      apiRoutes: [
+        "/api/playbooks/runs/[runId] (GET)",
+        "/api/playbooks/runs/[runId]/steps/[stepId] (PATCH)",
+      ],
+      auth: "requireHubRole.",
+      relatedPages: ["/playbooks"],
+    },
+  },
 };
 
 /**
