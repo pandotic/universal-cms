@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { runId, status, result, error_message } = body;
+    const { run_id, status, result, error_message } = body;
 
-    if (!runId || !status) {
+    if (!run_id || !status) {
       return NextResponse.json(
-        { error: "Bad request: runId and status are required" },
+        { error: "Bad request: run_id and status are required" },
         { status: 400 }
       );
     }
@@ -38,9 +38,9 @@ export async function POST(request: NextRequest) {
       updates.started_at = new Date().toISOString();
     }
 
-    await updateAgentRun(supabase, runId, updates);
+    const updatedRun = await updateAgentRun(supabase, run_id, updates);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ data: updatedRun });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Internal server error" },
