@@ -23,11 +23,11 @@ export default function ProjectProofPoints({ proofPoints }: ProjectProofPointsPr
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {proofPoints.map((point, i) => (
             <ScrollReveal key={point.index} delay={i * 0.06}>
-              <div className="p-5 rounded-xl border border-white/10 hover:border-white/20 transition-colors h-full flex gap-4">
-                <span className="text-[var(--color-accent)] font-bold text-2xl opacity-40 shrink-0 leading-tight">
+              <div className="p-6 rounded-xl border border-white/10 hover:border-white/20 transition-colors h-full flex gap-4">
+                <span className="text-[var(--color-accent)] font-bold text-2xl opacity-50 shrink-0 leading-tight">
                   {String(point.index).padStart(2, "0")}
                 </span>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-gray-200 text-base md:text-lg leading-relaxed">
                   {point.statement}
                 </p>
               </div>

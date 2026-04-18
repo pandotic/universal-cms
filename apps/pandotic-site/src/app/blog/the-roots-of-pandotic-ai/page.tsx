@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootsOfPandoticAI() {
   return (
-    <article className="py-20 md:py-32 px-4 md:px-6">
+    <article className="bg-pando bg-pando-soft bg-pando-fixed py-20 md:py-32 px-4 md:px-6">
       <div className="max-w-3xl mx-auto">
         <Link
           href="/blog"
@@ -33,9 +34,17 @@ export default function RootsOfPandoticAI() {
           The Roots of Pandotic AI
         </h1>
 
-        <div className="aspect-video rounded-2xl bg-gradient-to-br from-amber-900/40 to-yellow-900/30 mb-8 md:mb-12" />
+        <div className="aspect-video rounded-2xl overflow-hidden relative mb-8 md:mb-12 border border-white/10">
+          <Image
+            src="/images/pando-tree.webp"
+            alt="Pando tree — quaking aspen grove, one of the largest single organisms on Earth"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        </div>
 
-        <div className="prose prose-invert max-w-none space-y-6 text-gray-300 text-base md:text-lg leading-relaxed">
+        <div className="prose prose-invert max-w-none space-y-6 text-gray-200 text-lg md:text-xl leading-relaxed">
           <p>
             The name <strong className="text-white">Pandotic</strong> comes from two powerful sources of inspiration: the{" "}
             <strong className="text-white">Pando tree</strong> and the concept of{" "}

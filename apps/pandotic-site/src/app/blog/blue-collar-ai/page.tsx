@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function BlueCollarAI() {
   return (
-    <article className="py-20 md:py-32 px-4 md:px-6">
+    <article className="bg-pando bg-pando-soft bg-pando-fixed py-20 md:py-32 px-4 md:px-6">
       <div className="max-w-3xl mx-auto">
         <Link
           href="/blog"
@@ -38,7 +38,7 @@ export default function BlueCollarAI() {
           <Image src="/images/blog/blue-collar-ai.webp" alt="Blue Collar AI" fill className="object-cover" />
         </div>
 
-        <div className="prose prose-invert max-w-none space-y-6 text-gray-300 text-base md:text-lg leading-relaxed">
+        <div className="prose prose-invert max-w-none space-y-6 text-gray-200 text-lg md:text-xl leading-relaxed">
           <h2 className="text-xl md:text-2xl font-bold text-white">
             Putting Agentic AI to Work—Today.
           </h2>

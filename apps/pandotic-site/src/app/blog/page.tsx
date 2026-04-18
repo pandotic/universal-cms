@@ -22,12 +22,12 @@ export default function Blog() {
   return (
     <>
       {/* Header */}
-      <section className="py-20 md:py-32 px-4 md:px-6 text-center">
+      <section className="bg-pando py-24 md:py-36 px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
             From the build floor
           </h1>
-          <p className="text-gray-400 text-base md:text-lg">
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
             How we think about AI, product, and getting things into the world.
           </p>
         </div>
@@ -69,16 +69,16 @@ export default function Blog() {
               <div className="aspect-video relative overflow-hidden">
                 <Image src={post.image} alt={post.title} fill className="object-cover" />
               </div>
-              <div className="p-4 md:p-5">
+              <div className="p-5 md:p-6">
                 {post.category && (
-                  <span className="text-xs border border-white/20 text-gray-400 rounded-full px-3 py-1">
+                  <span className="text-[11px] md:text-xs tracking-wider uppercase border border-white/20 text-gray-300 rounded-full px-3 py-1">
                     {post.category}
                   </span>
                 )}
-                <h3 className="text-white font-semibold mt-3 group-hover:text-[var(--color-accent)] transition-colors">
+                <h3 className="text-white text-lg md:text-xl font-semibold leading-snug mt-4 group-hover:text-[var(--color-accent)] transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-400 text-sm md:text-base mt-3">
                   {post.author} &middot; {post.date}
                 </p>
               </div>

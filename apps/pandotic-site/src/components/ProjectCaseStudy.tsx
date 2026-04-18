@@ -33,7 +33,7 @@ export default function ProjectCaseStudy({ caseStudy, projectName }: ProjectCase
                   </span>
                   The Challenge
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                   {truncate(caseStudy.challenge, 400)}
                 </p>
               </div>
@@ -50,7 +50,7 @@ export default function ProjectCaseStudy({ caseStudy, projectName }: ProjectCase
                   </span>
                   The Solution
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                   {truncate(caseStudy.solution, 400)}
                 </p>
               </div>
@@ -66,10 +66,10 @@ export default function ProjectCaseStudy({ caseStudy, projectName }: ProjectCase
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {caseStudy.keyFeatures.map((feature, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-[var(--color-accent)] font-bold text-sm mt-0.5 shrink-0">
+                    <span className="text-[var(--color-accent)] font-bold text-base mt-0.5 shrink-0">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <p className="text-gray-400 text-sm leading-relaxed">{feature}</p>
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed">{feature}</p>
                   </div>
                 ))}
               </div>
@@ -92,8 +92,8 @@ export default function ProjectCaseStudy({ caseStudy, projectName }: ProjectCase
         {/* Pandotic's Role */}
         {caseStudy.pandoticRole && (
           <ScrollReveal delay={0.5}>
-            <p className="text-gray-500 text-xs mt-6 leading-relaxed max-w-3xl">
-              <span className="text-gray-400 font-medium">Pandotic&apos;s Role: </span>
+            <p className="text-gray-400 text-sm md:text-base mt-6 leading-relaxed max-w-3xl">
+              <span className="text-gray-300 font-medium">Pandotic&apos;s Role: </span>
               {truncate(caseStudy.pandoticRole, 300)}
             </p>
           </ScrollReveal>

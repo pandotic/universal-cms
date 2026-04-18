@@ -43,7 +43,7 @@ export default function ProjectHero({ project, productPage }: ProjectHeroProps) 
             </TextReveal>
 
             <ScrollReveal delay={0.2}>
-              <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-6">
+              <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-8">
                 {project.tagline}
               </p>
             </ScrollReveal>

@@ -63,14 +63,14 @@ export default function FeatureGrid({ expanded = false }: { expanded?: boolean }
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {features.map((feature, i) => (
           <ScrollReveal key={i} delay={i * 0.08}>
-            <div className="p-5 md:p-6 rounded-xl border border-white/10 hover:border-white/20 transition-colors h-full">
-              <p className="text-[var(--color-accent)] text-xs font-semibold tracking-wider uppercase mb-3">
+            <div className="p-6 md:p-7 rounded-xl border border-white/10 hover:border-white/20 transition-colors h-full">
+              <p className="text-[var(--color-accent)] text-[11px] md:text-xs font-semibold tracking-[0.15em] uppercase mb-3">
                 {feature.eyebrow}
               </p>
-              <h3 className="text-white text-lg font-semibold mb-3">
+              <h3 className="text-white text-lg md:text-xl font-semibold mb-3">
                 {expanded ? expandedTitles[i] : feature.title}
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                 {expanded ? expandedDescriptions[i] : feature.description}
               </p>
             </div>

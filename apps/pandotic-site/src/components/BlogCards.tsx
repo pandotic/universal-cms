@@ -19,11 +19,11 @@ export default function BlogCards({ limit = 3 }: { limit?: number }) {
               <div className="aspect-video bg-gray-900 relative overflow-hidden">
                 <Image src={post.image} alt={post.title} fill loading="lazy" className="object-cover" />
               </div>
-              <div className="p-4 md:p-5">
-                <h3 className="text-white font-semibold group-hover:text-[var(--color-accent)] transition-colors">
+              <div className="p-5 md:p-6">
+                <h3 className="text-white text-lg md:text-xl font-semibold leading-snug group-hover:text-[var(--color-accent)] transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-400 text-sm md:text-base mt-3">
                   {post.author} &middot; {post.date}
                 </p>
               </div>
