@@ -21,13 +21,13 @@ export default function WhyPandotic() {
   return (
     <>
       {/* Hero */}
-      <section className="py-20 md:py-32 px-4 md:px-6 text-center">
+      <section className="bg-pando py-24 md:py-40 px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <TextReveal as="h1" className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
             Why teams choose Pandotic
           </TextReveal>
           <ScrollReveal delay={0.3}>
-          <p className="text-gray-400 text-base md:text-lg">
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
             We sit between a traditional agency, a software consultancy, and an internal innovation
             lab &mdash; combining the best of each without the overhead of any.
           </p>
@@ -42,7 +42,7 @@ export default function WhyPandotic() {
             What makes this different
           </TextReveal>
           <ScrollReveal>
-            <p className="text-gray-400 text-center max-w-2xl mx-auto mb-10 md:mb-16">
+            <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-10 md:mb-16">
               Most firms are good at one thing. We connect strategy, systems, product, and execution
               into a single engagement.
             </p>
@@ -82,7 +82,7 @@ export default function WhyPandotic() {
                     {item.eyebrow}
                   </p>
                   <h3 className="text-white text-xl md:text-2xl font-bold mb-4">{item.title}</h3>
-                  <p className="text-gray-400 leading-relaxed">{item.description}</p>
+                  <p className="text-gray-300 text-base md:text-lg leading-relaxed">{item.description}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -91,26 +91,26 @@ export default function WhyPandotic() {
       </section>
 
       {/* How We Think About AI */}
-      <section className="py-12 md:py-20 px-4 md:px-6">
+      <section className="bg-pando bg-pando-soft py-12 md:py-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white text-center mb-4">
             How we think about AI
           </TextReveal>
           <ScrollReveal>
-            <p className="text-gray-400 text-center max-w-2xl mx-auto mb-10 md:mb-16">
+            <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-10 md:mb-16">
               AI works best when it strengthens the whole system, not when it replaces the humans
               inside it.
             </p>
           </ScrollReveal>
 
           <ScrollReveal className="max-w-3xl mx-auto">
-            <div className="p-6 md:p-8 rounded-2xl border border-white/10">
-              <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-4">
+            <div className="p-6 md:p-10 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm">
+              <p className="text-gray-200 text-lg md:text-xl leading-relaxed mb-5">
                 We build AI that helps information move faster, reduces friction, supports
                 decision-making, and makes hard work more manageable. The human expert supervises,
                 validates, and applies judgment. The AI handles the volume.
               </p>
-              <p className="text-gray-400 text-base md:text-lg leading-relaxed">
+              <p className="text-gray-200 text-lg md:text-xl leading-relaxed">
                 Think of a skilled professional who completes 10 complex tasks a day. With the right
                 AI system, the same expert can scale to 50 or 100 high-quality outputs &mdash; because
                 the AI drafts, calculates, and suggests while the human reviews, corrects, and
@@ -128,7 +128,7 @@ export default function WhyPandotic() {
             Our Process
           </TextReveal>
           <ScrollReveal>
-            <p className="text-gray-400 text-center max-w-2xl mx-auto mb-10 md:mb-16">
+            <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-10 md:mb-16">
               We move through a pattern that connects business clarity to working products.
             </p>
           </ScrollReveal>
@@ -162,8 +162,8 @@ export default function WhyPandotic() {
                 <div className="p-5 md:p-6 rounded-xl border border-white/10">
                   <span className="text-[var(--color-accent)] text-sm font-bold">{item.step}</span>
                   <h3 className="text-white text-lg md:text-xl font-semibold mt-3 mb-4">{item.title}</h3>
-                  <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-2">{item.line1}</p>
-                  <p className="text-gray-400 text-sm md:text-base leading-relaxed">{item.line2}</p>
+                  <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-3">{item.line1}</p>
+                  <p className="text-gray-300 text-base md:text-lg leading-relaxed">{item.line2}</p>
                 </div>
               </ScrollReveal>
             ))}

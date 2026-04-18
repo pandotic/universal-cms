@@ -100,7 +100,7 @@ function ScreenshotCard({
         </div>
       </div>
       <div className="px-4 py-3">
-        <p className="text-gray-300 text-sm font-medium">{label}</p>
+        <p className="text-gray-200 text-base font-medium">{label}</p>
       </div>
     </div>
   );

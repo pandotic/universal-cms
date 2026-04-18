@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RobinSEL() {
   return (
-    <article className="py-20 md:py-32 px-4 md:px-6">
+    <article className="bg-pando bg-pando-soft bg-pando-fixed py-20 md:py-32 px-4 md:px-6">
       <div className="max-w-3xl mx-auto">
         <Link
           href="/blog"
@@ -42,7 +42,7 @@ export default function RobinSEL() {
           <Image src="/images/blog/robin.webp" alt="Robin SEL" fill className="object-cover" />
         </div>
 
-        <div className="prose prose-invert max-w-none space-y-6 text-gray-300 text-base md:text-lg leading-relaxed">
+        <div className="prose prose-invert max-w-none space-y-6 text-gray-200 text-lg md:text-xl leading-relaxed">
           <h2 className="text-xl md:text-2xl font-bold text-white">Robin&apos;s Approach</h2>
           <p>
             Robin is an educational company dedicated to enhancing students&apos; mental health and

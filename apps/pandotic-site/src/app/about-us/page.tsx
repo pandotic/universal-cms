@@ -21,22 +21,22 @@ export default function AboutUs() {
   return (
     <>
       {/* Mission */}
-      <section className="py-20 md:py-32 px-4 md:px-6 text-center">
+      <section className="bg-pando py-24 md:py-40 px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <ScrollReveal>
-            <h1 className="text-[var(--color-accent)] text-lg font-semibold mb-4">Meet your Team</h1>
+            <h1 className="text-[var(--color-accent)] text-base md:text-lg font-semibold tracking-wider uppercase mb-4">Meet your Team</h1>
           </ScrollReveal>
-          <TextReveal as="h2" className="text-2xl md:text-5xl font-bold text-white leading-tight">
+          <TextReveal as="h2" className="text-3xl md:text-5xl font-bold text-white leading-tight">
             Four exited founders helping organizations move from ideas to working products, fast.
           </TextReveal>
         </div>
       </section>
 
       {/* Team */}
-      <section className="py-8 md:py-12 px-4 md:px-6">
+      <section className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
-            <p className="text-gray-400 text-center max-w-2xl mx-auto mb-8 md:mb-12">
+            <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-10 md:mb-14">
               We are a distributed team of founders and operators from energy, education, health, and
               digital marketing. We combine strategy, systems thinking, and hands-on execution to help
               organizations build faster.

@@ -33,7 +33,7 @@ export default function Home() {
             From messy ideas to{" "}
             <span className="font-bold">working products, fast</span>
           </h1>
-          <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-200 text-lg md:text-2xl leading-relaxed mb-10 max-w-2xl mx-auto">
             Pandotic helps organizations design, prototype, and launch AI-powered products,
             workflows, and digital experiences. We combine strategy, systems thinking, and hands-on
             execution to move from ambiguity to action faster than anyone else.
@@ -92,11 +92,11 @@ export default function Home() {
             <ScrollReveal key={i} delay={i * 0.15}>
               <div className="text-center p-6 md:p-8">
                 <div className="text-[var(--color-accent)] mb-4 flex justify-center">{service.icon}</div>
-                <p className="text-gray-500 text-xs font-semibold tracking-wider uppercase mb-3">
+                <p className="text-gray-400 text-[11px] md:text-xs font-semibold tracking-[0.2em] uppercase mb-3">
                   {service.eyebrow}
                 </p>
-                <h3 className="text-white text-xl font-semibold mb-3">{service.title}</h3>
-                <p className="text-gray-400 text-base">{service.description}</p>
+                <h3 className="text-white text-xl md:text-2xl font-semibold mb-4">{service.title}</h3>
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed">{service.description}</p>
               </div>
             </ScrollReveal>
           ))}
@@ -104,21 +104,21 @@ export default function Home() {
       </section>
 
       {/* Why Pandotic / Pando Module */}
-      <section className="py-12 md:py-20 px-4 md:px-6 border-y border-white/10">
+      <section className="bg-pando bg-pando-soft py-16 md:py-28 px-4 md:px-6 border-y border-white/10">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
-            <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white mb-6">
+            <TextReveal as="h2" className="text-3xl md:text-4xl font-bold text-white mb-6">
               Why Pandotic
             </TextReveal>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <p className="text-gray-500 text-sm border-l-2 border-[var(--color-accent)] pl-4 mb-8 max-w-xl">
+            <p className="text-gray-300 text-base md:text-lg italic border-l-2 border-[var(--color-accent)] pl-5 mb-10 max-w-xl leading-relaxed">
               Pando is a massive quaking aspen clone in Utah. What looks like a forest of 40,000 trees
               is actually one connected organism sharing a common root system.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-4">
+            <p className="text-gray-200 text-lg md:text-xl leading-relaxed mb-5">
               Pandotic takes inspiration from <strong className="text-white">Pando</strong>. The
               strongest systems are connected, resilient, and built to support many people working
               together. AI should not exist to replace the people doing the work. It should make good
@@ -127,7 +127,7 @@ export default function Home() {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
-            <p className="text-gray-400 text-base md:text-lg leading-relaxed">
+            <p className="text-gray-200 text-lg md:text-xl leading-relaxed">
               That idea drives everything we build. Modern technology with shared roots, practical
               value, and room for people to do better work.
             </p>
@@ -138,7 +138,7 @@ export default function Home() {
       {/* Testimonial */}
       <section className="py-12 md:py-20 px-4 md:px-6">
         <ScrollReveal className="max-w-4xl mx-auto text-center">
-          <blockquote className="text-lg md:text-2xl text-white/90 font-light leading-relaxed italic mb-8">
+          <blockquote className="text-xl md:text-3xl text-white/90 font-light leading-relaxed italic mb-10">
             &ldquo;Pandotic&apos;s team moved us into a new position as a company. By listening to our
             mission and our needs, they opened the door to creative problem-solving that not only
             saves time internally but allows us to center our customers&apos; needs and tailor our
@@ -147,8 +147,8 @@ export default function Home() {
           <div className="flex items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-600 to-gray-700" />
             <div className="text-left">
-              <p className="text-white font-semibold text-sm">Linda Thompson</p>
-              <p className="text-gray-500 text-sm">CEO, Robin SEL</p>
+              <p className="text-white font-semibold text-base">Linda Thompson</p>
+              <p className="text-gray-400 text-sm md:text-base">CEO, Robin SEL</p>
             </div>
           </div>
         </ScrollReveal>
@@ -160,13 +160,13 @@ export default function Home() {
           <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white mb-4">
             Meet your Team
           </TextReveal>
-          <p className="text-gray-400 text-base leading-relaxed mb-8">
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-10">
             Built by four exited founders who&apos;ve scaled companies across energy, education,
             health, and digital marketing.
           </p>
           <Link
             href="/about-us"
-            className="inline-block border border-white/50 text-white px-8 py-3 rounded-full hover:bg-white/10 transition-colors text-sm"
+            className="inline-block border border-white/50 text-white px-8 py-3 rounded-full hover:bg-white/10 transition-colors text-base font-medium"
           >
             Meet the team
           </Link>
@@ -182,7 +182,7 @@ export default function Home() {
           <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white mb-4">
             Practical AI. Working products. Shared upside.
           </TextReveal>
-          <h3 className="text-lg md:text-xl text-gray-400 mb-8">
+          <h3 className="text-lg md:text-2xl text-gray-300 leading-relaxed mb-10">
             We reduce the gap between insight and execution &mdash; so you can move from concept to
             customers faster.
           </h3>

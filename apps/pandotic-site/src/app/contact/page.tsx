@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 export default function Contact() {
   return (
     <>
-      <section className="py-20 md:py-32 px-4 md:px-6">
+      <section className="bg-pando py-24 md:py-36 px-4 md:px-6">
         <div className="max-w-xl mx-auto">
-          <TextReveal as="h1" className="text-3xl md:text-5xl font-bold text-white text-center mb-4">
+          <TextReveal as="h1" className="text-3xl md:text-5xl font-bold text-white text-center mb-6">
             Let&apos;s build something
           </TextReveal>
           <ScrollReveal delay={0.2}>
-          <p className="text-gray-400 text-base md:text-lg text-center mb-8 md:mb-12">
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed text-center mb-10 md:mb-14">
             Tell us what you&apos;re trying to build &mdash; or what problem you&apos;re trying to
             solve. No pitch decks required. Just a conversation about what you want to exist in the
             world.

@@ -20,14 +20,14 @@ export const metadata: Metadata = {
 
 function ProjectCard({ project, description }: { project: Project; description: string }) {
   return (
-    <div className="p-5 md:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-colors flex flex-col h-full">
-      <p className="text-[var(--color-accent)] text-xs font-semibold tracking-wider uppercase mb-3">
+    <div className="p-6 md:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-colors flex flex-col h-full">
+      <p className="text-[var(--color-accent)] text-[11px] md:text-xs font-semibold tracking-[0.15em] uppercase mb-3">
         {project.tagline.length > 60
           ? project.tagline.slice(0, 60).replace(/\s+\S*$/, "") + "..."
           : project.tagline}
       </p>
       <h3 className="text-white text-xl md:text-2xl font-bold mb-4">{project.name}</h3>
-      <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-6 flex-1">
+      <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-6 flex-1">
         {description}
       </p>
 
@@ -36,7 +36,7 @@ function ProjectCard({ project, description }: { project: Project; description: 
           {project.tags.slice(0, 4).map((tag) => (
             <span
               key={tag}
-              className="text-[10px] border border-white/10 text-gray-500 px-2 py-0.5 rounded-full"
+              className="text-[11px] border border-white/10 text-gray-400 px-2.5 py-0.5 rounded-full"
             >
               {tag}
             </span>
@@ -48,7 +48,7 @@ function ProjectCard({ project, description }: { project: Project; description: 
         {project.has_detail_page && (
           <Link
             href={`/projects/${project.slug}`}
-            className="text-[var(--color-accent)] text-sm font-semibold hover:underline inline-block min-h-[44px] leading-[44px]"
+            className="text-[var(--color-accent)] text-base font-semibold hover:underline inline-block min-h-[44px] leading-[44px]"
           >
             View Case Study &rarr;
           </Link>
@@ -58,7 +58,7 @@ function ProjectCard({ project, description }: { project: Project; description: 
             href={project.own_site_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--color-accent)] text-sm font-semibold hover:underline inline-block min-h-[44px] leading-[44px]"
+            className="text-[var(--color-accent)] text-base font-semibold hover:underline inline-block min-h-[44px] leading-[44px]"
           >
             Learn More &rarr;
           </a>
@@ -100,14 +100,14 @@ export default async function Projects() {
 
   return (
     <>
-      <section className="py-20 md:py-32 px-4 md:px-6 text-center">
+      <section className="bg-pando py-24 md:py-36 px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <TextReveal as="h1" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
             Pandotic Project Showcase
           </TextReveal>
           <ScrollReveal delay={0.3}>
-            <p className="text-gray-400 text-base md:text-lg">
-              Explore our portfolio of AI-driven ventures transforming industries—each designed to
+            <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
+              Explore our portfolio of AI-driven ventures transforming industries&mdash;each designed to
               unlock smarter workflows, deeper insights, and strategic growth opportunities.
             </p>
           </ScrollReveal>
@@ -125,7 +125,7 @@ export default async function Projects() {
                 {catMeta?.title || cat.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </TextReveal>
               <ScrollReveal>
-                <p className="text-gray-400 mb-8 md:mb-12 max-w-3xl">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 md:mb-12 max-w-3xl">
                   {catMeta?.description || ""}
                 </p>
               </ScrollReveal>
@@ -146,7 +146,7 @@ export default async function Projects() {
           <TextReveal as="h2" className="text-2xl md:text-4xl font-bold text-white mb-4">
             See something that resonates?
           </TextReveal>
-          <h3 className="text-lg md:text-xl text-gray-400 mb-8">
+          <h3 className="text-lg md:text-2xl text-gray-300 leading-relaxed mb-10">
             Tell us what you&apos;re building. We&apos;ll figure out the fastest path to a working
             product.
           </h3>

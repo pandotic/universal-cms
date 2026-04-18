@@ -19,7 +19,7 @@ export default function ProjectFeatureGrid({ features, projectName }: ProjectFea
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
             What Makes {projectName} Different
           </h2>
-          <p className="text-gray-400 max-w-3xl mb-8 md:mb-12">
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-3xl mb-8 md:mb-12">
             Key capabilities that set this platform apart.
           </p>
         </ScrollReveal>
@@ -27,19 +27,19 @@ export default function ProjectFeatureGrid({ features, projectName }: ProjectFea
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
           {features.map((feature, i) => (
             <ScrollReveal key={feature.title} delay={i * 0.08}>
-              <div className="p-5 md:p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-colors h-full flex flex-col">
-                <p className="text-[var(--color-accent)] text-xs font-semibold tracking-wider uppercase mb-3">
+              <div className="p-6 md:p-7 rounded-2xl border border-white/10 hover:border-white/20 transition-colors h-full flex flex-col">
+                <p className="text-[var(--color-accent)] text-[11px] md:text-xs font-semibold tracking-[0.15em] uppercase mb-3">
                   Feature {i + 1}
                 </p>
-                <h3 className="text-white text-lg font-semibold mb-3">
+                <h3 className="text-white text-lg md:text-xl font-semibold mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed mb-4 flex-1">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-4 flex-1">
                   {feature.description}
                 </p>
                 {feature.userBenefit && (
-                  <p className="text-gray-500 text-xs leading-relaxed border-t border-white/5 pt-3">
-                    <span className="text-gray-300 font-medium">Why it matters: </span>
+                  <p className="text-gray-400 text-sm md:text-base leading-relaxed border-t border-white/5 pt-4">
+                    <span className="text-gray-200 font-medium">Why it matters: </span>
                     {feature.userBenefit}
                   </p>
                 )}

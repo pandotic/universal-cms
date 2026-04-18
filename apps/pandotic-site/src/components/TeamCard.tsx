@@ -41,7 +41,7 @@ export default function TeamCard({ member }: { member: TeamMember }) {
         </div>
       </div>
       {member.bio.map((paragraph, i) => (
-        <p key={i} className="text-gray-400 text-sm md:text-base leading-relaxed mb-3 md:mb-4 last:mb-0">
+        <p key={i} className="text-gray-300 text-base md:text-lg leading-relaxed mb-4 last:mb-0">
           {paragraph}
         </p>
       ))}
