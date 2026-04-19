@@ -42,8 +42,6 @@ interface NavGroup {
   links: NavLink[];
 }
 
-const TEAM_HUB_URL = process.env.NEXT_PUBLIC_TEAM_HUB_URL;
-
 const GROUPS: NavGroup[] = [
   {
     label: "Workspace",
@@ -53,14 +51,12 @@ const GROUPS: NavGroup[] = [
       { href: "/properties", label: "Properties", icon: Globe },
     ],
   },
-  ...(TEAM_HUB_URL
-    ? [{
-        label: "Team",
-        links: [
-          { href: TEAM_HUB_URL, label: "Team Hub", icon: CalendarClock, external: true },
-        ],
-      } satisfies NavGroup]
-    : []),
+  {
+    label: "Team",
+    links: [
+      { href: "/team-hub", label: "Team Hub", icon: CalendarClock },
+    ],
+  },
   {
     label: "Build",
     links: [

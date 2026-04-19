@@ -71,7 +71,7 @@ When providing terminal commands for the user to run locally, always use `/Users
 Monorepo (`pnpm workspaces`) with three packages:
 
 - **`packages/cms-core`** (`@pandotic/universal-cms`) — Publishable npm package. Universal CMS for Next.js + Supabase sites. Contains types, data functions, UI components, middleware, AI helpers. All data functions use client-injection pattern: `fn(supabase: SupabaseClient, ...args)`.
-- **`packages/fleet-dashboard`** (`@pandotic/fleet-dashboard`) — **Pandotic Hub** — cross-property operations dashboard. Next.js 16 App Router, deployed on Netlify. Dark zinc theme, top-bar nav layout.
+- **`packages/fleet-dashboard`** (`@pandotic/fleet-dashboard`) — **Pandotic Hub** — cross-property operations dashboard. Next.js 16 App Router, deployed on Netlify. Dark zinc theme, top-bar nav layout. Also hosts **Team Hub** at `/team-hub/*` (weekly ops meetings, issues, to-dos, Granola transcripts) — see `src/app/team-hub/`, `src/components/team-hub/`, `src/hooks/team-hub/`.
 - **`template/`** — Starter template for new sites consuming `@pandotic/universal-cms`.
 
 ## Tech Stack
