@@ -208,5 +208,16 @@
     "version": "0.1.0",
     "author": "pandotic",
     "path": "skills/marketing-brand-profile-builder"
+  },
+  {
+    "id": "marketing-director",
+    "name": "Marketing — Director",
+    "icon": "Compass",
+    "category": "Marketing Ops",
+    "description": "Read a property's marketing state (playbook, recent pipeline activity, items awaiting review, setup gaps, agent errors) and synthesize a weekly plan for the human. Read-only — no DB writes, no fanout to other skills.",
+    "triggers": ["marketing plan", "weekly plan", "marketing director", "what's next for", "/marketing-plan"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-director"
   }
 ]
