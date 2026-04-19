@@ -345,6 +345,16 @@
       "import": "./dist/data/hub-skill-contract.js",
       "types": "./dist/data/hub-skill-contract.d.ts",
       "development": "./src/data/hub-skill-contract.ts"
+    },
+    "./error-logging": {
+      "import": "./dist/error-logging/index.js",
+      "types": "./dist/error-logging/index.d.ts",
+      "development": "./src/error-logging/index.ts"
+    },
+    "./error-logging/server": {
+      "import": "./dist/error-logging/server.js",
+      "types": "./dist/error-logging/server.d.ts",
+      "development": "./src/error-logging/server.ts"
     }
   },
   "files": [

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
-  BarChart3, Bot, Briefcase, ClipboardList,
+  AlertTriangle, BarChart3, Bot, Briefcase, ClipboardList,
   FileText, Flag, Globe, KeyRound, LayoutDashboard, ListChecks,
   Rocket, Search, Share2, ShoppingBag, Users, Wrench, Zap,
 } from "lucide-react";
@@ -34,6 +34,7 @@ const ROUTES = [
   { href: "/groups", label: "Groups", icon: Users, group: "Pages" },
   { href: "/users", label: "Users", icon: Users, group: "Pages" },
   { href: "/audit-log", label: "Audit Log", icon: ClipboardList, group: "Pages" },
+  { href: "/errors", label: "Errors", icon: AlertTriangle, group: "Pages" },
   { href: "/feature-flags", label: "Feature Flags", icon: Flag, group: "Pages" },
   { href: "/analytics", label: "Analytics", icon: BarChart3, group: "Pages" },
   { href: "/fleet/onboard", label: "Add property", icon: Globe, group: "Actions" },
