@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NavShell } from "./nav/nav-shell";
 import { PageHelpPanel } from "@/components/page-help/PageHelpPanel";
+import {
+  ErrorBoundary,
+  ErrorCaptureProvider,
+} from "@pandotic/universal-cms/error-logging";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +31,12 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <NavShell>{children}</NavShell>
-        <PageHelpPanel />
+        <ErrorCaptureProvider endpoint="/api/errors">
+          <ErrorBoundary name="RootLayout" endpoint="/api/errors">
+            <NavShell>{children}</NavShell>
+          </ErrorBoundary>
+          <PageHelpPanel />
+        </ErrorCaptureProvider>
       </body>
     </html>
   );

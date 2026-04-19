@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
+  AlertTriangle,
   BarChart3,
   Bot,
   Briefcase,
@@ -89,6 +90,7 @@ const GROUPS: NavGroup[] = [
       { href: "/groups", label: "Groups", icon: Users },
       { href: "/users", label: "Users", icon: Users },
       { href: "/audit-log", label: "Audit Log", icon: ClipboardList },
+      { href: "/errors", label: "Errors", icon: AlertTriangle },
       { href: "/feature-flags", label: "Feature Flags", icon: Flag },
       { href: "/analytics", label: "Analytics", icon: BarChart3 },
     ],
