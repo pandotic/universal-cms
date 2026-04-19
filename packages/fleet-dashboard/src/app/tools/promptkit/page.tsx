@@ -58,10 +58,11 @@ export default function PromptKitPage() {
     [provider, modelId]
   );
 
-  // Reset model when provider changes
+  // Reset model when provider changes, but only if current model isn't valid for new provider
   useEffect(() => {
-    setModelId(LLM_META[provider].defaultModel);
-  }, [provider]);
+    const valid = MODELS[provider].some((m) => m.id === modelId);
+    if (!valid) setModelId(LLM_META[provider].defaultModel);
+  }, [provider, modelId]);
 
   useEffect(() => {
     fetch("/api/promptkit/history?limit=20")
