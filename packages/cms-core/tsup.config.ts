@@ -93,6 +93,9 @@ export default defineConfig({
     "class-variance-authority",
     "lucide-react",
   ],
+  // Tsup 8.x strips "use client" from bundled outputs. Re-add it for
+  // client-only entries so Next.js can import them from Server Components.
+  onSuccess: "node scripts/post-build.mjs",
   // "use client" directives are in source files where needed (components).
   // Don't add a global banner — data/config modules run server-side.
 });
