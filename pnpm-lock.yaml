@@ -275,15 +275,24 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.102.1
         version: 2.102.1
+      '@tanstack/react-query':
+        specifier: ^5.51.0
+        version: 5.96.2(react@19.2.4)
       '@universal-cms/admin-core':
         specifier: workspace:*
         version: link:../admin-core
       '@universal-cms/admin-ui':
         specifier: workspace:*
         version: link:../admin-ui
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -299,6 +308,15 @@ importers:
       react-dom:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
+      sonner:
+        specifier: ^1.5.0
+        version: 1.7.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      tailwind-merge:
+        specifier: ^2.4.0
+        version: 2.6.1
+      zustand:
+        specifier: ^5.0.0
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.4)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0

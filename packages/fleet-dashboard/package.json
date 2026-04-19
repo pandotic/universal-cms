@@ -14,14 +14,20 @@
     "@pandotic/universal-cms": "workspace:*",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.102.1",
+    "@tanstack/react-query": "^5.51.0",
     "@universal-cms/admin-core": "workspace:*",
     "@universal-cms/admin-ui": "workspace:*",
+    "clsx": "^2.1.0",
     "cmdk": "^1.1.1",
+    "date-fns": "^3.6.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.408.0",
     "next": "^16.1.6",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.4.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
