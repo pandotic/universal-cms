@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useUIStore } from '@/stores/ui'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from '@/hooks/useAuth'
 import { useDumpClassify } from '@/hooks/useDumpClassify'
 import { useCreateIssue } from '@/hooks/useIssues'
 import { useCreateTodo } from '@/hooks/useTodos'
@@ -15,7 +15,8 @@ type DumpType = 'issue' | 'todo' | null
 
 export function DumpModal() {
   const { isDumpModalOpen, dumpModalPresetType, closeDumpModal } = useUIStore()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
+  const currentUserName = teamUser?.name ?? TEAM_MEMBERS[0].name
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [text, setText] = useState('')
@@ -27,7 +28,7 @@ export function DumpModal() {
   const [priority, setPriority] = useState<'urgent' | 'discuss' | 'fyi'>('discuss')
 
   // To-do fields
-  const [owner, setOwner] = useState(currentUser.name)
+  const [owner, setOwner] = useState(currentUserName)
   const [dueDate, setDueDate] = useState(formatDate(getNextMeetingDate()))
 
   const classify = useDumpClassify()
@@ -41,7 +42,7 @@ export function DumpModal() {
       setText('')
       setClassification(null)
       setAiAccepted(false)
-      setOwner(currentUser.name)
+      setOwner(currentUserName)
       setDueDate(formatDate(getNextMeetingDate()))
       setPriority('discuss')
 
@@ -55,7 +56,7 @@ export function DumpModal() {
 
       setTimeout(() => textareaRef.current?.focus(), 50)
     }
-  }, [isDumpModalOpen, dumpModalPresetType, currentUser.name])
+  }, [isDumpModalOpen, dumpModalPresetType, currentUserName])
 
   const effectiveType = aiAccepted && classification ? classification.type : selectedType
 
@@ -95,6 +96,8 @@ export function DumpModal() {
       createTodo.mutate(
         {
           description: text.trim(),
+          ownerName: owner,
+          due_date: dueDate || undefined,
           source: 'dump',
           raw_dump_text: text,
           ai_classified: !!classification,
@@ -290,7 +293,7 @@ export function DumpModal() {
           {/* Submitted by */}
           <div>
             <p className="text-[12px] font-medium" style={{ color: 'var(--text-tertiary)' }}>
-              Submitted by: <span style={{ color: 'var(--text-secondary)' }}>{currentUser.name}</span>
+              Submitted by: <span style={{ color: 'var(--text-secondary)' }}>{currentUserName}</span>
             </p>
           </div>
         </div>

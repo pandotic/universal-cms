@@ -5,6 +5,7 @@ export interface User {
   short_name: string
   color: string
   is_active: boolean
+  auth_user_id: string | null
   created_at: string
 }
 
@@ -43,6 +44,7 @@ export interface Todo {
   related_issue_id: string | null
   created_in_meeting_id: string | null
   completed_at: string | null
+  completed_by: string | null
   carry_count: number
   created_at: string
   updated_at: string

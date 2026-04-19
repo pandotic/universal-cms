@@ -1,0 +1,14 @@
+[build]
+  base = "packages/team-hub"
+  command = "cd ../.. && pnpm --filter @pandotic/team-hub build"
+  publish = "packages/team-hub/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NODE_OPTIONS = "--max-old-space-size=4096"
+
+# SPA fallback: every non-asset route hits index.html so React Router takes over.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

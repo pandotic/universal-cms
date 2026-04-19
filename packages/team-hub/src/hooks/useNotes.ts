@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from './useAuth'
 import type { NoteWithUser } from '@/lib/types'
 
 export function useNotes(meetingId?: string) {
@@ -26,24 +26,20 @@ export function useNotes(meetingId?: string) {
 
 export function useCreateNote() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: {
       text: string
       meetingId?: string
     }) => {
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
+      if (!teamUser) throw new Error('Not signed in')
 
       const { data, error } = await supabase
         .from('notes')
         .insert({
           text: input.text,
-          created_by: user?.id ?? null,
+          created_by: teamUser.id,
           meeting_id: input.meetingId ?? null,
         })
         .select()

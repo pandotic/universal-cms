@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from './useAuth'
 import type { OpenIssue, Issue } from '@/lib/types'
 
 export function useOpenIssues() {
@@ -54,7 +54,7 @@ export function useAllIssues(filters?: {
 
 export function useCreateIssue() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: {
@@ -65,18 +65,13 @@ export function useCreateIssue() {
       raw_dump_text?: string
       ai_classified?: boolean
     }) => {
-      // Look up user ID by name
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
+      if (!teamUser) throw new Error('Not signed in')
 
       const { data, error } = await supabase
         .from('issues')
         .insert({
           ...input,
-          submitter_id: user?.id ?? null,
+          submitter_id: teamUser.id,
         })
         .select()
         .single()

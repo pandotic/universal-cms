@@ -1,14 +1,8 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { ChevronUp, ChevronDown } from 'lucide-react'
-import { useIssueOrder, useReorderIssue, useInitializeIssueOrder } from '@/hooks/useIssueOrder'
+import { useIssueOrder, useReorderIssue } from '@/hooks/useIssueOrder'
 import { useMeetingPrepVotes } from '@/hooks/useMeetingPrep'
 import type { OpenIssue } from '@/lib/types'
-
-interface IssueReorderProps {
-  meetingId: string
-  issues: OpenIssue[]
-  onReorderedIssues: (issues: OpenIssue[]) => void
-}
 
 export function useOrderedIssues(meetingId: string | undefined, issues: OpenIssue[]): OpenIssue[] {
   const { data: order } = useIssueOrder(meetingId)
