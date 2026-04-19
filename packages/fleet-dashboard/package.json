@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "seed-brands": "tsx scripts/seed-brands.ts"
+    "seed-brands": "tsx scripts/seed-brands.ts",
+    "brand-profile-helper": "tsx scripts/skill-helpers/brand-profile-helper.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

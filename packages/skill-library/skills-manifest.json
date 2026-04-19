@@ -197,5 +197,16 @@
     "version": "1.0.0",
     "author": "pandotic",
     "path": "skills/pandotic-content"
+  },
+  {
+    "id": "marketing-brand-profile-builder",
+    "name": "Marketing — Brand Profile Builder",
+    "icon": "Sparkles",
+    "category": "Marketing Ops",
+    "description": "Generate derivative brand assets (descriptions at 5 lengths, per-platform social bios, press boilerplate, NAP, JSON-LD schema, hashtags, keywords) for a property and upsert to hub_brand_assets. Idempotent — re-running overwrites.",
+    "triggers": ["build brand profile", "generate brand assets", "brand descriptions", "brand bios", "press boilerplate", "populate hub_brand_assets"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-brand-profile-builder"
   }
 ]
