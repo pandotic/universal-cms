@@ -15,7 +15,7 @@ export function ResolveDialog({ issueId, meetingId, onClose }: ResolveDialogProp
   const [resolutionNote, setResolutionNote] = useState('')
   const [createFollowUp, setCreateFollowUp] = useState(false)
   const [todoDescription, setTodoDescription] = useState('')
-  const [todoOwner, setTodoOwner] = useState(TEAM_MEMBERS[0].name)
+  const [todoOwner, setTodoOwner] = useState<string>(TEAM_MEMBERS[0].name)
   const [todoDueDate, setTodoDueDate] = useState(format(getNextMeetingDate(), 'yyyy-MM-dd'))
 
   const resolveIssue = useResolveIssue()

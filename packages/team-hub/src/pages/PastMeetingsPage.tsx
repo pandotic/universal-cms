@@ -108,6 +108,28 @@ export default function PastMeetingsPage() {
                     {chair.name}
                   </span>
                 )}
+                {meeting.attendees?.length ? (
+                  <span
+                    className="flex items-center gap-1"
+                    title={(meeting.attendees ?? [])
+                      .map((id) => users?.find((u: User) => u.id === id)?.name)
+                      .filter(Boolean)
+                      .join(', ')}
+                  >
+                    {(meeting.attendees ?? []).map((id) => {
+                      const attendee = users?.find((u: User) => u.id === id)
+                      if (!attendee) return null
+                      return (
+                        <UserAvatar
+                          key={id}
+                          name={attendee.short_name}
+                          color={attendee.color}
+                          size={16}
+                        />
+                      )
+                    })}
+                  </span>
+                ) : null}
                 {meeting.rating && (
                   <span
                     className="text-[12px] font-medium"

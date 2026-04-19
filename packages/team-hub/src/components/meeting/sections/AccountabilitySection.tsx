@@ -1,4 +1,4 @@
-import { useWeeklyUserStats, usePendingCommitments, useUpdateCommitment } from '@/hooks/useAccountability'
+import { useWeeklyUserStats, usePendingCommitments } from '@/hooks/useAccountability'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { CommitmentReview } from '../CommitmentReview'
 import type { WeeklyUserStats } from '@/lib/types'

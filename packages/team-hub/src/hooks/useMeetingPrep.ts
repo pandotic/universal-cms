@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from './useAuth'
 import type { MeetingPrep, MeetingPrepWithUser } from '@/lib/types'
 
 export function useMeetingPrepVotes(meetingId: string | undefined) {
@@ -20,24 +20,18 @@ export function useMeetingPrepVotes(meetingId: string | undefined) {
 }
 
 export function useMyPrepVotes(meetingId: string | undefined) {
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useQuery({
-    queryKey: ['meeting-prep', meetingId, 'my', currentUser.name],
-    enabled: !!meetingId,
+    queryKey: ['meeting-prep', meetingId, 'my', teamUser?.id ?? null],
+    enabled: !!meetingId && !!teamUser,
     queryFn: async () => {
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
-      if (!user) return []
-
+      if (!teamUser) return []
       const { data, error } = await supabase
         .from('meeting_prep')
         .select('*')
         .eq('meeting_id', meetingId!)
-        .eq('user_id', user.id)
+        .eq('user_id', teamUser.id)
       if (error) throw error
       return data as MeetingPrep[]
     },
@@ -46,7 +40,7 @@ export function useMyPrepVotes(meetingId: string | undefined) {
 
 export function useVoteOnIssue() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: {
@@ -55,18 +49,13 @@ export function useVoteOnIssue() {
       priorityVote: number
       note?: string
     }) => {
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
-      if (!user) throw new Error('User not found')
+      if (!teamUser) throw new Error('Not signed in')
 
       const { error } = await supabase
         .from('meeting_prep')
         .upsert({
           meeting_id: input.meetingId,
-          user_id: user.id,
+          user_id: teamUser.id,
           issue_id: input.issueId,
           priority_vote: input.priorityVote,
           note: input.note ?? null,
@@ -81,23 +70,18 @@ export function useVoteOnIssue() {
 
 export function useMarkPrepReady() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: { meetingId: string; meeting: { prep_ready: string[] } }) => {
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
-      if (!user) throw new Error('User not found')
+      if (!teamUser) throw new Error('Not signed in')
 
       const current = input.meeting.prep_ready ?? []
-      if (current.includes(user.id)) return
+      if (current.includes(teamUser.id)) return
 
       const { error } = await supabase
         .from('meetings')
-        .update({ prep_ready: [...current, user.id] })
+        .update({ prep_ready: [...current, teamUser.id] })
         .eq('id', input.meetingId)
       if (error) throw error
     },

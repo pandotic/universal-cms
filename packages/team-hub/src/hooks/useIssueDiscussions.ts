@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from './useAuth'
 import type { IssueDiscussionWithUser } from '@/lib/types'
 
 export function useIssueDiscussions(issueId: string) {
@@ -21,7 +21,7 @@ export function useIssueDiscussions(issueId: string) {
 
 export function useAddIssueDiscussion() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: {
@@ -30,11 +30,7 @@ export function useAddIssueDiscussion() {
       meetingId?: string
       source?: 'manual' | 'transcript'
     }) => {
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', currentUser.name)
-        .single()
+      if (!teamUser) throw new Error('Not signed in')
 
       const { data, error } = await supabase
         .from('issue_discussions')
@@ -42,7 +38,7 @@ export function useAddIssueDiscussion() {
           issue_id: input.issueId,
           note: input.note,
           meeting_id: input.meetingId ?? null,
-          created_by: user?.id ?? null,
+          created_by: teamUser.id,
           source: input.source ?? 'manual',
         })
         .select()

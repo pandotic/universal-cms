@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useCurrentUserStore } from '@/stores/currentUser'
+import { useAuth } from './useAuth'
 import type { ActiveTodo, Todo } from '@/lib/types'
 
 export function useActiveTodos() {
@@ -50,7 +50,7 @@ export function useAllTodos(filters?: {
 
 export function useCreateTodo() {
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUserStore((s) => s.currentUser)
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async (input: {
@@ -63,18 +63,23 @@ export function useCreateTodo() {
       related_issue_id?: string
       created_in_meeting_id?: string
     }) => {
-      const ownerName = input.ownerName ?? currentUser.name
-      const { data: owner } = await supabase
-        .from('users')
-        .select('id')
-        .eq('name', ownerName)
-        .single()
+      if (!teamUser) throw new Error('Not signed in')
+
+      let ownerId: string = teamUser.id
+      if (input.ownerName && input.ownerName !== teamUser.name) {
+        const { data: owner } = await supabase
+          .from('users')
+          .select('id')
+          .eq('name', input.ownerName)
+          .single()
+        if (owner?.id) ownerId = owner.id
+      }
 
       const { data, error } = await supabase
         .from('todos')
         .insert({
           description: input.description,
-          owner_id: owner?.id ?? null,
+          owner_id: ownerId,
           due_date: input.due_date ?? null,
           source: input.source,
           raw_dump_text: input.raw_dump_text ?? null,
@@ -97,6 +102,7 @@ export function useCreateTodo() {
 
 export function useToggleTodoDone() {
   const queryClient = useQueryClient()
+  const { teamUser } = useAuth()
 
   return useMutation({
     mutationFn: async ({ id, done }: { id: string; done: boolean }) => {
@@ -105,6 +111,7 @@ export function useToggleTodoDone() {
         .update({
           status: done ? 'done' : 'open',
           completed_at: done ? new Date().toISOString() : null,
+          completed_by: done ? (teamUser?.id ?? null) : null,
         })
         .eq('id', id)
       if (error) throw error
