@@ -70,6 +70,8 @@ export default defineConfig({
     "data/hub-marketing-ops": "src/data/hub-marketing-ops.ts",
     "data/hub-marketing-playbooks": "src/data/hub-marketing-playbooks.ts",
     "data/hub-skill-contract": "src/data/hub-skill-contract.ts",
+    "error-logging/index": "src/error-logging/index.ts",
+    "error-logging/server": "src/error-logging/server.ts",
   },
   format: ["esm"],
   dts: true,
@@ -91,6 +93,9 @@ export default defineConfig({
     "class-variance-authority",
     "lucide-react",
   ],
+  // Tsup 8.x strips "use client" from bundled outputs. Re-add it for
+  // client-only entries so Next.js can import them from Server Components.
+  onSuccess: "node scripts/post-build.mjs",
   // "use client" directives are in source files where needed (components).
   // Don't add a global banner — data/config modules run server-side.
 });
