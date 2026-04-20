@@ -65,8 +65,9 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Case 2: no existing row, but the domain is @pandotic.com -> create one.
-  IF v_email LIKE '%@pandotic.com' THEN
+  -- Case 2: no existing row, but the domain is @pandotic.ai (or legacy
+  -- @pandotic.com) -> create one.
+  IF v_email LIKE '%@pandotic.ai' OR v_email LIKE '%@pandotic.com' THEN
     v_local := split_part(v_email, '@', 1);
     INSERT INTO public.users (name, email, short_name, color, auth_user_id)
     VALUES (
@@ -79,9 +80,9 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Case 3: non-pandotic, non-seeded user. Allow the Hub sign-up to
-  -- proceed without giving them team-hub membership. The /team-hub
-  -- layout handles the access-denied UI client-side.
+  -- Case 3: external Hub user. Allow the Hub sign-up to proceed without
+  -- giving them team-hub membership. The /team-hub layout handles the
+  -- access-denied UI client-side.
   RETURN NEW;
 END;
 $$;

@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users (name, email, short_name, color) VALUES
-  ('Allen', 'allen@pandotic.com', 'A', '#7F77DD'),
-  ('Matt', 'matt@pandotic.com', 'M', '#1D9E75'),
-  ('Dan', 'dan@pandotic.com', 'D', '#D4537E'),
-  ('Scott', 'scott@pandotic.com', 'S', '#BA7517')
+  ('Allen', 'allen@pandotic.ai',     'A', '#7F77DD'),
+  ('Matt',  'matt@pandotic.ai',      'M', '#1D9E75'),
+  ('Dan',   'dangolden@pandotic.ai', 'D', '#D4537E'),
+  ('Scott', 'scott@pandotic.ai',     'S', '#BA7517')
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================
