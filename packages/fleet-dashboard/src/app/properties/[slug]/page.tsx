@@ -94,6 +94,12 @@ export default function PropertyDetailPage() {
           >
             Open Site
           </a>
+          <Link
+            href={`/properties/${property.slug}/modules`}
+            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800"
+          >
+            Modules
+          </Link>
           <a
             href={`${property.url.replace(/\/+$/, "")}/admin`}
             target="_blank"

@@ -86,6 +86,10 @@ export interface HubProperty {
   analytics_site_id: string | null;
   content_pending_review_count: number;
   agent_errors_24h_count: number;
+  // Package version tracking (Hub-authoritative module sync)
+  package_version: string | null;
+  target_package_version: string | null;
+  last_module_sync_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -107,6 +111,9 @@ export type HubPropertyInsert = Omit<
   | "analytics_site_id"
   | "content_pending_review_count"
   | "agent_errors_24h_count"
+  | "package_version"
+  | "target_package_version"
+  | "last_module_sync_at"
 > & {
   health_status?: HealthStatus;
   ssl_valid?: boolean;
@@ -120,6 +127,9 @@ export type HubPropertyInsert = Omit<
   analytics_site_id?: string | null;
   content_pending_review_count?: number;
   agent_errors_24h_count?: number;
+  package_version?: string | null;
+  target_package_version?: string | null;
+  last_module_sync_at?: string | null;
 };
 
 export type HubPropertyUpdate = Partial<

@@ -78,6 +78,14 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "CMS Admin",
+    links: [
+      { href: "/cms/marketing-cms", label: "Marketing CMS", icon: Megaphone },
+      { href: "/cms/app-admin", label: "App Admin", icon: LayoutDashboard },
+      { href: "/cms/group-admin", label: "Group Admin", icon: ShieldCheck },
+    ],
+  },
+  {
     label: "APIs",
     links: [
       { href: "/apis", label: "Services & Usage", icon: BarChart3 },
