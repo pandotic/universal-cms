@@ -8,8 +8,10 @@ import {
   BarChart3,
   Bot,
   Briefcase,
+  CalendarClock,
   ChevronLeft,
   ClipboardList,
+  ExternalLink,
   FileText,
   Flag,
   Globe,
@@ -32,6 +34,7 @@ interface NavLink {
   href: string;
   label: string;
   icon: LucideIcon;
+  external?: boolean;
 }
 
 interface NavGroup {
@@ -46,6 +49,12 @@ const GROUPS: NavGroup[] = [
       { href: "/", label: "Overview", icon: LayoutDashboard },
       { href: "/fleet", label: "Fleet Matrix", icon: Globe },
       { href: "/properties", label: "Properties", icon: Globe },
+    ],
+  },
+  {
+    label: "Team",
+    links: [
+      { href: "/team-hub", label: "Team Hub", icon: CalendarClock },
     ],
   },
   {
@@ -174,25 +183,45 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
               )}
               <ul className="space-y-0.5">
                 {group.links.map((link) => {
-                  const active = isActive(pathname, link.href);
+                  const active = !link.external && isActive(pathname, link.href);
                   const Icon = link.icon;
+                  const className = `flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
+                    collapsed ? "justify-center px-2" : ""
+                  } ${
+                    active
+                      ? "bg-zinc-800 text-white"
+                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                  }`;
                   return (
                     <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onClick={onClose}
-                        title={collapsed ? link.label : undefined}
-                        className={`flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
-                          collapsed ? "justify-center px-2" : ""
-                        } ${
-                          active
-                            ? "bg-zinc-800 text-white"
-                            : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="truncate">{link.label}</span>}
-                      </Link>
+                      {link.external ? (
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={onClose}
+                          title={collapsed ? link.label : undefined}
+                          className={className}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && (
+                            <>
+                              <span className="truncate">{link.label}</span>
+                              <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-zinc-500" />
+                            </>
+                          )}
+                        </a>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          onClick={onClose}
+                          title={collapsed ? link.label : undefined}
+                          className={className}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span className="truncate">{link.label}</span>}
+                        </Link>
+                      )}
                     </li>
                   );
                 })}
