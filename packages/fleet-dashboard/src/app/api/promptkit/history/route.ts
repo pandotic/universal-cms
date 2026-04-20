@@ -22,12 +22,14 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const provider = url.searchParams.get("provider") as LLMProvider | null;
     const favorite = url.searchParams.get("favorite") === "true";
+    const propertyId = url.searchParams.get("property_id");
     const limit = Number(url.searchParams.get("limit") ?? 50);
     const offset = Number(url.searchParams.get("offset") ?? 0);
 
     const result = await listPromptkitHistory(supabase, user.id, {
       provider: provider ?? undefined,
       favorite: favorite || undefined,
+      propertyId: propertyId ?? undefined,
       limit,
       offset,
     });
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
       tone: body.tone ?? "direct",
       output_mode: body.output_mode ?? "single",
       label: body.label,
+      property_id: body.property_id ?? null,
     });
 
     return NextResponse.json({ data: entry });

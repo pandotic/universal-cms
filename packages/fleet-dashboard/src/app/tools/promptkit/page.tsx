@@ -29,7 +29,16 @@ interface HistoryRow {
   output_mode: OutputMode;
   is_favorite: boolean;
   label: string | null;
+  property_id: string | null;
   created_at: string;
+}
+
+interface Property {
+  id: string;
+  name: string;
+  slug: string;
+  url: string;
+  preset?: string | null;
 }
 
 const PROVIDERS: LLMProvider[] = ["claude", "gemini", "openai"];
@@ -51,6 +60,13 @@ export default function PromptKitPage() {
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [propertyId, setPropertyId] = useState<string>("");
+
+  const selectedProperty = useMemo(
+    () => properties.find((p) => p.id === propertyId) ?? null,
+    [properties, propertyId]
+  );
 
   const models = useMemo(() => MODELS[provider], [provider]);
   const modelMeta = useMemo(
@@ -69,10 +85,24 @@ export default function PromptKitPage() {
       .then((r) => (r.ok ? r.json() : { entries: [] }))
       .then((d) => setHistory(d.entries ?? []))
       .catch(() => setHistory([]));
+
+    fetch("/api/properties")
+      .then((r) => (r.ok ? r.json() : { data: [] }))
+      .then((d) => setProperties(d.data ?? []))
+      .catch(() => setProperties([]));
   }, []);
 
   async function handleOptimize() {
     if (!rawPrompt.trim()) return;
+
+    const repo = selectedProperty
+      ? {
+          url: selectedProperty.url,
+          description: selectedProperty.name,
+          stack: selectedProperty.preset ?? undefined,
+          isClaudeCode: false,
+        }
+      : undefined;
 
     const opt = optimizePrompt({
       mode: "quick",
@@ -80,6 +110,7 @@ export default function PromptKitPage() {
       rawPrompt,
       tone,
       outputMode,
+      repo,
     });
     setResult(opt);
     setCopied(false);
@@ -103,6 +134,7 @@ export default function PromptKitPage() {
           notes: opt.notes,
           tone,
           output_mode: outputMode,
+          property_id: propertyId || null,
         }),
       });
       if (res.ok) {
@@ -154,6 +186,7 @@ export default function PromptKitPage() {
     setTone(row.tone);
     setOutputMode(row.output_mode);
     setRawPrompt(row.raw_prompt);
+    setPropertyId(row.property_id ?? "");
     setResult({
       prompt: row.optimized_prompt,
       mode: row.output_mode,
@@ -331,6 +364,41 @@ export default function PromptKitPage() {
             </div>
           </div>
 
+          {/* Property / project context */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Project context <span className="text-zinc-600">(optional)</span>
+              </label>
+              {selectedProperty && (
+                <button
+                  onClick={() => setPropertyId("")}
+                  className="text-[10px] text-zinc-500 hover:text-zinc-300"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <select
+              value={propertyId}
+              onChange={(e) => setPropertyId(e.target.value)}
+              className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+            >
+              <option value="">— No project context —</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.slug})
+                </option>
+              ))}
+            </select>
+            {selectedProperty && (
+              <p className="mt-1.5 text-[11px] text-zinc-500">
+                Injects {selectedProperty.url}
+                {selectedProperty.preset ? ` · ${selectedProperty.preset}` : ""} into the optimized prompt.
+              </p>
+            )}
+          </div>
+
           {/* Raw prompt */}
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -471,6 +539,14 @@ export default function PromptKitPage() {
                             <span>{h.model_label ?? h.model_id}</span>
                             <span>·</span>
                             <span>{h.tone}</span>
+                            {h.property_id && (
+                              <>
+                                <span>·</span>
+                                <span className="text-emerald-500/70">
+                                  {properties.find((p) => p.id === h.property_id)?.slug ?? "project"}
+                                </span>
+                              </>
+                            )}
                           </div>
                           <p className="mt-1 line-clamp-2 text-sm text-zinc-200">
                             {h.raw_prompt}

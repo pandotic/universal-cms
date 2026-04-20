@@ -21,12 +21,14 @@ export interface PromptkitHistoryRow {
   output_mode: OutputMode;
   is_favorite: boolean;
   label: string | null;
+  property_id: string | null;
   created_at: string;
 }
 
 export interface PromptkitHistoryFilters {
   provider?: LLMProvider;
   favorite?: boolean;
+  propertyId?: string;
   limit?: number;
   offset?: number;
 }
@@ -42,6 +44,7 @@ export interface SavePromptkitEntryInput {
   tone: PromptTone;
   output_mode: OutputMode;
   label?: string;
+  property_id?: string | null;
 }
 
 export async function listPromptkitHistory(
@@ -59,6 +62,7 @@ export async function listPromptkitHistory(
 
   if (filters?.provider) query = query.eq("provider", filters.provider);
   if (filters?.favorite === true) query = query.eq("is_favorite", true);
+  if (filters?.propertyId) query = query.eq("property_id", filters.propertyId);
 
   const { data, error, count } = await query
     .order("created_at", { ascending: false })
@@ -99,6 +103,7 @@ export async function savePromptkitEntry(
       tone: input.tone,
       output_mode: input.output_mode,
       label: input.label ?? null,
+      property_id: input.property_id ?? null,
     })
     .select()
     .single();
