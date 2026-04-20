@@ -20,8 +20,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -r --filter '@pandotic/universal-cms' --filter '@pandotic/team-hub' --filter '@pandotic/skill-library' typecheck
+      - run: pnpm -r --filter '@pandotic/universal-cms' --filter '@pandotic/skill-library' --filter '@universal-cms/admin-core' --filter '@universal-cms/admin-ui' typecheck
       - run: pnpm test
-      - run: pnpm -r --filter '@pandotic/universal-cms' build
+      - run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
