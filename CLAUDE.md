@@ -1,6 +1,100 @@
 # Universal CMS — Project Context for Claude
 
-## ⚡ Resume Point (as of April 17, 2026, session close)
+## ⚡ Resume Point — Team Hub port (as of April 20, 2026, session close)
+
+**Team Hub merged into Pandotic Hub** as `/team-hub/*` route tree. Branch
+`claude/pandotic-team-hub-KMsMW` is ready to PR and merge. Full plan at
+`/root/.claude/plans/pandotic-team-hub-glowing-robin.md`.
+
+### What landed on the branch (4 commits)
+
+- `742075b` — magic-link auth + DumpModal owner/due_date fix + attendees on
+  past meetings + sidebar entry (pre-port).
+- `6e5f46f` — **full port** of `packages/team-hub` → `packages/fleet-dashboard`:
+  - Routes at `app/team-hub/{page.tsx, issues, todos, meetings, meetings/[id]}`.
+  - Components under `components/team-hub/{dump, issues, meeting, todos, ui}`.
+  - Hooks under `hooks/team-hub/` — `useAuth` replaced with `useTeamUser`
+    that reads the Hub's existing Supabase session.
+  - Migrations renumbered `00120_team_hub_initial.sql` through
+    `00123_team_hub_auth.sql`. Idempotent (IF NOT EXISTS / OR REPLACE /
+    ON CONFLICT DO NOTHING). Auth trigger softened — non-@pandotic sign-ups
+    no longer hard-rejected; they just don't get a `users` row.
+  - Edge functions `dump-classify`, `process-transcript`, `fetch-granola`
+    moved to `packages/fleet-dashboard/supabase/functions/`.
+  - Theme scoped via `[data-team-hub].dark` so team-hub CSS vars don't leak.
+  - TanStack Query provider scoped to `app/team-hub/layout.tsx`.
+  - `packages/team-hub/` directory deleted.
+- `978d507` — drop deleted team-hub entries from pnpm-lock.
+- `881df9a` — cast QueryClientProvider to bypass @tanstack/react-query v5 +
+  @types/react 19 children typing mismatch (see
+  https://github.com/TanStack/query/issues/6444). Netlify build now green.
+
+### Ops already done on Hub Supabase (`rimbgolutrxpmwsoswhq`)
+
+- ✅ `supabase migration repair --status applied 00105…00117, 00500…00502`
+  to unblock the CLI past the pre-existing drift (20+ Hub migrations were
+  applied manually / via dashboard and never recorded in
+  `supabase_migrations.schema_migrations`).
+- ✅ `supabase db push` — team-hub migrations `00120–00123` now applied.
+- ✅ `supabase functions deploy dump-classify process-transcript fetch-granola`.
+- ✅ `ANTHROPIC_API_KEY` secret confirmed present.
+
+### 🚨 Ops still to do (after merging this PR)
+
+1. **Seed the original agenda.** Paste
+   `packages/fleet-dashboard/supabase/seed-team-hub.sql` into
+   https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new
+   and run. Idempotent (`ON CONFLICT DO NOTHING`).
+2. **Back-fill `auth_user_id` on the 4 founders.** The `handle_new_user`
+   trigger only fires on *new* Supabase sign-ups. Allen/Matt/Dan/Scott
+   presumably already signed into the Hub pre-migration, so their
+   `auth_user_id` is still NULL until we run this once in the SQL editor:
+   ```sql
+   UPDATE public.users u
+      SET auth_user_id = a.id
+     FROM auth.users a
+    WHERE LOWER(u.email) = LOWER(a.email)
+      AND u.auth_user_id IS NULL;
+   ```
+   Without this, `/team-hub` shows the "Team Hub is for founders" panel to
+   the actual founders because `useTeamUser` can't resolve their row.
+3. **Smoke test** `/team-hub` in the browser:
+   - Agenda loads with the seed items.
+   - Dump bar Cmd-K → "Dan: prep Burning Man demo" → lands on Dan.
+   - Resolving an issue writes `completed_by` correctly.
+   - `/team-hub/meetings/[id]` renders archived meetings.
+   - Non-founder Hub users see the access-denied panel (tested by signing
+     in as any `@pandotic-site.com` or other non-founder email, if any exist).
+
+### Follow-ups worth picking up in a future session (not blocking)
+
+- **Granola auto-sync.** `fetch-granola` is manual-trigger today. Schedule it
+  via Supabase pg_cron so transcripts show up on `/team-hub/meetings/[id]`
+  without a click.
+- **Meeting summary on past-meetings list.** `/team-hub/meetings` shows
+  date + chair + rating + counts. The AI extraction writes a summary per
+  meeting; surface the first sentence as a one-liner on each row.
+- **Hide sidebar "Team Hub" entry for non-founders.** Cheap UX win —
+  gate in `app/nav/sidebar.tsx` by checking whether the user has a
+  `public.users` row (via a small server-side helper).
+- **Migration history cleanup.** The Hub Supabase project has 20+ migrations
+  applied manually that were repaired as "applied" to unblock this work.
+  At some point, reconcile the history table with the actual schema — run
+  `supabase db pull` against a staging copy, diff against the committed
+  migrations, either delete stale migration files or capture the true
+  schema as a new baseline.
+- **Pre-existing fleet-dashboard build blockers.** `src/app/{groups,users,
+  properties}/page.tsx`, `src/lib/adapters/*`, and `src/lib/middleware/
+  admin-rbac.ts` still import from `@universal-cms/admin-core` and
+  `@universal-cms/admin-ui` — vestigial deps flagged back in PR #39. They
+  only build because Netlify builds those workspace packages first. If
+  someone removes those packages, these consumers break. Decide: either
+  port the references into cms-core or formally keep admin-core/admin-ui
+  alive.
+
+---
+
+## ⚡ Older Resume Point — Stage 0 of 10-site rollout (April 17, 2026)
 
 **Stage 0 of the 10-site rollout is DONE and merged to main** (PR #39, commit
 `ec94847`). Full plan lives at
