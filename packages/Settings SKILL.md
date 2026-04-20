@@ -1,1 +1,0 @@
-/Users/mattgolden/Code/Settings-Kit/SKILL.md
