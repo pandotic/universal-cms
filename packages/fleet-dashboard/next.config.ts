@@ -10,8 +10,6 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@pandotic/universal-cms",
     "@pandotic/skill-library",
-    "@universal-cms/admin-core",
-    "@universal-cms/admin-ui",
   ],
   async redirects() {
     return [

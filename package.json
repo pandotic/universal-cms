@@ -3,7 +3,7 @@
   "scripts": {
     "test": "pnpm --filter @pandotic/universal-cms test",
     "typecheck": "pnpm -r typecheck",
-    "build": "pnpm --filter @universal-cms/admin-core build && pnpm --filter @universal-cms/admin-ui build && pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/skill-library build",
+    "build": "pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/skill-library build",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish"

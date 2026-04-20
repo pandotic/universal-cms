@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { PlatformAdminRoute } from '@universal-cms/admin-ui';
-import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
+import { PlatformAdminRoute } from '@pandotic/universal-cms/components/admin';
+import type { SupabaseClientAdapter } from '@pandotic/universal-cms/admin';
 import { supabase } from './lib/supabaseClient';
 import { AppLayout } from './components/AppLayout';
 import { LoginPage } from './pages/LoginPage';
