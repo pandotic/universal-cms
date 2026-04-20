@@ -1,5 +1,76 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Team Hub Phase 2: auto-built Fleet review (April 22, 2026)
+
+Branch `claude/pandotic-team-hub-KMsMW`, commit `207ec6a`, **pushed and ready
+to PR**. Rebased onto main (includes PR #62 cleanup renumbering), typecheck +
+Next build both green locally. Full plan at
+`/root/.claude/plans/pandotic-team-hub-glowing-robin.md`.
+
+### What's in the commit
+
+- **New `hub_initiatives` table** (`00517_team_hub_initiatives.sql` — slotted
+  after cleanup's `00516_feature_flags.sql`). Unified model for
+  conferences / partnerships / deals / bets / other, with owner, stage
+  (idea / active / stalled / won / lost / complete / archived),
+  counterparty, starts_on, next_step, next_step_due, last_update_at.
+- **Agenda section swap.** Deleted `CommandCenterReviewSection` placeholder.
+  Added `FleetReviewSection` that renders two subsections: "Properties
+  needing attention" (auto-flagged from `hub_properties`) and "Initiatives
+  in flight" (from `hub_initiatives`). Each row links to
+  `/properties/[slug]` or `/initiatives/[slug]`.
+- **Pure-function flag derivation** in
+  `@pandotic/universal-cms/data/hub-fleet-review` (6 property rules,
+  5 initiative rules). Self-documenting + independently testable.
+- **New `/initiatives` pages** in fleet-dashboard (list + create + edit).
+  Sidebar entry under the "Team" group with a Target icon.
+- **Seed hardening.** `seed-team-hub.sql` rewritten with
+  `INSERT … SELECT … WHERE NOT EXISTS` so re-pasting is a noop (the original
+  cause of duplicate issues/todos in live data).
+- **Granola integration docs.** New `packages/fleet-dashboard/README.md`
+  documents the full flow end-to-end + audit SQL to check whether real
+  transcripts have flowed through yet.
+
+### Ops already done on live DB (`rimbgolutrxpmwsoswhq`)
+
+- ✅ Chunk 2 CLI run completed (`migration repair` + `db push`). Migration
+  history now records 00503–00516.
+- ✅ `hub_initiatives` table created + 6 seeded rows (ASU GSV, Gaia, CJ/McLeod,
+  SCE, Burning Man, education vertical) via dashboard paste using the
+  `00517` SQL.
+
+### 🚨 Ops still to do (after merging this PR)
+
+1. **Tell Supabase 00517 is already applied** — since the table was created
+   via dashboard paste before the migration file landed:
+   ```bash
+   cd packages/fleet-dashboard
+   supabase migration repair --status applied 00517
+   ```
+2. **Smoke test the Fleet review section.** Open `/team-hub` and scroll to
+   section 02. Should show 6 initiatives sorted by next-step due. Properties
+   subsection will be empty if no active property is flagged — that's fine.
+3. **(Optional) collapse legacy duplicates.** Chunk 1 notes mention 20
+   issues / 25 todos of "real team data" already in the DB. If any are
+   actually dupes from early seed runs, paste the dedupe block from
+   `packages/fleet-dashboard/README.md` (top of file, "Team Hub — reseeding"
+   section).
+
+### Follow-ups for future sessions
+
+- **Granola auto-sync** via Supabase pg_cron (listed in README's "Future:
+  auto-sync" section). Today the flow is manual-click.
+- **Meeting summary on past-meetings list** — surface the AI-extracted
+  `ai_summary` first sentence as a one-liner on `/team-hub/meetings`.
+- **Hide sidebar "Team Hub" + "Initiatives" entries for non-founders** via
+  a small server-side helper in `app/nav/sidebar.tsx`.
+- **Pre-existing fleet-dashboard build blockers** (`@universal-cms/admin-core`
+  / `admin-ui` imports in `/groups`, `/users`, `/properties`, adapters,
+  admin-rbac middleware). Tracked under Chunk 4 in the Cleanup resume point
+  below.
+
+---
+
 ## ⚡ Resume Point — Cleanup, Chunks 1 + 2 (April 20, 2026, session close)
 
 Branch `claude/cleanup-merged-project-UKjY5`. Chunk 1 merged as PR #60. Chunk 2
