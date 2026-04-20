@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flag, ToggleLeft, ToggleRight } from 'lucide-react';
-import type { SupabaseClientAdapter, FeatureFlag } from '@universal-cms/admin-core';
-import { useFeatureFlags, toggleFeatureFlag } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter, FeatureFlag } from '../../../admin/index.js';
+import { useFeatureFlags, toggleFeatureFlag } from '../../../admin/index.js';
 
 export interface FeatureFlagPanelProps {
   supabase: SupabaseClientAdapter;
