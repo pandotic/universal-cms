@@ -201,6 +201,21 @@
       "types": "./dist/data/hub-admin.d.ts",
       "development": "./src/data/hub-admin.ts"
     },
+    "./types/initiatives": {
+      "import": "./dist/types/initiatives.js",
+      "types": "./dist/types/initiatives.d.ts",
+      "development": "./src/types/initiatives.ts"
+    },
+    "./data/hub-initiatives": {
+      "import": "./dist/data/hub-initiatives.js",
+      "types": "./dist/data/hub-initiatives.d.ts",
+      "development": "./src/data/hub-initiatives.ts"
+    },
+    "./data/hub-fleet-review": {
+      "import": "./dist/data/hub-fleet-review.js",
+      "types": "./dist/data/hub-fleet-review.d.ts",
+      "development": "./src/data/hub-fleet-review.ts"
+    },
     "./types/projects": {
       "import": "./dist/types/projects.js",
       "types": "./dist/types/projects.d.ts",
