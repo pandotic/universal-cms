@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import ScrollReveal from "@/components/ScrollReveal";
 import BlogCards from "@/components/BlogCards";
 import ProjectHero from "@/components/ProjectHero";
-import ProjectFeatureGrid from "@/components/ProjectFeatureGrid";
-import ProjectCaseStudy from "@/components/ProjectCaseStudy";
-import ProjectProofPoints from "@/components/ProjectProofPoints";
-import ProjectTechStack from "@/components/ProjectTechStack";
+import ProjectDeepDive from "@/components/ProjectDeepDive";
 import ProjectVideoEmbed from "@/components/ProjectVideoEmbed";
 import ProjectScreenshots from "@/components/ProjectScreenshots";
 import {
@@ -127,18 +124,8 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      <ProjectFeatureGrid
-        features={project.features}
-        projectName={project.name}
-      />
-
       <ProjectVideoEmbed
         videoId={project.video_long_id}
-        projectName={project.name}
-      />
-
-      <ProjectCaseStudy
-        caseStudy={project.caseStudy}
         projectName={project.name}
       />
 
@@ -159,8 +146,6 @@ export default async function ProjectPage({ params }: PageProps) {
           </div>
         </section>
       )}
-
-      <ProjectTechStack differentiators={project.techDifferentiators} />
 
       {project.productPage.whatWeBuilt.length > 0 && (
         <section className="py-12 md:py-20 px-4 md:px-6">
@@ -191,9 +176,15 @@ export default async function ProjectPage({ params }: PageProps) {
         </section>
       )}
 
-      <ProjectProofPoints proofPoints={project.proofPoints} />
-
       <ProjectScreenshots slug={slug} screenshots={[]} />
+
+      <ProjectDeepDive
+        projectName={project.name}
+        caseStudy={project.caseStudy}
+        features={project.features}
+        techDifferentiators={project.techDifferentiators}
+        proofPoints={project.proofPoints}
+      />
 
       <section className="py-12 md:py-20 px-4 md:px-6 text-center">
         <ScrollReveal className="max-w-3xl mx-auto">

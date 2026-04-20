@@ -9,6 +9,8 @@ demo_url: null
 live_url: null
 own_site_url: null
 repo_url: "https://github.com/dangolden/homedoc"
+has_own_marketing_site: false
+own_marketing_site_url: null
 hero_screenshot: "screenshots/homedoc-dashboard-hero.png"
 video_long_id: "homedoc-long"
 video_short_id: "homedoc-short"
