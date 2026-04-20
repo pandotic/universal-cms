@@ -1,6 +1,71 @@
 # Universal CMS — Project Context for Claude
 
-## ⚡ Resume Point — Team Hub port (as of April 20, 2026, session close)
+## ⚡ Resume Point — Cleanup, Chunks 1 + 2 (April 20, 2026, session close)
+
+Branch `claude/cleanup-merged-project-UKjY5`. Chunk 1 merged as PR #60. Chunk 2
+pushed, waiting on user to run the CLI commands in
+`packages/fleet-dashboard/supabase/manual/chunk-2-runbook.md`.
+
+### What shipped in Chunk 1 (PR #60, merged)
+
+- **Bug 1 (`/fleet` React #310):** `DeploymentsCols` split into empty + full
+  variants so hook count is constant per render path.
+- **Bug 2 (`/properties` white-on-white):** `EntityManagementPanel` moved off
+  hardcoded `bg-white` / `text-gray-*` onto zinc tokens to match dark Hub
+  layout (also improves `/groups`, `/users`).
+- **`OPS_RUNBOOK.md` + `packages/fleet-dashboard/supabase/manual/chunk-1-ops.sql`:**
+  founder `auth_user_id` backfill, Team Hub agenda seed (skipped — 20 issues /
+  25 todos of real team data already there), `feature_flags` table with RLS.
+
+### Chunk 1 live-DB verification (user ran in dashboard SQL editor)
+
+- `feature_flags` table created ✅
+- Team Hub seed correctly skipped (real data present) ⏭️
+- `linked_founders = 1` — only Dan has signed in. Allen / Matt / Scott
+  need to sign in at the Hub login page; the `handle_new_user` trigger
+  from `00123_team_hub_auth.sql` auto-links them on first sign-in.
+
+### What landed on the branch for Chunk 2 (un-merged)
+
+- **13 migration renames** to free slots `00503–00515` (collision cleanup).
+  Full map in `chunk-2-runbook.md`.
+- **`00505_hub_skills.sql` rewritten** — CREATE TYPE wrapped in
+  `DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL; END $$` blocks,
+  CREATE TABLE uses `IF NOT EXISTS`, RLS uses `DROP POLICY IF EXISTS`
+  → CREATE pattern. Now fully idempotent.
+- **`00516_feature_flags.sql`** — codifies the chunk-1 manual table creation
+  so fresh Supabase projects get it via `db push`.
+- **`_consolidated_00110-00117.sql`** moved to
+  `supabase/migrations/archive/` — was a backup, not a real migration.
+
+### Chunk 2 ops for user to run (CLI, from packages/fleet-dashboard)
+
+```bash
+supabase migration repair --status applied 00506 00511 00513 00514 00515 00516
+supabase db push
+```
+
+Expected: 8 idempotent migrations apply (`00503, 00504, 00505, 00507,
+00508, 00509, 00510, 00512`), 6 marked as already-applied. If CLI throws
+the `SUPABASE_DB_PASSWORD` error again, fallback SQL block in
+`chunk-2-runbook.md` does the repair step via dashboard.
+
+### Remaining from the Chunk plan (not started)
+
+- **Chunk 3:** wire `@pandotic/skill-library` into root + Netlify build chain
+  (package builds clean locally; issue is just missing `dist/` at deploy time).
+- **Chunk 4:** decide on `@universal-cms/admin-core` / `admin-ui` — 8 files
+  still import from them; either port into cms-core and delete, or formally
+  adopt (add to CI + changesets + release workflow). Also the
+  `.changeset/initial-release.md` only versions one of six publishable
+  packages.
+- **Chunk 5:** cruft — `packages/admin-extraction/`, `packages/promptkit/`
+  (spec-only dir), broken `packages/Settings SKILL.md` symlink,
+  `/Skill Onboarding/` loose docs.
+
+---
+
+## ⚡ Older Resume Point — Team Hub port (as of April 20, 2026, session close)
 
 **Team Hub merged into Pandotic Hub** as `/team-hub/*` route tree. Branch
 `claude/pandotic-team-hub-KMsMW` is ready to PR and merge. Full plan at
