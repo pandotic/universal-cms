@@ -21,6 +21,7 @@ import {
   Share2,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Users,
   Wrench,
   X,
@@ -83,6 +84,13 @@ const GROUPS: NavGroup[] = [
       { href: "/cms/marketing-cms", label: "Marketing CMS", icon: Megaphone },
       { href: "/cms/app-admin", label: "App Admin", icon: LayoutDashboard },
       { href: "/cms/group-admin", label: "Group Admin", icon: ShieldCheck },
+    ],
+  },
+  {
+    label: "Tools",
+    links: [
+      { href: "/tools/promptkit", label: "PromptKit", icon: Sparkles },
+      { href: "/tools/pmf-evaluator", label: "PMF Evaluator", icon: Wrench },
     ],
   },
   {
@@ -202,19 +210,6 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
           ))}
         </nav>
 
-        {/* Footer */}
-        {!collapsed && (
-          <div className="border-t border-zinc-800 p-3">
-            <Link
-              href="/tools/pmf-evaluator"
-              onClick={onClose}
-              className="flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-            >
-              <Wrench className="h-3.5 w-3.5" />
-              PMF Evaluator
-            </Link>
-          </div>
-        )}
       </aside>
     </>
   );
