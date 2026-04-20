@@ -219,5 +219,16 @@
     "version": "0.1.0",
     "author": "pandotic",
     "path": "skills/marketing-director"
+  },
+  {
+    "id": "close-session",
+    "name": "Close Session",
+    "icon": "Wrench",
+    "category": "Developer Tools",
+    "description": "Cleanly close a Claude Code session by committing any remaining work, preserving context and unimplemented plans, updating CLAUDE.md with outstanding items, and pushing to the remote branch. Ensures no work or context is lost before a PR is opened.",
+    "triggers": ["/close-session", "close session", "wrap up session", "end session", "finish session"],
+    "version": "1.0.0",
+    "author": "pandotic",
+    "path": "skills/close-session"
   }
 ]
