@@ -355,6 +355,31 @@
       "import": "./dist/error-logging/server.js",
       "types": "./dist/error-logging/server.d.ts",
       "development": "./src/error-logging/server.ts"
+    },
+    "./types/promptkit": {
+      "import": "./dist/types/promptkit.js",
+      "types": "./dist/types/promptkit.d.ts",
+      "development": "./src/types/promptkit.ts"
+    },
+    "./promptkit/models": {
+      "import": "./dist/promptkit/models.js",
+      "types": "./dist/promptkit/models.d.ts",
+      "development": "./src/promptkit/models.ts"
+    },
+    "./promptkit/skills": {
+      "import": "./dist/promptkit/skills.js",
+      "types": "./dist/promptkit/skills.d.ts",
+      "development": "./src/promptkit/skills/index.ts"
+    },
+    "./promptkit/optimizers": {
+      "import": "./dist/promptkit/optimizers.js",
+      "types": "./dist/promptkit/optimizers.d.ts",
+      "development": "./src/promptkit/optimizers/index.ts"
+    },
+    "./data/promptkit-history": {
+      "import": "./dist/data/promptkit-history.js",
+      "types": "./dist/data/promptkit-history.d.ts",
+      "development": "./src/data/promptkit-history.ts"
     }
   },
   "files": [
