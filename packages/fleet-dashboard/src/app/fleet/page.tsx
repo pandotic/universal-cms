@@ -746,28 +746,58 @@ function DeploymentsCols({
   onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
   onUpgrade: (deploymentId: string, propertyId: string) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-
+  // Split into two components so each render path has a fixed hook count —
+  // avoids the React #310 class of bug where hook order could desync between
+  // rows that do and don't have a CMS deployment.
   if (!cmsDeployment) {
-    return (
-      <>
-        <td className="px-4 py-3">
-          <Link href="/fleet/deploy" className="text-xs text-zinc-500 hover:text-zinc-300 underline">
-            Install CMS
-          </Link>
-        </td>
-        <td className="px-4 py-3"><span className="text-xs text-zinc-600">-</span></td>
-        <td className="px-4 py-3">
-          {otherDeployments.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {otherDeployments.map((d) => <VersionBadge key={d.id} deployment={d} />)}
-            </div>
-          ) : <span className="text-xs text-zinc-600">-</span>}
-        </td>
-        <td className="px-4 py-3"><span className="text-xs text-zinc-600">-</span></td>
-      </>
-    );
+    return <DeploymentsColsEmpty otherDeployments={otherDeployments} />;
   }
+  return (
+    <DeploymentsColsFull
+      propertyId={propertyId}
+      cmsDeployment={cmsDeployment}
+      otherDeployments={otherDeployments}
+      onTogglePin={onTogglePin}
+      onUpgrade={onUpgrade}
+    />
+  );
+}
+
+function DeploymentsColsEmpty({ otherDeployments }: { otherDeployments: PackageDeployment[] }) {
+  return (
+    <>
+      <td className="px-4 py-3">
+        <Link href="/fleet/deploy" className="text-xs text-zinc-500 hover:text-zinc-300 underline">
+          Install CMS
+        </Link>
+      </td>
+      <td className="px-4 py-3"><span className="text-xs text-zinc-600">-</span></td>
+      <td className="px-4 py-3">
+        {otherDeployments.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {otherDeployments.map((d) => <VersionBadge key={d.id} deployment={d} />)}
+          </div>
+        ) : <span className="text-xs text-zinc-600">-</span>}
+      </td>
+      <td className="px-4 py-3"><span className="text-xs text-zinc-600">-</span></td>
+    </>
+  );
+}
+
+function DeploymentsColsFull({
+  propertyId,
+  cmsDeployment,
+  otherDeployments,
+  onTogglePin,
+  onUpgrade,
+}: {
+  propertyId: string;
+  cmsDeployment: PackageDeployment;
+  otherDeployments: PackageDeployment[];
+  onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
+  onUpgrade: (deploymentId: string, propertyId: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
 
   const isOutdated =
     cmsDeployment.installed_version &&
