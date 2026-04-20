@@ -93,6 +93,10 @@
     "type": "git",
     "url": "https://github.com/pandotic/universal-cms"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "license": "MIT",
   "author": "Pandotic"
 }
