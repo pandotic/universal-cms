@@ -1,7 +1,0 @@
-{
-  "name": "@universal-cms/admin-schema",
-  "version": "0.1.0",
-  "description": "Portable Supabase migrations and RLS policies for the three-tier admin system.",
-  "files": ["migrations", "rls", "seed", "README.md"],
-  "scripts": {}
-}
