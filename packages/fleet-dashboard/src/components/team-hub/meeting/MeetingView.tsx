@@ -3,7 +3,7 @@
 import { MeetingHeader } from './MeetingHeader'
 import { AgendaSection } from './AgendaSection'
 import { CompanyHealthSection } from './sections/CompanyHealthSection'
-import { CommandCenterReviewSection } from './sections/CommandCenterReviewSection'
+import { FleetReviewSection } from './sections/FleetReviewSection'
 import { AccountabilitySection } from './sections/AccountabilitySection'
 import { IssuesSection } from './sections/IssuesSection'
 import { TodosSection } from './sections/TodosSection'
@@ -59,7 +59,7 @@ export function MeetingView({ meeting, readOnly }: MeetingViewProps) {
         sectionIndex={1}
         meeting={meeting}
       >
-        <CommandCenterReviewSection />
+        <FleetReviewSection />
       </AgendaSection>
 
       <AgendaSection

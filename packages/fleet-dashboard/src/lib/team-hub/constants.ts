@@ -25,7 +25,7 @@ export const TEAM_MEMBERS = [
 
 export const AGENDA_SECTIONS = [
   { number: '01', title: 'Company health', timeBudget: '5 min', seconds: 300 },
-  { number: '02', title: 'Command Center review', timeBudget: '10 min', seconds: 600 },
+  { number: '02', title: 'Fleet review', timeBudget: '10 min', seconds: 600 },
   { number: '03', title: 'Accountability review', timeBudget: '5 min', seconds: 300 },
   { number: '04', title: 'Issues list — IDS', timeBudget: '15 min', seconds: 900 },
   { number: '05', title: 'To-dos', timeBudget: '5 min', seconds: 300 },
