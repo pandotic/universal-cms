@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
-import { isPlatformAdmin } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter } from '../../../admin/index.js';
+import { isPlatformAdmin } from '../../../admin/index.js';
 
 export interface PlatformAdminRouteProps {
   children: React.ReactNode;

@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
 
     const cmsVersion = deps["@pandotic/universal-cms"] ?? null;
     const skillLibraryVersion = deps["@pandotic/skill-library"] ?? null;
-    const adminUiVersion = deps["@universal-cms/admin-ui"] ?? null;
     const hasNextjs = !!deps["next"];
     const hasSupabase = !!deps["@supabase/supabase-js"];
 
@@ -85,7 +84,6 @@ export async function GET(request: NextRequest) {
         hasCms: !!cmsVersion,
         cmsVersion: cmsVersion?.replace(/^[\^~]/, "") ?? null,
         skillLibraryVersion: skillLibraryVersion?.replace(/^[\^~]/, "") ?? null,
-        adminUiVersion: adminUiVersion?.replace(/^[\^~]/, "") ?? null,
         detectedPlatform,
         hasNextjs,
         hasSupabase,

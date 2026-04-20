@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Activity, Search, Download } from 'lucide-react';
-import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
-import { getAuditLogs } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter } from '../../../admin/index.js';
+import { getAuditLogs } from '../../../admin/index.js';
 
 export interface AuditLogViewerProps {
   supabase: SupabaseClientAdapter;

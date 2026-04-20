@@ -23,15 +23,12 @@ importers:
 
   apps/dashboard:
     dependencies:
+      '@pandotic/universal-cms':
+        specifier: workspace:*
+        version: link:../../packages/cms-core
       '@supabase/supabase-js':
         specifier: ^2.39.3
         version: 2.101.1
-      '@universal-cms/admin-core':
-        specifier: workspace:*
-        version: link:../../packages/admin-core
-      '@universal-cms/admin-ui':
-        specifier: workspace:*
-        version: link:../../packages/admin-ui
       lucide-react:
         specifier: ^0.344.0
         version: 0.344.0(react@18.3.1)
@@ -125,53 +122,7 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
 
-  packages/admin-core:
-    devDependencies:
-      '@supabase/supabase-js':
-        specifier: ^2.39.3
-        version: 2.101.1
-      '@types/react':
-        specifier: ^18.2.56
-        version: 18.3.28
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-
   packages/admin-schema: {}
-
-  packages/admin-ui:
-    dependencies:
-      '@universal-cms/admin-core':
-        specifier: workspace:*
-        version: link:../admin-core
-    devDependencies:
-      '@supabase/supabase-js':
-        specifier: ^2.39.3
-        version: 2.101.1
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.1.6
-      '@types/react-dom':
-        specifier: ^19.0.0
-        version: 19.1.6(@types/react@19.1.6)
-      lucide-react:
-        specifier: ^0.469.0
-        version: 0.469.0(react@19.2.4)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.4
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.4(react@19.2.4)
-      react-router-dom:
-        specifier: ^6.22.3
-        version: 6.30.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
 
   packages/cms-core:
     dependencies:
@@ -248,6 +199,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
+      react-router-dom:
+        specifier: ^6.30.0
+        version: 6.30.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)
@@ -281,12 +235,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.51.0
         version: 5.96.2(react@19.2.4)
-      '@universal-cms/admin-core':
-        specifier: workspace:*
-        version: link:../admin-core
-      '@universal-cms/admin-ui':
-        specifier: workspace:*
-        version: link:../admin-ui
       clsx:
         specifier: ^2.1.0
         version: 2.1.1

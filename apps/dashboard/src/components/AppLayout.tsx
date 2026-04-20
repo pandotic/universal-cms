@@ -2,9 +2,9 @@ import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Shield, LogOut, Wrench } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useIsPlatformAdmin } from '@universal-cms/admin-core';
+import { useIsPlatformAdmin } from '@pandotic/universal-cms/admin';
 import { supabase } from '../lib/supabaseClient';
-import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter } from '@pandotic/universal-cms/admin';
 
 export function AppLayout({ fullBleed = false }: { fullBleed?: boolean }) {
   const { user, signOut } = useAuth();
