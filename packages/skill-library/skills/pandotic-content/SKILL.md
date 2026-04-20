@@ -37,8 +37,9 @@ Before doing any deep work, your **first response** should be a brief orientatio
    - Any features to highlight or skip?
    - Project slug preference?
    - Any directional notes?
+   - **Does this project already have its own marketing site?** (If yes, ask for the URL. If no, ask whether we should scaffold one as part of this run — default **yes, scaffold** unless the user declines.)
 
-**Wait for the user to respond** before proceeding to Phase 1. If they say "go" or "run it" with no notes, that's fine — proceed.
+**Wait for the user to respond** before proceeding to Phase 1. If they say "go" or "run it" with no notes, that's fine — proceed, and default to scaffolding a microsite (Phase 5) unless the user opted out.
 
 ### Phase Overview
 
@@ -46,8 +47,9 @@ Before doing any deep work, your **first response** should be a brief orientatio
 |-------|-----------------|----------|
 | **Phase 1: Inspect** | Code audit, product inventory, alignment check | 1-2 |
 | **Phase 2: Public Content** | Case study, portfolio, blurbs, video scripts, features | 3-8 |
-| **Phase 3: Strategy & Synthesis** | Internal capabilities, proof points, differentiators, product page | 9-12, 16 |
-| **Phase 4: Screenshots & File Output** | Screenshot brief, links, gaps + write all files | 13-15, file output |
+| **Phase 3: Strategy & Synthesis** | Internal capabilities, proof points, differentiators, landing page | 9-12, 16 |
+| **Phase 4: Project Marketing Surface** | Either a full microsite scaffold **or** a site-lift-pack of copy snippets, depending on `has_own_marketing_site` | 17 |
+| **Phase 5: Screenshots & File Output** | Screenshot brief, links, gaps + write all files | 13-15, file output |
 
 ### Default: Run All Phases in Sequence
 
@@ -283,7 +285,7 @@ Focus on outcomes: "We designed the system so that [business result], which mean
 
 ### Section 16 — One-Page Product Landing Page
 
-Write a complete one-page product landing page for `pandotic.ai/<project-slug>`. This synthesizes the best content from other sections into a CMS-ready markdown page.
+Write a tight one-page product landing page for `pandotic.ai/projects/<project-slug>`. This is the **landing** — not the knowledge base. It sits on top of a Deep Dive accordion that pulls in the case study, features, proof points, and tech differentiators from Sections 3, 8, 11, 12. Your job here is to hook the reader fast and let the depth live behind the accordion.
 
 #### YAML Frontmatter
 
@@ -304,23 +306,159 @@ generated: <ISO 8601 date>
 
 If the project has its own site, set `own_site_url` and CTA links there. If demo-only, use `demo_url`. If no public access yet, CTA is "Learn more" / "Get in touch."
 
-#### Page Structure
+#### Page Structure (in this exact order — the Pandotic site parser depends on it)
 
-1. **Hero** — Headline (most compelling statement), subheadline (1-2 sentences), screenshot placeholder `![Hero](screenshots/<filename>)`, primary CTA
-2. **What It Solves** — 2-3 paragraphs on the problem, drawn from Section 3's Challenge but punchier
-3. **How It Works** — 3-5 capabilities with bold titles + 1-2 sentence descriptions, from Section 8
-4. **Video Section** — `{{video-embed: <slug>-long}}` placeholder with 1-sentence description. Videos are produced from scripts in Sections 6-7 and hosted on this page
-5. **Why It's Different** — 2-3 paragraphs from Sections 3 + 12
-6. **Proof Points** — Best 4-6 from Section 11, as a grid or bullet list
-7. **About Pandotic Footer** — 2-3 sentences on Pandotic's role, soft CTA, `{{contact-link}}`
+1. **H1 headline** — most compelling single statement.
+2. **Opening paragraph** — 1-2 sentences expanding the headline. Acts as the subheadline/lede.
+3. **Hero image** — `![Hero](screenshots/<filename>)`
+4. **Primary CTA link** — `[Get in Touch]({{contact-link}})` (or `[Try It]({{demo-link}})` if there's a live demo)
+5. `---`
+6. **## The Problem No One Talks About** (or similar H2) — **1 short paragraph, max 60 words.** No more. This populates the "Why This Matters" section.
+7. `---`
+8. **## How It Works** — **exactly 3-5** capability blocks. Each block: `**Bold Title**` on its own line, then 1 short paragraph (25-40 words). No sub-bullets. No "why it matters" expansion here — that lives in the features file.
+9. `---`
+10. **`{{video-embed: <slug>-long}}`** placeholder + one-line italicized caption.
+11. `---`
+12. **## Why It's Different** — **1-2 short paragraphs, max 100 words total.** One sharp idea, not a list.
+13. `---`
+14. **## What We Built** — **exactly 4-6 bullets.** Each bullet is one line describing an outcome ("Built X that does Y"). No sub-bullets. No explanation paragraphs. Pulls from the best of Section 11 proof points, trimmed.
+15. `---`
+16. **## About Pandotic** — 2-3 sentences on Pandotic's role + soft CTA with `{{contact-link}}`.
 
-**Rules:** Must stand alone (no "as mentioned in..." references). 600-900 words body content. The page lives at `pandotic.ai/<project-slug>`.
+#### Hard rules
+
+- **Word cap: 400-550 words total** across all visible body copy. Count as you go. If you're over, cut — don't compress.
+- **Must stand alone** — no "as mentioned elsewhere" references.
+- **Do NOT include on this page:**
+  - Detailed feature breakdowns with "What it does / Why it matters / Differentiation" — those live in `features.md` and render in the Deep Dive accordion.
+  - The 12 modular proof points — those live in `proof-points.md` and render in the Deep Dive.
+  - The full 5-source / multi-paragraph technical differentiators — those live in `tech-differentiators.md` and render in the Deep Dive.
+  - The full challenge/solution narrative — that lives in `case-study.md` and renders in the Deep Dive.
+- **Do NOT repeat** content that's already in `case-study.md` verbatim. Summarize. The landing is a promise; the case study is the evidence.
+- **The landing page is the first impression.** It should tempt the reader to open the Deep Dive, not replace it.
 
 ---
 
-## Phase 4: Screenshots, Links, Gaps & File Output
+## Phase 4: Project Marketing Surface (Section 17)
 
-This phase produces **Sections 13-15** and then **writes all files** from all phases.
+Every project needs a marketing surface somewhere. Sometimes that's the Pandotic showcase page (already covered by Section 16). But projects that ship as standalone products usually also need their own homepage — either scaffolded from scratch, or slotted into an existing site.
+
+This phase branches on the `has_own_marketing_site` metadata flag set during Step 0.
+
+### Section 17a — Microsite Scaffold (`has_own_marketing_site: false`)
+
+Produce a complete, standalone marketing site skeleton under `microsite/`. These files are designed to drop into the `template/` starter in this monorepo or into any Next.js 16 + markdown-driven site.
+
+**Output structure:**
+
+```
+microsite/
+  _config.yaml              # site metadata + nav order
+  home.md                   # hero + value prop + 3 feature teasers + primary CTA
+  features.md               # expanded feature overview (3-5 features, deeper than home.md)
+  how-it-works.md           # product walkthrough, user-flow framed
+  pricing.md                # skip if not applicable — note in _config.yaml
+  faq.md                    # 8-12 question/answer entries pulled from case-study + features
+  about.md                  # project backstory + Pandotic's role
+  contact.md                # CTA page + form copy
+```
+
+**`_config.yaml` schema:**
+
+```yaml
+site_title: "<Project Name>"
+site_tagline: "<one-line pitch>"
+primary_cta: "<label>"
+primary_cta_url: "<url or {{contact-link}}>"
+nav_order:
+  - home
+  - features
+  - how-it-works
+  - pricing         # omit if skipped
+  - faq
+  - about
+  - contact
+theme_hint: "light | dark | auto"   # leave as "auto" if unsure
+```
+
+**Rules per page:**
+- Every page has YAML frontmatter (`section: 17a`, `title`, `project`, `status: draft`, `generated`).
+- `home.md` must be tight: headline (under 10 words), 1-2 sentence subheadline, 3 feature teasers (title + 1 sentence each), one primary CTA. Max 250 words.
+- `features.md` expands to 3-5 features with 1 short paragraph each. Max 500 words.
+- `faq.md` is at least 8 entries, max 12. Draw questions directly from the gaps or objections implied by the case study — e.g., "How does the AI extraction stay accurate?", "What happens if an API fails?", "How do I embed this on my site?"
+- No placeholder copy like "Lorem ipsum" — if you don't have the information, write a clearly-marked `[TODO: verify with team]` inline.
+
+### Section 17b — Site-Lift-Pack (`has_own_marketing_site: true`)
+
+If the project already has its own marketing site, **don't scaffold a new one.** Produce a single `site-lift-pack.md` that's a menu of drop-in copy the user can paste into Webflow, Framer, or whatever they're running.
+
+**Output file:** `site-lift-pack.md`
+
+**Structure:**
+
+```markdown
+---
+section: 17b
+title: "Site Lift Pack"
+project: "<project-slug>"
+existing_site: "<own_marketing_site_url>"
+status: draft
+generated: "<ISO 8601 date>"
+---
+
+# Site Lift Pack — <Project Name>
+
+Drop-in copy variants for <own_marketing_site_url>. Every block is standalone — paste as-is or lightly edit.
+
+## Hero headlines (3 variants)
+1. ...
+2. ...
+3. ...
+
+## Hero subheadlines (3 variants)
+1. ...
+2. ...
+3. ...
+
+## Feature cards (3-5 cards, drop-in ready)
+- **<Title>** — <1 sentence>
+- **<Title>** — <1 sentence>
+...
+
+## FAQ entries (8-12 Q&A pairs)
+**Q: ...**
+A: ...
+
+## CTA copy (3 variants)
+1. Primary: "..."
+2. Secondary: "..."
+3. Low-friction: "..."
+
+## Social proof / testimonial prompts (3)
+Prompts the team can send to real customers to capture testimonials.
+1. ...
+2. ...
+3. ...
+```
+
+**Rule:** Do not invent testimonials, customer names, or metrics. The social-proof section is *prompts for the team to gather real quotes*, not fabricated quotes.
+
+### Choosing between 17a and 17b
+
+| Situation | Produce |
+|-----------|---------|
+| Greenfield project, no public site yet | 17a (microsite) |
+| User said "yes, scaffold one" in Step 0 | 17a (microsite) |
+| Project has `own_marketing_site_url` set | 17b (site-lift-pack) |
+| User explicitly declined Phase 5 in Step 0 | Skip both |
+
+If unsure, ask — but default to 17a for new projects and 17b for established ones.
+
+---
+
+## Phase 5: Screenshots, Links, Gaps & File Output
+
+This phase produces **Sections 13-15** and then **writes all files** from all phases (including Section 16 landing page and Section 17 marketing surface).
 
 ### Section 13 — Screenshot Capture Brief
 
@@ -407,10 +545,21 @@ Create `pandotic-content-output/<project-slug>/` in the current project repo:
   tech-differentiators.md    # Section 12
   screenshot-brief.md        # Section 13
   links.md                   # Section 14
-  product-page.md            # Section 16
+  product-page.md            # Section 16 — slim Pandotic-site landing (400-550 words)
   internal/
     secret-sauce.md          # Section 9
     extensible.md            # Section 10
+  # ── Marketing surface (Phase 4 / Section 17) — EXACTLY ONE of the following:
+  microsite/                 # Section 17a — if has_own_marketing_site: false
+    _config.yaml
+    home.md
+    features.md
+    how-it-works.md
+    pricing.md               # omit if skipped
+    faq.md
+    about.md
+    contact.md
+  site-lift-pack.md          # Section 17b — if has_own_marketing_site: true
 ```
 
 **Sections NOT written to files:** 1 (alignment check), 2 (code review), 15 (gaps) — these stay in conversation only.
@@ -457,6 +606,9 @@ demo_url: "<url or null>"
 live_url: "<url or null>"
 own_site_url: "<url or null>"
 repo_url: "<url or null>"
+# Marketing-surface flags (set during Step 0 — drive Phase 4 branching)
+has_own_marketing_site: true/false
+own_marketing_site_url: "<url or null>"
 hero_screenshot: "screenshots/<recommended-hero-filename>"
 video_long_id: "<project-slug>-long"
 video_short_id: "<project-slug>-short"
@@ -474,6 +626,9 @@ sections_included:
   - product-page
   - internal/secret-sauce
   - internal/extensible
+  # Include exactly one of the following depending on the flag above:
+  - microsite                # if has_own_marketing_site: false
+  - site-lift-pack           # if has_own_marketing_site: true
 tags:
   - "<industry>"
   - "<technology>"

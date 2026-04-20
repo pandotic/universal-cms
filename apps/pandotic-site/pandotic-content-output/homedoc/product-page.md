@@ -13,7 +13,7 @@ generated: "2026-04-07T00:00:00Z"
 
 # Your Home, Finally Understood
 
-HomeDoc uses AI to read your documents, score your risks, and manage every system in your home — so you can make better decisions without doing the research yourself.
+HomeDoc uses AI to read your documents, score your risks, and plan your maintenance — so you make better decisions without doing the research yourself.
 
 ![Hero](screenshots/homedoc-dashboard-hero.png)
 
@@ -23,30 +23,23 @@ HomeDoc uses AI to read your documents, score your risks, and manage every syste
 
 ## The Problem No One Talks About
 
-Homeownership is one of the largest financial commitments most people make, yet the tools for managing a home haven't changed in decades. Warranty documents sit in drawers. Maintenance happens when something breaks. Environmental risks — wildfire, flood, water contamination — go unassessed until a disaster strikes or insurance renewal arrives.
-
-The information to make better decisions exists: it's in your utility bills, inspection reports, appliance labels, and a dozen federal databases. But no one has the time or expertise to gather, read, and act on all of it.
-
-HomeDoc does.
+Homeownership is a giant financial commitment managed on sticky notes and forgotten folders. The information exists — utility bills, inspection reports, risk databases — but no one has time to gather, read, and act on it.
 
 ---
 
 ## How It Works
 
 **AI Document Intelligence**
-Upload a utility bill, inspection report, warranty, or appliance photo. HomeDoc's multi-model AI pipeline extracts structured data using the right model for each document type — fast and cheap for simple documents, advanced reasoning for complex reports, vision AI for physical labels. Every extraction is reviewed by you before it's saved.
+Upload a utility bill, inspection report, warranty, or appliance photo. A multi-model pipeline picks the right AI for each document type. You review before it saves.
 
 **Environmental Risk Scoring**
-Know your property's wildfire, flood, earthquake, crime, and climate risk — scored by aggregating five federal and state data sources into a composite assessment. No single source tells the full story. HomeDoc combines them.
+Wildfire, flood, earthquake, crime, and climate risk — scored from five federal and state sources. No single source tells the full story; HomeDoc combines them.
 
 **Total Cost of Ownership**
-Compare the true 25-year cost of system upgrades — not just the sticker price. The TCO engine models 17 HVAC systems with federal and state incentives, climate-zone-adjusted energy costs, and year-by-year projections. See when a heat pump pays for itself.
-
-**Smart Maintenance**
-Automated maintenance schedules tied to every appliance in your home. Reminders based on system age, manufacturer recommendations, and usage patterns. A complete service history that travels with the home.
+Compare the 25-year cost of system upgrades, not just sticker price. Federal and state incentives included. See when a heat pump actually pays for itself.
 
 **Embeddable Widgets**
-Contractors and partners embed any of 17+ HomeDoc tools on their own websites — solar calculators, risk assessments, water safety reports — with lead capture, custom branding, and CRM integration via webhooks.
+Contractors and partners embed any of 17+ HomeDoc tools on their own sites — with lead capture, custom branding, and CRM webhooks built in.
 
 ---
 
@@ -58,27 +51,23 @@ Contractors and partners embed any of 17+ HomeDoc tools on their own websites �
 
 ## Why It's Different
 
-HomeDoc isn't another home management app that asks you to enter data. It reads your documents, scores your risks from public data, and plans your maintenance — so the platform gets smarter with every interaction, not every manual entry.
-
-The AI pipeline uses four specialized models instead of one, each matched to its task: a cost-efficient model for simple extractions, a reasoning model for complex analysis, a vision model for physical labels, and a preprocessing service for multi-page documents. Every extraction passes through a human review step. AI proposes, you approve.
-
-The architecture is built for distribution: any module can be embedded on a partner's website with lead capture and webhook delivery. New API integrations are added via configuration, not code. Data isolation is enforced at the database level, not the application level. This is a platform designed for scale, not a prototype dressed up as a product.
+HomeDoc doesn't ask you to enter data. It reads your documents, scores your risks from public data, and plans your maintenance — getting smarter with every interaction instead of every manual entry. Four specialized AI models handle different document types. AI proposes, you approve.
 
 ---
 
 ## What We Built
 
-- Built a multi-model AI extraction pipeline processing 8 document types across 4 AI services with human review gates and per-call cost tracking
-- Designed 5-source composite wildfire risk scoring aggregating FEMA, NIFC, USGS, NOAA, and CAL FIRE data with intelligent multi-tier caching
-- Architected 17+ embeddable widgets with email-gated lead capture, webhook delivery, and domain-level access control
-- Developed an 11-stage wildfire defense certification workflow coordinating homeowners, contractors, and inspectors
-- Created a TCO engine comparing 17 HVAC systems with federal/state incentives and climate-zone-adjusted energy modeling
-- Shipped 14 feature modules, 33 edge functions, and 121 database migrations in a production-grade platform
+- Multi-model AI pipeline processing 8 document types across 4 services with human review gates and per-call cost tracking
+- 5-source composite wildfire risk scoring aggregating FEMA, NIFC, USGS, NOAA, and CAL FIRE data
+- 17+ embeddable widgets with email-gated lead capture, domain whitelisting, and webhook delivery
+- Total Cost of Ownership engine modeling 17 HVAC systems with federal/state incentives and climate-adjusted energy costs
+- 11-stage wildfire defense certification workflow coordinating homeowners, contractors, and inspectors
+- 14 feature modules, 33 edge functions, 121 database migrations — production-grade from day one
 
 ---
 
 ## About Pandotic
 
-Pandotic is a consultancy and venture studio that helps organizations move quickly from idea to working AI-powered product. HomeDoc demonstrates what practical AI looks like at scale — not a single model doing everything, but a thoughtful architecture where the right tool handles each job, humans stay in the loop, and the platform is built for growth from day one.
+Pandotic designs and ships AI-powered products — fast, practical, built for real adoption. HomeDoc shows what that looks like in a domain full of fragmentation: the right model for each job, humans in the loop, and an architecture built for growth.
 
 [Learn more about Pandotic]({{contact-link}})
