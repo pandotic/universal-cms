@@ -13,6 +13,8 @@ const rootDir = resolve(__dirname, "..");
 
 const CLIENT_BUNDLES = [
   "dist/error-logging/index.js",
+  "dist/components/admin/index.js",
+  "dist/components/theme/index.js",
 ];
 
 for (const rel of CLIENT_BUNDLES) {

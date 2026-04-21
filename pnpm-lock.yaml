@@ -320,10 +320,10 @@ importers:
         version: link:../packages/cms-core
       '@supabase/ssr':
         specifier: ^0.10.0
-        version: 0.10.0(@supabase/supabase-js@2.101.1)
+        version: 0.10.0(@supabase/supabase-js@2.102.1)
       '@supabase/supabase-js':
-        specifier: ^2.99.1
-        version: 2.101.1
+        specifier: ^2.102.1
+        version: 2.102.1
       '@tailwindcss/postcss':
         specifier: ^4.0.0
         version: 4.2.2
@@ -6065,11 +6065,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  '@supabase/ssr@0.10.0(@supabase/supabase-js@2.101.1)':
-    dependencies:
-      '@supabase/supabase-js': 2.101.1
-      cookie: 1.1.1
 
   '@supabase/ssr@0.10.0(@supabase/supabase-js@2.102.1)':
     dependencies:
