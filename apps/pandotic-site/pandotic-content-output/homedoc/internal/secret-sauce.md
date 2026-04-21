@@ -14,7 +14,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** A document extraction pipeline that routes different document types to different AI models based on cost, capability, and complexity. Google Gemini 2.0 Flash handles 7 document types (utility bills, appliance labels, receipts, insurance, warranties, test results, bids) at ~$0.001/call. GPT-4o handles inspection reports requiring complex 5-part output with severity normalization at ~$0.01/call. Google Vision handles OCR for physical appliance nameplates. Unstructured.io preprocesses multi-page PDFs into markdown before any AI model processes them.
 
-**Why it's powerful:** Most "AI-powered" platforms use a single model for everything — overpaying for simple tasks and underperforming on complex ones. This approach optimizes both cost and quality by matching model capability to task complexity.
+**The edge:** Most "AI-powered" platforms use a single model for everything — overpaying for simple tasks and underperforming on complex ones. This approach optimizes both cost and quality by matching model capability to task complexity.
 
 **What's unique about Pandotic's implementation:** The prompt registry is document-type-specific — each extraction type has tailored prompts, expected output schemas, and validation rules. The Unstructured.io preprocessing step is critical: a 50-page PDF fed directly to an LLM produces unreliable results, but converting it to structured markdown first yields dramatically better extraction.
 
@@ -24,7 +24,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** Every AI extraction result is cached in `extraction_results_cache` (30-day TTL) and presented in a review UI. The user can approve, correct, or reject each extracted field before it persists to the database. Field corrections are tracked in `extraction_field_corrections`.
 
-**Why it's powerful:** This pattern solves the trust problem with AI extraction. Users don't have to blindly accept AI output, and the system generates correction data that reveals extraction quality patterns.
+**The edge:** This pattern solves the trust problem with AI extraction. Users don't have to blindly accept AI output, and the system generates correction data that reveals extraction quality patterns.
 
 **What's unique:** The cache-review-persist architecture means extraction errors never pollute the database. The correction tracking creates a de facto quality metrics system without building a separate analytics pipeline.
 
@@ -34,7 +34,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** Wildfire risk aggregated from 5 independent data sources, each cached at its own interval: FEMA NRI (90 days), NIFC Historical (90 days), USGS Wildland Hazard (365 days), NOAA Weather (6 hours), CAL FIRE FHSZ (365 days). Per-source caches feed a composite cache. County-level aggregation means one API call can serve hundreds of users.
 
-**Why it's powerful:** Tiered caching is the only architecture that balances data freshness with cost. Weather data needs to be fresh (6 hours). Historical fire maps don't change often (365 days). A flat caching policy either overpays for stale data or under-refreshes dynamic data.
+**The edge:** Tiered caching is the only architecture that balances data freshness with cost. Weather data needs to be fresh (6 hours). Historical fire maps don't change often (365 days). A flat caching policy either overpays for stale data or under-refreshes dynamic data.
 
 **What's unique:** The composite scoring logic weighs sources differently — a high NOAA weather risk during fire season is weighted more heavily than a moderate FEMA national index. The county-level aggregation strategy means the marginal cost of adding a new user in an already-cached county is zero.
 
@@ -44,7 +44,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** The `extract-inspection` edge function processes home inspection reports from 5+ inspection software platforms (Spectora, HomeGauge, Horizon, Palm-Tech, and others) and normalizes their findings into a unified severity scale: safety_hazard, deficiency, maintenance_item, monitor, informational. The extraction produces a 5-part output: home attributes, systems, findings, fix-it items, and recommended projects.
 
-**Why it's powerful:** Inspection reports from different platforms use different terminology, structures, and severity classifications. Without normalization, the same roof issue might be "Major Defect" in one report and "Monitor" in another.
+**The edge:** Inspection reports from different platforms use different terminology, structures, and severity classifications. Without normalization, the same roof issue might be "Major Defect" in one report and "Monitor" in another.
 
 **What's unique:** The 5-part output structure (attributes → systems → findings → fix-its → projects) creates a natural pipeline from "what the inspector found" to "what the homeowner should do." Related findings are automatically grouped into project recommendations.
 
@@ -54,7 +54,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** All external API integrations are stored in the `api_integrations` database table with configuration, credentials, health status, and usage tracking. Adding a new API requires only a database migration — no code deployment. The admin dashboard auto-surfaces new integrations with health checks, usage metrics, and cost monitoring.
 
-**Why it's powerful:** In most platforms, adding a new API integration requires code changes, deployment, and dashboard updates. HomeDoc's registry pattern makes new integrations a configuration change, not a development project.
+**The edge:** In most platforms, adding a new API integration requires code changes, deployment, and dashboard updates. HomeDoc's registry pattern makes new integrations a configuration change, not a development project.
 
 **What's unique:** The `api_call_tracking` table logs every call with endpoint, response time, cost, and cache hit status. The admin dashboard shows real-time health status, cost trends, and quota usage per integration. Credential rotation is tracked via `api_credentials_audit`.
 
@@ -64,7 +64,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** The electrification service (`electrificationService.ts`, 1,268 lines) calculates gas usage, electrification readiness, and conversion costs using dynamic climate zone factors. Alaska's heating intensity factor is 1.8x; Florida's is 0.2x. Gas usage is distributed across end-uses (space heating 45%, water heating 25%, cooking 8%, etc.) and adjusted for household occupancy.
 
-**Why it's powerful:** Generic calculators use national averages. HomeDoc's climate-zone-aware modeling produces dramatically more accurate estimates for homes in extreme climates — where the decision to electrify has the highest financial stakes.
+**The edge:** Generic calculators use national averages. HomeDoc's climate-zone-aware modeling produces dramatically more accurate estimates for homes in extreme climates — where the decision to electrify has the highest financial stakes.
 
 **What's unique:** The model combines IECC climate zones with appliance-specific efficiency ratings, occupant count adjustments, and age-based degradation factors. A 15-year-old furnace in Minneapolis is modeled very differently from a 5-year-old furnace in Phoenix.
 
@@ -74,7 +74,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** 33 independent Supabase edge functions running on Deno, with shared utilities for CORS handling, authentication (user-scoped + service role), request logging, and rate limiting. All AI calls, property lookups, and risk aggregation run server-side.
 
-**Why it's powerful:** Edge functions keep API keys out of the browser, enforce rate limiting at the server level, and enable RLS-enforced data access patterns. Each function deploys independently, so a change to the extraction pipeline doesn't affect the risk scoring service.
+**The edge:** Edge functions keep API keys out of the browser, enforce rate limiting at the server level, and enable RLS-enforced data access patterns. Each function deploys independently, so a change to the extraction pipeline doesn't affect the risk scoring service.
 
 **What's unique:** The shared `_shared/` directory provides standardized patterns (CORS, auth, logging, rate limiting) that ensure every function follows the same security and observability model. The rate limiter implementation prevents abuse without blocking legitimate usage.
 
@@ -84,7 +84,7 @@ generated: "2026-04-07T00:00:00Z"
 
 **What it is:** Row-Level Security policies at the PostgreSQL level enforce data isolation between organizations. Organization-scoped widgets, branding, and access controls are configured per-tenant. Group admin panels provide organization-level management.
 
-**Why it's powerful:** RLS at the database level means data isolation is enforced regardless of application code bugs. A misconfigured API endpoint can't leak data across organizations because the database itself prevents it.
+**The edge:** RLS at the database level means data isolation is enforced regardless of application code bugs. A misconfigured API endpoint can't leak data across organizations because the database itself prevents it.
 
 **What's unique:** The multi-tenancy model supports three distinct access patterns: direct homeowner access, professional-managed access (contractors viewing client homes), and organization-scoped access (group admins managing multiple properties). White-label branding is per-organization.
 
