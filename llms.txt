@@ -9,65 +9,36 @@ Scope of this file: the consumable package + app admin. Hub / Fleet /
 Team Hub dashboards are excluded, except for the backend tables they
 expose via the package's data subpaths.
 
+Regenerate with `pnpm ai-context`.
+
 ## Quickstart
 
-- [AI_CONTEXT.md](./AI_CONTEXT.md): Condensed one-file spec — paste into any AI chat session to bootstrap context.
-- [packages/cms-core/README.md](./packages/cms-core/README.md): Install, env vars, subpath examples, design tenets.
-- [PUBLISHING.md](./PUBLISHING.md): GitHub Packages publish flow + consumer `.npmrc` + `NODE_AUTH_TOKEN` setup.
-- [UPGRADE.md](./UPGRADE.md): Semver policy + per-version upgrade checklist.
-- [template/src/cms.config.ts](./template/src/cms.config.ts): Starter `CmsConfig` — edit per site.
-- [template/src/middleware.ts](./template/src/middleware.ts): Drop-in Supabase SSR auth middleware protecting `/admin/*`.
+- [AI_CONTEXT.md](./AI_CONTEXT.md): Condensed one-file spec — paste into any AI chat session.
+- [packages/cms-core/README.md](./packages/cms-core/README.md): Install, env vars, subpath examples.
+- [PUBLISHING.md](./PUBLISHING.md): GitHub Packages publish flow.
+- [UPGRADE.md](./UPGRADE.md): Semver + upgrade checklist.
+- [template/src/cms.config.ts](./template/src/cms.config.ts): Starter `CmsConfig`.
+- [template/src/middleware.ts](./template/src/middleware.ts): Drop-in Supabase SSR auth.
 
 ## Package surface
 
-- [packages/cms-core/package.json](./packages/cms-core/package.json): Canonical list of subpath exports + peer deps.
-- [packages/cms-core/src/config.ts](./packages/cms-core/src/config.ts): `CmsConfig`, `CmsModuleName`, `modulePresets`, `MODULE_MIGRATIONS`, `getRequiredMigrations`.
-- [packages/cms-core/src/types/index.ts](./packages/cms-core/src/types/index.ts): Shared types — `ContentPage`, `MediaItem`, `Review`, `SiteSetting`, `ActivityLogEntry`, `TrackingProvider`, `ErrorLogEntry`.
-- [packages/cms-core/src/types/admin.ts](./packages/cms-core/src/types/admin.ts): Platform admin types — `UserProfile`, `UserRoleAssignment`, `Organization`, `PlatformModule`, `AdminAuditLog`, `FeatureFlag`.
-- [packages/cms-core/src/middleware/auth.ts](./packages/cms-core/src/middleware/auth.ts): `requireAdmin(supabase, request, roles)`, `apiError(err, status)`.
-- [packages/cms-core/src/security/index.ts](./packages/cms-core/src/security/index.ts): Rate limiters, env validators, CSP headers, zod body validator, CSS sanitizer.
-- [packages/cms-core/src/ai/index.ts](./packages/cms-core/src/ai/index.ts): `getCmsTools`, `buildSystemPrompt`, `executeTool` — Anthropic tool-use helpers for admin chat.
-
-## Data functions (client-injection)
-
-- [packages/cms-core/src/data/content-pages.ts](./packages/cms-core/src/data/content-pages.ts): Content pages CRUD.
-- [packages/cms-core/src/data/entities.ts](./packages/cms-core/src/data/entities.ts): Directory entities.
-- [packages/cms-core/src/data/reviews.ts](./packages/cms-core/src/data/reviews.ts): User reviews + moderation.
-- [packages/cms-core/src/data/categories.ts](./packages/cms-core/src/data/categories.ts): Taxonomy.
-- [packages/cms-core/src/data/media.ts](./packages/cms-core/src/data/media.ts): Media library + Supabase Storage.
-- [packages/cms-core/src/data/forms.ts](./packages/cms-core/src/data/forms.ts): Forms + submissions.
-- [packages/cms-core/src/data/site-settings.ts](./packages/cms-core/src/data/site-settings.ts): Key-value settings store.
-- [packages/cms-core/src/data/activity-log.ts](./packages/cms-core/src/data/activity-log.ts): Audit trail.
-- [packages/cms-core/src/data/error-log.ts](./packages/cms-core/src/data/error-log.ts): Error log + markdown formatting.
-- [packages/cms-core/src/data/affiliates.ts](./packages/cms-core/src/data/affiliates.ts): Affiliate programs + tracking URLs.
-- [packages/cms-core/src/data/certifications.ts](./packages/cms-core/src/data/certifications.ts): Certifications + rule engine.
-- [packages/cms-core/src/data/cta-blocks.ts](./packages/cms-core/src/data/cta-blocks.ts): Reusable CTA blocks.
-- [packages/cms-core/src/data/listicles.ts](./packages/cms-core/src/data/listicles.ts): Ranked lists.
-- [packages/cms-core/src/data/redirects.ts](./packages/cms-core/src/data/redirects.ts): 301/302 management.
-- [packages/cms-core/src/data/internal-links.ts](./packages/cms-core/src/data/internal-links.ts): Internal link graph + orphan detection.
-- [packages/cms-core/src/data/link-checker.ts](./packages/cms-core/src/data/link-checker.ts): Broken link + 404 tracking.
-- [packages/cms-core/src/data/ai-conversations.ts](./packages/cms-core/src/data/ai-conversations.ts): Admin chat persistence.
-- [packages/cms-core/src/data/api-usage.ts](./packages/cms-core/src/data/api-usage.ts): API call tracking + keys + audit.
-- [packages/cms-core/src/data/projects.ts](./packages/cms-core/src/data/projects.ts): Portfolio project pages.
-- [packages/cms-core/src/data/project-parsers.ts](./packages/cms-core/src/data/project-parsers.ts): Markdown-to-structured parsers for project sections.
-
-## Components
-
-- [packages/cms-core/src/components/admin/index.ts](./packages/cms-core/src/components/admin/index.ts): `AdminShell`, `AdminSidebar`, `CommandPalette`, `ChatPanel`, `CmsProvider`, `useCmsConfig`.
-- [packages/cms-core/src/components/ui/index.ts](./packages/cms-core/src/components/ui/index.ts): shadcn/Radix primitives — Button, Input, Card, Dialog, Table, Tabs, Toast, DropdownMenu, etc.
-- [packages/cms-core/src/components/theme/index.ts](./packages/cms-core/src/components/theme/index.ts): `ThemeProvider`, `useTheme`, `ThemeInjector`, `ThemeToggle`.
-- [packages/cms-core/src/components/tracking/index.ts](./packages/cms-core/src/components/tracking/index.ts): `TrackingInjector`, `TrackingNoscript`, `WebmasterVerification`.
-- [packages/cms-core/src/components/projects/index.ts](./packages/cms-core/src/components/projects/index.ts): `ProjectHero`, `ProjectFeatureGrid`, `ProjectCaseStudy`, `ProjectProofPoints`, `ProjectTechStack`, `ProjectVideoEmbed`, `ProjectScreenshots`, `ScrollReveal`, `TextReveal`.
+- [packages/cms-core/package.json](./packages/cms-core/package.json): Canonical subpath export list.
+- [packages/cms-core/src/config.ts](./packages/cms-core/src/config.ts): `CmsConfig`, `modulePresets`, `MODULE_MIGRATIONS`, `getRequiredMigrations`.
+- [packages/cms-core/src/types/index.ts](./packages/cms-core/src/types/index.ts): Shared domain types.
+- [packages/cms-core/src/types/admin.ts](./packages/cms-core/src/types/admin.ts): Platform admin types.
+- [packages/cms-core/src/middleware/auth.ts](./packages/cms-core/src/middleware/auth.ts): `requireAdmin`, `apiError`.
+- [packages/cms-core/src/security/index.ts](./packages/cms-core/src/security/index.ts): Rate limiters, env validators, CSP headers.
+- [packages/cms-core/src/ai/index.ts](./packages/cms-core/src/ai/index.ts): Anthropic tool-use helpers for admin chat.
 
 ## Database
 
-- [template/supabase/migrations/](./template/supabase/migrations/): 27 idempotent SQL migrations. `00003` + `00006` always required; others gated by enabled modules.
+- [template/supabase/migrations/](./template/supabase/migrations/): Idempotent SQL migrations.
 
 ## Template
 
 - [template/](./template/): Next.js 16 App Router starter. Copy as-is for a new site.
-- [template/src/app/admin/](./template/src/app/admin/): Admin pages — dashboard, content-pages, media, directory, categories, reviews, affiliates, forms, activity, errors, settings.
-- [template/src/app/api/admin/](./template/src/app/api/admin/): Matching API handlers, all gated by `requireAdmin`.
+- [template/src/app/admin/](./template/src/app/admin/): Admin pages.
+- [template/src/app/api/admin/](./template/src/app/api/admin/): Admin API handlers.
 
 ## Optional
 
