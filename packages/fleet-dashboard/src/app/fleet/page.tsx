@@ -1290,13 +1290,11 @@ function RegisterPackageModal({
                 setPackageName(e.target.value);
                 if (e.target.value === "@pandotic/universal-cms") setCategory("cms");
                 else if (e.target.value === "@pandotic/skill-library") setCategory("library");
-                else if (e.target.value === "@universal-cms/admin-ui") setCategory("ui");
               }}
               className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
             >
               <option value="@pandotic/universal-cms">@pandotic/universal-cms</option>
               <option value="@pandotic/skill-library">@pandotic/skill-library</option>
-              <option value="@universal-cms/admin-ui">@universal-cms/admin-ui</option>
               <option value="custom">Custom package...</option>
             </select>
           </div>

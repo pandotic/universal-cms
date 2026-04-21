@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isPlatformAdmin } from "@universal-cms/admin-core/rbac";
-import type { SupabaseClientAdapter } from "@universal-cms/admin-core/types";
+import { isPlatformAdmin } from "@pandotic/universal-cms/admin/rbac";
+import type { SupabaseClientAdapter } from "@pandotic/universal-cms/admin/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**

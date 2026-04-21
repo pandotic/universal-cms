@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { EntityManagementPanel } from "@universal-cms/admin-ui";
+import { EntityManagementPanel } from "@pandotic/universal-cms/components/admin";
 import { groupAdapter } from "@/lib/adapters/group-adapter";
 import { adminConfig } from "@/config/admin-config";
 

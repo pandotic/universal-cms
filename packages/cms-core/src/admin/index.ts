@@ -18,10 +18,10 @@ export type {
   PlatformModule,
   AuthAdapter,
   SupabaseClientAdapter,
-} from './types/index.js';
+} from './types.js';
 
 // Adapters
-export type { EntityAdapter, EntityField } from './adapters/index.js';
+export type { EntityAdapter, EntityField } from './adapters.js';
 
 // RBAC
 export {
@@ -36,7 +36,7 @@ export {
   revokeRole,
   logAdminAction,
   getAuditLogs,
-} from './rbac/index.js';
+} from './rbac.js';
 
 // Services
 export {
@@ -50,7 +50,7 @@ export {
   getFeatureFlags,
   isFeatureEnabled,
   toggleFeatureFlag,
-} from './services/index.js';
+} from './services.js';
 
 // Hooks
 export {
@@ -60,4 +60,4 @@ export {
   useFeatureFlag,
   useFeatureFlags,
   useAdminSettings,
-} from './hooks/index.js';
+} from './hooks.js';

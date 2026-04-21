@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Search, ChevronLeft, ChevronRight, Shield, ShieldOff } from 'lucide-react';
-import type { SupabaseClientAdapter, AdminUser } from '@universal-cms/admin-core';
-import { grantRole, revokeRole, getUserRoles, updateAccountStatus, logAdminAction } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter, AdminUser } from '../../../admin/index.js';
+import { grantRole, revokeRole, getUserRoles, updateAccountStatus, logAdminAction } from '../../../admin/index.js';
 
 export interface UserManagementPanelProps {
   supabase: SupabaseClientAdapter;

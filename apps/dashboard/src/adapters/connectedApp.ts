@@ -1,4 +1,4 @@
-import type { EntityAdapter } from '@universal-cms/admin-core';
+import type { EntityAdapter } from '@pandotic/universal-cms/admin';
 
 export const connectedAppAdapter: EntityAdapter = {
   entityName: 'App',

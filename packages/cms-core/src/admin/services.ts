@@ -14,8 +14,8 @@ import type {
   FeatureFlag,
   AdminUser,
   AccountStatus,
-} from '../types/index.js';
-import { logAdminAction } from '../rbac/index.js';
+} from './types.js';
+import { logAdminAction } from './rbac.js';
 
 // ---------------------------------------------------------------------------
 // Organization service

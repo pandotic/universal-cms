@@ -77,6 +77,12 @@ export default defineConfig({
     "promptkit/skills": "src/promptkit/skills/index.ts",
     "promptkit/optimizers": "src/promptkit/optimizers/index.ts",
     "data/promptkit-history": "src/data/promptkit-history.ts",
+    "admin/index": "src/admin/index.ts",
+    "admin/types": "src/admin/types.ts",
+    "admin/adapters": "src/admin/adapters.ts",
+    "admin/rbac": "src/admin/rbac.ts",
+    "admin/services": "src/admin/services.ts",
+    "admin/hooks": "src/admin/hooks.ts",
   },
   format: ["esm"],
   dts: true,
@@ -97,6 +103,7 @@ export default defineConfig({
     "zod",
     "class-variance-authority",
     "lucide-react",
+    "react-router-dom",
   ],
   // Tsup 8.x strips "use client" from bundled outputs. Re-add it for
   // client-only entries so Next.js can import them from Server Components.
