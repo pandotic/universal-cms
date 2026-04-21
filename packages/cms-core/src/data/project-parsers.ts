@@ -22,7 +22,9 @@ export function parseFeatures(content: string): ParsedFeature[] {
 
     const title = titleMatch[1].trim();
     const description = extractBoldSection(section, "What it does:");
-    const userBenefit = extractBoldSection(section, "Why it matters to users:");
+    const userBenefit =
+      extractBoldSection(section, "User impact:") ||
+      extractBoldSection(section, "Why it matters to users:");
     const differentiation = extractBoldSection(section, "Differentiation:");
 
     features.push({ title, description, userBenefit, differentiation });

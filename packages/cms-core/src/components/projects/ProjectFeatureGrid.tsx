@@ -41,7 +41,7 @@ export default function ProjectFeatureGrid({ features, projectName }: ProjectFea
                 </p>
                 {feature.userBenefit && (
                   <p className="text-gray-500 text-xs leading-relaxed border-t border-white/5 pt-3">
-                    <span className="text-gray-300 font-medium">Why it matters: </span>
+                    <span className="text-gray-300 font-medium">Impact: </span>
                     {feature.userBenefit}
                   </p>
                 )}
