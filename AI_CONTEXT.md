@@ -199,6 +199,8 @@ Flip booleans in `modules` to enable. The build step reads
 - **SEO & Technical:** `seo`, `redirects`, `linkChecker`, `internalLinks`, `imagesSeo`
 - **Tools & Public Features:** `compareTools`, `assessmentTool`, `resourcesPage`, `smallBusinessPage`
 - **Forms & Lead Capture:** `forms`, `ctaManager`
+- **Users & Organizations:** `businessEntities`, `linkedinAuth`, `vendorProfiles`
+- **Media & Content Extensions:** `videos`
 - **System:** `errorLog`, `activityLog`, `bulkImport`, `apiUsage`
 <!-- /AUTO:MODULE_CATALOG -->
 
@@ -424,6 +426,18 @@ ones listed by `getRequiredMigrations(cmsConfig)`.
 | `00025_api_usage_tracking` | API Usage Tracking — `api_usage`, `api_keys`, `api_audit` |
 | `00025_projects` | Projects showcase tables — `projects`, `project_sections` |
 | `00026_tracking_and_webmaster` | Tracking & Webmaster verification settings |
+| `00030_video_content` | Video content generation tables for HeyGen integration — `videos`, `video_generation_log` |
+| `00031_content_page_tags` | Add tags column to content_pages for blog/insights categorization |
+| `00032_business_entities` | Business Entities: companies + user_companies — `companies`, `user_companies` |
+| `00033_companies_universal_profile` | Universal Company Profile: extend companies table + add child tables — `company_links`, `company_documents`, `company_evidence` |
+| `00034_company_enrichment` | Company Enrichment Pipeline: tracks enrichment runs with proposed/approved changes. — `company_enrichment_runs` |
+| `00035_company_claims_submissions` | Phase 4: Company Claim Workflow + Submissions — `company_claim_requests`, `company_submissions` |
+| `00036_tighten_companies_insert_rls` | Tighten the companies INSERT RLS policy. |
+| `00037_company_vendor_profiles` | Company Vendor Profiles: universal product/service data for directory entities. — `company_vendor_profiles` |
+| `00038_consolidate_company_columns` | Consolidate duplicate columns from 00026 that were superseded by 00027. |
+| `00039_claim_token_expiry` | Add token expiry column to claim requests for email verification flow. |
+| `00040_media_meta_overlay` | media_meta: an overlay table for image metadata (alt text, caption) on — `media_meta` |
+| `00041_content_page_display_options` | Add display_options JSONB column to content_pages for per-page UI feature toggles |
 <!-- /AUTO:MIGRATIONS -->
 
 Core (always required): `00003`, `00006`.
