@@ -104,6 +104,18 @@ Import from `@pandotic/universal-cms/<subpath>`:
 | `/components/tracking` | `TrackingInjector`, `WebmasterVerification`, `TrackingNoscript` |
 | `/components/projects` | Portfolio/project-page components (hero, feature grid, case study, etc.) |
 
+### App Admin surface (`/admin/*`) — tiered RBAC + entity-agnostic admin plumbing
+
+| Subpath | What's in it |
+|---|---|
+| `/admin/types` | `CoreRoleType`, `UserRole`, `AdminTier`, `AccountStatus`, `AdminUser`, `Organization`, `OrganizationMember`, `AuditLogEntry`, `FeatureFlag`, `AdminSetting`, `AdminAlert`, `PlatformModule`, `AuthAdapter`, `SupabaseClientAdapter` |
+| `/admin/adapters` | `EntityAdapter`, `EntityField` — plugin slot for app-specific entities (e.g. HomeDoc "Home/Property", ConcertBucket "Concert/Venue"). Declares fields, list/detail rendering, query shape. |
+| `/admin/rbac` | `isPlatformAdmin`, `getUserRoles`, `getHighestRole`, `detectAdminTier`, `canAccessTier`, `getTierLabel`, `getAdminDashboardRoute`, `grantRole`, `revokeRole`, `logAdminAction`, `getAuditLogs` — single source of truth for permission checks. |
+| `/admin/services` | `createOrganization`, `getUserOrganizations`, `addOrganizationMember`, `removeOrganizationMember`, `updateAccountStatus`, `getAdminSettingsByCategory`, `updateAdminSetting`, `getFeatureFlags`, `isFeatureEnabled`, `toggleFeatureFlag` |
+| `/admin/hooks` | `useAdminTier`, `useIsPlatformAdmin`, `useUserRoles`, `useFeatureFlag`, `useFeatureFlags`, `useAdminSettings` — React hooks built on the adapters. |
+
+Tier hierarchy: `PLATFORM_ADMIN` (3) > `GROUP_ADMIN` (2) > `ENTITY_ADMIN` (1) > `NONE` (0). All route guards and service-level authorization should flow through `can()` / `canAccessTier()` instead of ad-hoc queries.
+
 ### Data subpaths (client-injection pattern — all take `SupabaseClient` first)
 
 | Subpath | Domain |
