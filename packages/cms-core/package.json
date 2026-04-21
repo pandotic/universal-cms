@@ -171,6 +171,11 @@
       "types": "./dist/components/theme/index.d.ts",
       "development": "./src/components/theme/index.ts"
     },
+    "./components/theme/server": {
+      "import": "./dist/components/theme/server.js",
+      "types": "./dist/components/theme/server.d.ts",
+      "development": "./src/components/theme/server.ts"
+    },
     "./components/tracking": {
       "import": "./dist/components/tracking/index.js",
       "types": "./dist/components/tracking/index.d.ts",
