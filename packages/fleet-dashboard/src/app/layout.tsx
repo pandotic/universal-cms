@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NavShell } from "./nav/nav-shell";
 import { PageHelpPanel } from "@/components/page-help/PageHelpPanel";
+import { Providers } from "./providers";
 import {
   ErrorBoundary,
   ErrorCaptureProvider,
@@ -33,7 +34,9 @@ export default function RootLayout({
         </a>
         <ErrorCaptureProvider endpoint="/api/errors">
           <ErrorBoundary name="RootLayout" endpoint="/api/errors">
-            <NavShell>{children}</NavShell>
+            <Providers>
+              <NavShell>{children}</NavShell>
+            </Providers>
           </ErrorBoundary>
           <PageHelpPanel />
         </ErrorCaptureProvider>

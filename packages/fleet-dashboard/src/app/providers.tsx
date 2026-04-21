@@ -13,7 +13,7 @@ const QCP = QueryClientProvider as unknown as React.FC<{
   children: ReactNode;
 }>;
 
-export function QueryProvider({ children }: { children: ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(
     () =>
       new QueryClient({
