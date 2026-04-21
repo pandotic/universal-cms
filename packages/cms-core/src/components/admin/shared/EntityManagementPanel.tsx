@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { SupabaseClientAdapter, EntityAdapter } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter, EntityAdapter } from '../../../admin/index.js';
 
 export interface EntityManagementPanelProps {
   supabase: SupabaseClientAdapter;

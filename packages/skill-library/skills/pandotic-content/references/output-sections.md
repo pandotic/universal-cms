@@ -116,12 +116,25 @@ Highlight the most compelling features or capabilities — the things that make 
 
 For each one:
 - What it does
-- Why it matters to users
-- Why it matters to the business
+- **User impact** — what changes for the person using it (outcome, time saved, friction removed)
+- **Business impact** — what it unlocks commercially (flywheel, upsell path, distribution)
 - Whether it feels differentiated
 - Whether this capability is extensible to other projects
 
 Do not just list UI elements. Explain why each feature exists and what problem it solves.
+
+### Impact-copy voice
+
+The labels above are prompts to us, not headings for the reader. The copy must
+read like a confident assertion of impact — never like it's answering "why is
+this important?"
+
+- ✅ Lead with the outcome or the failure mode it eliminates.
+- ❌ Don't open with "This matters because…" / "The reason this is powerful…"
+- ❌ Don't use "Why it matters to users / the business / Why it's powerful" as
+  literal headings. Use **User impact:** / **Business impact:** in public
+  content, and **The edge:** in internal notes.
+- Keep it to 2-3 sentences per block. Cut preamble — the impact *is* the point.
 
 ---
 
@@ -134,7 +147,7 @@ Do not just list UI elements. Explain why each feature exists and what problem i
 For each capability found in the project, document:
 
 - **What it is** — the pattern, system, or technique (be specific and technical)
-- **Why it's powerful** — what makes this approach better than the obvious alternative
+- **The edge** — what makes this approach better than the obvious alternative. Assert the advantage; don't narrate "why it's powerful." Lead with what breaks in the naive version or what this approach wins on.
 - **What's unique about Pandotic's implementation** — the twist, the insight, the non-obvious design choice
 - **Complexity hidden from the user** — what hard problems are solved invisibly
 

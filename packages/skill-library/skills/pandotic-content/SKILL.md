@@ -200,12 +200,31 @@ Highlight the most compelling features or capabilities — the things that make 
 
 For each one:
 - What it does
-- Why it matters to users
-- Why it matters to the business
+- **User impact** — what changes for the person using it (outcome, time saved, friction removed)
+- **Business impact** — what it unlocks commercially (flywheel, upsell path, distribution)
 - Whether it feels differentiated
 - Whether this capability is extensible to other projects
 
 Do not just list UI elements. Explain why each feature exists and what problem it solves.
+
+### Impact-copy voice — don't answer "why is this important?"
+
+The labels above are **prompts to us, not to the reader.** The copy underneath
+must read like a confident assertion of impact, not like it's answering a
+rhetorical question. A reader who skims the page should never be able to
+reverse-engineer that the writer was told "cover why it matters."
+
+- ✅ Lead with the outcome or the failure mode it eliminates: *"No manual data
+  entry."* / *"Widgets turn HomeDoc from a consumer product into a B2B
+  distribution platform."*
+- ❌ Don't restate the label as a sentence opener: *"This matters to users
+  because…"* / *"The reason this is powerful is that…"* / *"It's important
+  because…"*
+- ❌ Don't use "Why it matters to users:" / "Why it matters to the business:" /
+  "Why it's powerful:" as headings in the output. Use **User impact:** /
+  **Business impact:** / (for internal notes) **The edge:** instead.
+- Keep it to 2-3 sentences per block. If you need a preamble to set up the
+  impact, cut the preamble — the impact *is* the point.
 
 ---
 
@@ -222,9 +241,14 @@ This phase produces **Sections 9-12 and 16**. Sections 9-10 are internal-only. S
 For each capability found in the project, document:
 
 - **What it is** — the pattern, system, or technique (be specific and technical)
-- **Why it's powerful** — what makes this approach better than the obvious alternative
+- **The edge** — what makes this approach better than the obvious alternative (assert the advantage, don't narrate "why it's powerful")
 - **What's unique about Pandotic's implementation** — the twist, the insight, the non-obvious design choice
 - **Complexity hidden from the user** — what hard problems are solved invisibly
+
+> Same voice rule as Section 8: the copy under **The edge** should read like a
+> confident claim, not an answer to "why is this powerful?" Lead with what
+> breaks in the obvious alternative, or what this approach wins on — not with
+> "This is powerful because…"
 
 Look for:
 - AI workflow orchestration (multi-step chains, fan-out/fan-in, fallback logic)

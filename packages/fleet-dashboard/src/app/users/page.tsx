@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { UserManagementPanel } from "@universal-cms/admin-ui";
+import { UserManagementPanel } from "@pandotic/universal-cms/components/admin";
 import { adminConfig } from "@/config/admin-config";
 
 export default function UsersPage() {

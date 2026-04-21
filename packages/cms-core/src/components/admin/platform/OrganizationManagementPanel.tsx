@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Building2, Search, Plus, Users as UsersIcon } from 'lucide-react';
-import type { SupabaseClientAdapter, Organization } from '@universal-cms/admin-core';
+import type { SupabaseClientAdapter, Organization } from '../../../admin/index.js';
 
 export interface OrganizationManagementPanelProps {
   supabase: SupabaseClientAdapter;

@@ -7,8 +7,8 @@ import {
   EntityManagementPanel,
   FeatureFlagPanel,
   AuditLogViewer,
-} from '@universal-cms/admin-ui';
-import type { SupabaseClientAdapter } from '@universal-cms/admin-core';
+} from '@pandotic/universal-cms/components/admin';
+import type { SupabaseClientAdapter } from '@pandotic/universal-cms/admin';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { connectedAppAdapter } from '../adapters/connectedApp';

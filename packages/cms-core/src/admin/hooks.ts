@@ -6,9 +6,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { SupabaseClientAdapter, AdminTierInfo, UserRole, FeatureFlag, AdminSetting } from '../types/index.js';
-import { isPlatformAdmin, detectAdminTier, getUserRoles } from '../rbac/index.js';
-import { getFeatureFlags, isFeatureEnabled, getAdminSettingsByCategory } from '../services/index.js';
+import type { SupabaseClientAdapter, AdminTierInfo, UserRole, FeatureFlag, AdminSetting } from './types.js';
+import { isPlatformAdmin, detectAdminTier, getUserRoles } from './rbac.js';
+import { getFeatureFlags, isFeatureEnabled, getAdminSettingsByCategory } from './services.js';
 
 // ---------------------------------------------------------------------------
 // useAdminTier — detect the current user's admin tier

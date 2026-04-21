@@ -5,7 +5,7 @@
  * should flow through `can()` instead of ad-hoc queries.
  */
 
-import type { SupabaseClientAdapter, AdminTier, AdminTierInfo, UserRole, CoreRoleType } from '../types/index.js';
+import type { SupabaseClientAdapter, AdminTier, AdminTierInfo, UserRole, CoreRoleType } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Tier hierarchy

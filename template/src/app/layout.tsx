@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeInjector } from "@pandotic/universal-cms/components/theme";
+import { ThemeInjector } from "@pandotic/universal-cms/components/theme/server";
 import {
   TrackingInjector,
   WebmasterVerification,

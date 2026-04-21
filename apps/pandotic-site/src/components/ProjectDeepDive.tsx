@@ -112,7 +112,7 @@ export default function ProjectDeepDive({
                     {feature.userBenefit && (
                       <p className="text-gray-400 text-sm leading-relaxed mb-2">
                         <span className="text-gray-200 font-medium">
-                          Why it matters:{" "}
+                          Impact:{" "}
                         </span>
                         {feature.userBenefit}
                       </p>
