@@ -1,219 +1,104 @@
 # Universal CMS — Project Context for Claude
 
-## ⚡ Resume Point — Cleanup sweep (Apr 21, 2026, all 7 chunks merged)
+## Session wrap — Hub bug fixes + template build repair (Apr 21, 2026)
 
-Seven-chunk audit + cleanup pass landed across PRs #60, #62, #63, #65, #66,
-#67. Hub is now functional end-to-end, migration history is reconciled with
-live DB, admin packages are consolidated into cms-core, and the release
-pipeline is unblocked.
+Four PRs shipped this session, starting from a user report that
+`pandhub.netlify.app` crashed on every page with
+"No QueryClient set, use QueryClientProvider to set one".
 
-### What shipped (PR order)
+### What shipped
 
-| PR | Chunk | Summary |
+| PR | Title | Summary |
 |---|---|---|
-| #60 | 1 | `/fleet` React #310 crash fixed; `/properties` dark-theme fix; `OPS_RUNBOOK.md` + `chunk-1-ops.sql` |
-| #62 | 2 | 13 migration renames (00503–00515), `00505_hub_skills` made idempotent, `00516_feature_flags` codified, `chunk-2-runbook.md` |
-| #63 | 3+4 | Root build chain covers all workspace pkgs; CI typechecks everything; `@universal-cms/admin-core`/`admin-ui` ported into `@pandotic/universal-cms/admin*` + `./components/admin` and both packages deleted |
-| #65 | 5 | Cruft sweep: deleted `packages/admin-extraction/`, broken `Settings SKILL.md` symlink; archived promptkit specs + `Skill Onboarding/` under `docs/archive/` |
-| #66 | 6 | Release workflow hardened (explicit `version` script, `createGithubReleases`, debug output); `@pandotic/skill-library` got `publishConfig`; `admin-schema` marked private; `docs/RELEASE.md` added |
-| #67 | 7 | Sidebar `/team-hub` gated to founders only; meeting summaries shown on `/team-hub/meetings`; `schedule-granola-sync.sql` + `docs/GRANOLA-CRON.md`; `docs/MIGRATION-RECONCILIATION.md` |
+| #73 | fix(hub): lift QueryClientProvider to root layout | Sidebar calls `useTeamUser` (react-query) at the root, but the provider was scoped to `/team-hub/layout.tsx`. Every non-team-hub page crashed. Fix: new `src/app/providers.tsx` wraps `NavShell` in the root layout; `team-hub/layout.tsx` simplified. |
+| #74 | fix(template): unblock compilation after chunks 3+4 port | Admin port into cms-core stripped `"use client"` from bundled output. Extended the post-build patcher to tag `dist/components/admin/index.js` and `dist/components/theme/index.js`; split `components/theme` into client (`./components/theme`) + server (`./components/theme/server`) so `ThemeInjector` (an async Server Component) lives separately from `ThemeProvider`/`ThemeToggle`. Bumped template's `@supabase/supabase-js` to `^2.102.1` to match cms-core; excluded the broken-since-inception `template/admin-integrated/` from typecheck. |
+| #75 | feat(team-hub): auto-built Fleet review agenda + initiatives model | Rebased the long-lived Phase 2 Team Hub branch. New `hub_initiatives` entity (migration `00517`), `/initiatives` admin pages, `FleetReviewSection` replacing the old Command Center placeholder, pure-function flag derivation in `cms-core/src/data/hub-fleet-review.ts`. Sidebar gains an "Initiatives" link (founders only). |
+| #69 | feat(cms): add company profiles, media-meta overlay, display options, videos | Not opened this session — fixed the `ai-context-drift` CI failure by merging main into the branch and regenerating `AI_CONTEXT.md` + `llms-full.txt` via `pnpm ai-context`. |
 
-### Live-DB state (Pandotic Hub, `rimbgolutrxpmwsoswhq`)
+### Live state after this session
 
-- `supabase_migrations.schema_migrations` has 17 rows at version ≥ 00500.
-- `feature_flags` table created.
-- Team Hub has 20 real issues + 25 real todos (seed was correctly skipped).
-- **Founder linkage**: Dan is linked. Allen / Matt / Scott still need to
-  sign in at the Hub login page once — the `handle_new_user` trigger
-  (now at `00515_team_hub_auth.sql`) will auto-link them.
+- `pandhub.netlify.app` loads without the QueryClient error.
+- `cms-core` builds cleanly; 66/66 tests pass.
+- `template/` compiles (typecheck still fails on one pre-existing issue — see below).
+- Sidebar now gates both `/team-hub` and `/initiatives` to founders.
 
 ## Outstanding Work
 
-### Auto-running, watch for
+### Manual ops to run (PR #75 aftermath)
 
-1. **Version Packages PR** — when PR #66 (Chunk 6) merged, the Release
-   workflow should have detected two pending changesets
-   (`@pandotic/universal-cms` + `@pandotic/skill-library`) and opened a
-   "chore: version packages" PR. Merging that PR publishes
-   `@pandotic/universal-cms@0.2.0` + `@pandotic/skill-library@0.2.0` to
-   GitHub Packages. Check:
-   https://github.com/pandotic/universal-cms/pulls?q=is%3Apr+version+packages
-   If it didn't appear, the "Report changesets outputs" step at the
-   bottom of the release run logs has the diagnostic. See `docs/RELEASE.md`
-   § Troubleshooting.
+1. **Apply migration `00517_team_hub_initiatives.sql`** to the Hub Supabase
+   project (`rimbgolutrxpmwsoswhq`):
+   ```bash
+   cd /Users/dangolden/Documents/Github/universal-cms
+   git pull origin main
+   supabase db push --linked
+   ```
+2. **Seed initiatives.** Paste
+   `packages/fleet-dashboard/supabase/seed-initiatives.sql` into
+   https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new and
+   run. Idempotent — seeds the 6 original agenda items (ASU GSV, Gaia,
+   CJ/McLeod, SCE, Burning Man, education vertical).
+3. *(Optional)* dedupe existing team-hub issues/todos using the SQL block
+   in `packages/fleet-dashboard/README.md`.
 
-### Optional, documented, skippable
+### Watch-for: Version Packages PR (carried over)
 
-2. **Founder sign-ins** — ask Allen / Matt / Scott to log into the Hub once
-   so `public.users.auth_user_id` gets populated. No SQL needed.
-3. **Granola pg_cron auto-sync** — runbook at `docs/GRANOLA-CRON.md`. Three
-   prereqs (pg_cron + pg_net extensions, service-role key in Vault), then
-   `supabase db query --linked --file supabase/manual/schedule-granola-sync.sql`.
-4. **Migration history reconciliation** — runbook at `docs/MIGRATION-RECONCILIATION.md`.
-   Not urgent. Trigger when Stage 2+ sites report drift or when we want to
-   ship a publishable schema.
+When PR #66 merged, the Release workflow should have opened a
+"chore: version packages" PR bumping
+`@pandotic/universal-cms` + `@pandotic/skill-library` based on pending
+changesets. Check:
+https://github.com/pandotic/universal-cms/pulls?q=is%3Apr+version+packages
+Merging it publishes `0.2.0` to GitHub Packages and unblocks Stage 1 of
+the 10-site rollout. Diagnostic in the Release workflow run logs
+("Report changesets outputs" step). See `docs/RELEASE.md`
+§ Troubleshooting.
 
-### Unblocked, ready for Stage 1
+### Founder sign-ins (carried over)
 
-Once the Version Packages PR merges and the initial publish succeeds, the
-10-site rollout (see older resume point below for the plan doc) can proceed.
+Allen / Matt / Scott each need to log into the Hub once so
+`public.users.auth_user_id` populates. The `handle_new_user` trigger
+does the rest. No SQL needed.
+
+### Optional, documented
+
+- **Granola pg_cron auto-sync** — runbook at `docs/GRANOLA-CRON.md`.
+- **Migration history reconciliation** — runbook at
+  `docs/MIGRATION-RECONCILIATION.md`. Trigger when Stage 2+ sites report
+  drift or when we want to ship a publishable schema.
+
+### Flagged for a future session (not urgent)
+
+- **`template/admin-integrated/`** was added in commit `ab21575` and has
+  been broken since inception — it references
+  `@pandotic/admin-ui` / `@pandotic/admin-core` workspace packages that
+  never existed in this repo. PR #74 excluded it from the template
+  typecheck so the main template can build, but the folder is still on
+  disk. Either port its demos to `@pandotic/universal-cms/components/admin`
+  or delete the folder.
+- **`template/src/app/api/admin/errors/route.ts`** has a pre-existing
+  `ErrorSeverity` type coercion error that blocks
+  `pnpm --filter universal-cms-template build` at the typecheck phase.
+  Template compile phase passes thanks to PR #74. Trivial fix: coerce
+  `severity` / `category` URL params through the enum.
+
+### Stale branches safe to delete
+
+After the 4 PRs above merged, these remote branches are superseded:
+- `claude/add-error-logging-8u1mK` (PR #54 shipped v2)
+- `claude/chunk-3-skill-library-build-chain` (merged via PR #63)
+- `claude/chunk-4-admin-core-decision` (merged via PR #64)
+- `claude/chunk-6-release-pipeline` (merged via PR #66)
+- `claude/pandotic-team-hub-KMsMW` (superseded by the rebased Phase 2
+  branch that merged as PR #75)
+
+### Unblocked — ready for Stage 1
+
+Once the Version Packages PR merges and the initial publish succeeds,
 Stage 1 greenfield pilot needs:
-- A new empty repo set up per the prompt in the old rollout plan.
+- A new empty repo.
 - `.npmrc` in the consumer repo pointing at `https://npm.pkg.github.com`
   (snippet in `PUBLISHING.md` / `docs/RELEASE.md`).
 - `NODE_AUTH_TOKEN` env var set locally + in Netlify.
-
----
-
-## ⚡ Older Resume Point — Team Hub port (as of April 20, 2026, session close)
-
-**Team Hub merged into Pandotic Hub** as `/team-hub/*` route tree. Branch
-`claude/pandotic-team-hub-KMsMW` is ready to PR and merge. Full plan at
-`/root/.claude/plans/pandotic-team-hub-glowing-robin.md`.
-
-### What landed on the branch (4 commits)
-
-- `742075b` — magic-link auth + DumpModal owner/due_date fix + attendees on
-  past meetings + sidebar entry (pre-port).
-- `6e5f46f` — **full port** of `packages/team-hub` → `packages/fleet-dashboard`:
-  - Routes at `app/team-hub/{page.tsx, issues, todos, meetings, meetings/[id]}`.
-  - Components under `components/team-hub/{dump, issues, meeting, todos, ui}`.
-  - Hooks under `hooks/team-hub/` — `useAuth` replaced with `useTeamUser`
-    that reads the Hub's existing Supabase session.
-  - Migrations renumbered `00120_team_hub_initial.sql` through
-    `00123_team_hub_auth.sql`. Idempotent (IF NOT EXISTS / OR REPLACE /
-    ON CONFLICT DO NOTHING). Auth trigger softened — non-@pandotic sign-ups
-    no longer hard-rejected; they just don't get a `users` row.
-  - Edge functions `dump-classify`, `process-transcript`, `fetch-granola`
-    moved to `packages/fleet-dashboard/supabase/functions/`.
-  - Theme scoped via `[data-team-hub].dark` so team-hub CSS vars don't leak.
-  - TanStack Query provider scoped to `app/team-hub/layout.tsx`.
-  - `packages/team-hub/` directory deleted.
-- `978d507` — drop deleted team-hub entries from pnpm-lock.
-- `881df9a` — cast QueryClientProvider to bypass @tanstack/react-query v5 +
-  @types/react 19 children typing mismatch (see
-  https://github.com/TanStack/query/issues/6444). Netlify build now green.
-
-### Ops already done on Hub Supabase (`rimbgolutrxpmwsoswhq`)
-
-- ✅ `supabase migration repair --status applied 00105…00117, 00500…00502`
-  to unblock the CLI past the pre-existing drift (20+ Hub migrations were
-  applied manually / via dashboard and never recorded in
-  `supabase_migrations.schema_migrations`).
-- ✅ `supabase db push` — team-hub migrations `00120–00123` now applied.
-- ✅ `supabase functions deploy dump-classify process-transcript fetch-granola`.
-- ✅ `ANTHROPIC_API_KEY` secret confirmed present.
-
-### 🚨 Ops still to do (after merging this PR)
-
-1. **Seed the original agenda.** Paste
-   `packages/fleet-dashboard/supabase/seed-team-hub.sql` into
-   https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new
-   and run. Idempotent (`ON CONFLICT DO NOTHING`).
-2. **Back-fill `auth_user_id` on the 4 founders.** The `handle_new_user`
-   trigger only fires on *new* Supabase sign-ups. Allen/Matt/Dan/Scott
-   presumably already signed into the Hub pre-migration, so their
-   `auth_user_id` is still NULL until we run this once in the SQL editor:
-   ```sql
-   UPDATE public.users u
-      SET auth_user_id = a.id
-     FROM auth.users a
-    WHERE LOWER(u.email) = LOWER(a.email)
-      AND u.auth_user_id IS NULL;
-   ```
-   Without this, `/team-hub` shows the "Team Hub is for founders" panel to
-   the actual founders because `useTeamUser` can't resolve their row.
-3. **Smoke test** `/team-hub` in the browser:
-   - Agenda loads with the seed items.
-   - Dump bar Cmd-K → "Dan: prep Burning Man demo" → lands on Dan.
-   - Resolving an issue writes `completed_by` correctly.
-   - `/team-hub/meetings/[id]` renders archived meetings.
-   - Non-founder Hub users see the access-denied panel (tested by signing
-     in as any `@pandotic-site.com` or other non-founder email, if any exist).
-
-### Follow-ups worth picking up in a future session (not blocking)
-
-- **Granola auto-sync.** `fetch-granola` is manual-trigger today. Schedule it
-  via Supabase pg_cron so transcripts show up on `/team-hub/meetings/[id]`
-  without a click.
-- **Meeting summary on past-meetings list.** `/team-hub/meetings` shows
-  date + chair + rating + counts. The AI extraction writes a summary per
-  meeting; surface the first sentence as a one-liner on each row.
-- **Hide sidebar "Team Hub" entry for non-founders.** Cheap UX win —
-  gate in `app/nav/sidebar.tsx` by checking whether the user has a
-  `public.users` row (via a small server-side helper).
-- **Migration history cleanup.** The Hub Supabase project has 20+ migrations
-  applied manually that were repaired as "applied" to unblock this work.
-  At some point, reconcile the history table with the actual schema — run
-  `supabase db pull` against a staging copy, diff against the committed
-  migrations, either delete stale migration files or capture the true
-  schema as a new baseline.
-- **Pre-existing fleet-dashboard build blockers.** `src/app/{groups,users,
-  properties}/page.tsx`, `src/lib/adapters/*`, and `src/lib/middleware/
-  admin-rbac.ts` still import from `@universal-cms/admin-core` and
-  `@universal-cms/admin-ui` — vestigial deps flagged back in PR #39. They
-  only build because Netlify builds those workspace packages first. If
-  someone removes those packages, these consumers break. Decide: either
-  port the references into cms-core or formally keep admin-core/admin-ui
-  alive.
-
----
-
-## ⚡ Older Resume Point — Stage 0 of 10-site rollout (April 17, 2026)
-
-**Stage 0 of the 10-site rollout is DONE and merged to main** (PR #39, commit
-`ec94847`). Full plan lives at
-`/root/.claude/plans/i-need-to-start-hazy-quokka.md`.
-
-### What landed in PR #39 (`feat(stage-0): idempotent migrations + GH Packages publish wiring`)
-
-- All 27 `template/supabase/migrations/*.sql` are now idempotent (IF NOT EXISTS
-  / DROP-IF-EXISTS+CREATE / ON CONFLICT). Safe to apply to a DB that already
-  has overlapping schema.
-- `hub-admin` + `types/admin` added to `@pandotic/universal-cms` exports in both
-  `package.json` and `tsup.config.ts`.
-- Removed vestigial `@universal-cms/admin-core` and `@universal-cms/admin-ui`
-  workspace deps from `cms-core` (zero actual imports; would've broken external
-  `pnpm install`).
-- `publishConfig` points `@pandotic/universal-cms` at
-  `https://npm.pkg.github.com` with `access: restricted`.
-- `.github/workflows/release.yml` rewired to target GitHub Packages using the
-  built-in `GITHUB_TOKEN` (no extra secrets).
-- New `packages/cms-core/README.md` for external consumers.
-- New `PUBLISHING.md` covering publish flow + per-consumer `.npmrc` +
-  `NODE_AUTH_TOKEN` setup (local / Netlify / Actions).
-- `packages/fleet-dashboard/.env.example` completed (SERVICE_ROLE_KEY,
-  APP_PASSWORD, optional AGENT_WEBHOOK_SECRET / ANTHROPIC_API_KEY / GitHub OAuth).
-
-### 🚨 Unresolved at session close — check FIRST next session
-
-1. **Release workflow did not open a "Version Packages" PR.** After merging
-   PR #39, the changesets action should have opened a PR bumping
-   `@pandotic/universal-cms` based on `.changeset/initial-release.md`. As of
-   session close, no such PR exists. Investigate at
-   https://github.com/pandotic/universal-cms/actions/workflows/release.yml —
-   look for errors about `packages: write` permission, changesets action
-   failures, or GITHUB_TOKEN / NODE_AUTH_TOKEN auth. Fix before anything else
-   can move forward.
-
-2. **Parallel-session PRs #40 and #41 both introduce migration `00110_*.sql`**
-   — they will collide. Needs renumbering on one of them before either merges.
-   - PR #40 `claude/plan-skill-onboarding-8drJN` — 00110–00117 + cms-core data
-   - PR #41 `claude/redesign-navigation-saas-B7hZT` — 00110_playbooks.sql
-
-### When publish is unblocked → Stage 1
-
-1. Publish `@pandotic/universal-cms@0.1.0` to GitHub Packages (fix step 1 above,
-   merge the Version Packages PR).
-2. Stage 1 greenfield pilot — new empty repo consuming the package. A ready-to-
-   paste prompt for the new site's Claude Code session is in the chat
-   transcript of this session (asks that session to scaffold Next.js 16 +
-   `.npmrc` + `.env.example` + `src/cms.config.ts` + `src/middleware.ts` stubs,
-   leave `supabase/migrations/` empty for us to fill, don't install the
-   package until it's published).
-3. Register pilot in Hub via `/properties` → Create; verify version sync at
-   `/fleet`.
-4. Only then proceed to Stage 2 (first of the 10 production sites).
 
 ---
 
