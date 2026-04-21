@@ -10,6 +10,17 @@ import { Archive } from 'lucide-react'
 import { formatDate } from '@/lib/team-hub/utils'
 import type { User } from '@/lib/team-hub/types'
 
+// Extract the first sentence from the AI meeting summary for the list view.
+// Handles common terminators (. ! ?) and falls back to the whole string if
+// no terminator is found within the first 200 chars.
+function firstSentence(text: string | null | undefined): string | null {
+  if (!text) return null
+  const trimmed = text.trim()
+  if (!trimmed) return null
+  const match = trimmed.slice(0, 240).match(/[^.!?]+[.!?]/)
+  return (match ? match[0] : trimmed.slice(0, 200)).trim()
+}
+
 function MeetingMetricsSummary() {
   const { data: stats } = useMeetingStats(12)
 
@@ -91,64 +102,76 @@ export default function PastMeetingsPage() {
           {meetings.map((meeting) => {
             const chair = users?.find((u: User) => u.id === meeting.chair_id)
             const meetingStats = statsMap.get(meeting.id)
+            const summary = firstSentence(meeting.ai_summary)
             return (
               <Link
                 key={meeting.id}
                 href={`/team-hub/meetings/${meeting.id}`}
-                className="flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors duration-150 hover:border-[var(--border-hover)]"
+                className="flex flex-col gap-1 rounded-lg border px-4 py-3 transition-colors duration-150 hover:border-[var(--border-hover)]"
                 style={{ borderColor: 'var(--border-default)' }}
               >
-                <span
-                  className="text-[13px] font-medium"
-                  style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  {formatDate(meeting.meeting_date)}
-                </span>
-                {chair && (
-                  <span className="flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                    <UserAvatar name={chair.short_name} color={chair.color} size={18} />
-                    {chair.name}
-                  </span>
-                )}
-                {meeting.attendees?.length ? (
+                <div className="flex items-center gap-4">
                   <span
-                    className="flex items-center gap-1"
-                    title={(meeting.attendees ?? [])
-                      .map((id) => users?.find((u: User) => u.id === id)?.name)
-                      .filter(Boolean)
-                      .join(', ')}
+                    className="text-[13px] font-medium"
+                    style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}
                   >
-                    {(meeting.attendees ?? []).map((id) => {
-                      const attendee = users?.find((u: User) => u.id === id)
-                      if (!attendee) return null
-                      return (
-                        <UserAvatar
-                          key={id}
-                          name={attendee.short_name}
-                          color={attendee.color}
-                          size={16}
-                        />
-                      )
-                    })}
+                    {formatDate(meeting.meeting_date)}
                   </span>
-                ) : null}
-                {meeting.rating && (
-                  <span
-                    className="text-[12px] font-medium"
-                    style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                  {chair && (
+                    <span className="flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                      <UserAvatar name={chair.short_name} color={chair.color} size={18} />
+                      {chair.name}
+                    </span>
+                  )}
+                  {meeting.attendees?.length ? (
+                    <span
+                      className="flex items-center gap-1"
+                      title={(meeting.attendees ?? [])
+                        .map((id) => users?.find((u: User) => u.id === id)?.name)
+                        .filter(Boolean)
+                        .join(', ')}
+                    >
+                      {(meeting.attendees ?? []).map((id) => {
+                        const attendee = users?.find((u: User) => u.id === id)
+                        if (!attendee) return null
+                        return (
+                          <UserAvatar
+                            key={id}
+                            name={attendee.short_name}
+                            color={attendee.color}
+                            size={16}
+                          />
+                        )
+                      })}
+                    </span>
+                  ) : null}
+                  {meeting.rating && (
+                    <span
+                      className="text-[12px] font-medium"
+                      style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                    >
+                      {meeting.rating}/10
+                    </span>
+                  )}
+                  {meetingStats && (
+                    <span className="text-[11px]" style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                      {meetingStats.issues_resolved} resolved · {meetingStats.todos_created} to-dos
+                    </span>
+                  )}
+                  <span className="flex-1" />
+                  <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                    View &rarr;
+                  </span>
+                </div>
+                {summary && (
+                  <p
+                    className="truncate text-[12px] leading-relaxed"
+                    style={{ color: 'var(--text-secondary)' }}
+                    title={meeting.ai_summary ?? undefined}
                   >
-                    {meeting.rating}/10
-                  </span>
+                    {summary}
+                  </p>
                 )}
-                {meetingStats && (
-                  <span className="text-[11px]" style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                    {meetingStats.issues_resolved} resolved · {meetingStats.todos_created} to-dos
-                  </span>
-                )}
-                <span className="flex-1" />
-                <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                  View &rarr;
-                </span>
               </Link>
             )
           })}
