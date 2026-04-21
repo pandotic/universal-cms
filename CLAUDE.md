@@ -1,67 +1,67 @@
 # Universal CMS — Project Context for Claude
 
-## ⚡ Resume Point — Cleanup, Chunks 1 + 2 (April 20, 2026, session close)
+## ⚡ Resume Point — Cleanup sweep (Apr 21, 2026, all 7 chunks merged)
 
-Branch `claude/cleanup-merged-project-UKjY5`. Chunk 1 merged as PR #60. Chunk 2
-pushed, waiting on user to run the CLI commands in
-`packages/fleet-dashboard/supabase/manual/chunk-2-runbook.md`.
+Seven-chunk audit + cleanup pass landed across PRs #60, #62, #63, #65, #66,
+#67. Hub is now functional end-to-end, migration history is reconciled with
+live DB, admin packages are consolidated into cms-core, and the release
+pipeline is unblocked.
 
-### What shipped in Chunk 1 (PR #60, merged)
+### What shipped (PR order)
 
-- **Bug 1 (`/fleet` React #310):** `DeploymentsCols` split into empty + full
-  variants so hook count is constant per render path.
-- **Bug 2 (`/properties` white-on-white):** `EntityManagementPanel` moved off
-  hardcoded `bg-white` / `text-gray-*` onto zinc tokens to match dark Hub
-  layout (also improves `/groups`, `/users`).
-- **`OPS_RUNBOOK.md` + `packages/fleet-dashboard/supabase/manual/chunk-1-ops.sql`:**
-  founder `auth_user_id` backfill, Team Hub agenda seed (skipped — 20 issues /
-  25 todos of real team data already there), `feature_flags` table with RLS.
+| PR | Chunk | Summary |
+|---|---|---|
+| #60 | 1 | `/fleet` React #310 crash fixed; `/properties` dark-theme fix; `OPS_RUNBOOK.md` + `chunk-1-ops.sql` |
+| #62 | 2 | 13 migration renames (00503–00515), `00505_hub_skills` made idempotent, `00516_feature_flags` codified, `chunk-2-runbook.md` |
+| #63 | 3+4 | Root build chain covers all workspace pkgs; CI typechecks everything; `@universal-cms/admin-core`/`admin-ui` ported into `@pandotic/universal-cms/admin*` + `./components/admin` and both packages deleted |
+| #65 | 5 | Cruft sweep: deleted `packages/admin-extraction/`, broken `Settings SKILL.md` symlink; archived promptkit specs + `Skill Onboarding/` under `docs/archive/` |
+| #66 | 6 | Release workflow hardened (explicit `version` script, `createGithubReleases`, debug output); `@pandotic/skill-library` got `publishConfig`; `admin-schema` marked private; `docs/RELEASE.md` added |
+| #67 | 7 | Sidebar `/team-hub` gated to founders only; meeting summaries shown on `/team-hub/meetings`; `schedule-granola-sync.sql` + `docs/GRANOLA-CRON.md`; `docs/MIGRATION-RECONCILIATION.md` |
 
-### Chunk 1 live-DB verification (user ran in dashboard SQL editor)
+### Live-DB state (Pandotic Hub, `rimbgolutrxpmwsoswhq`)
 
-- `feature_flags` table created ✅
-- Team Hub seed correctly skipped (real data present) ⏭️
-- `linked_founders = 1` — only Dan has signed in. Allen / Matt / Scott
-  need to sign in at the Hub login page; the `handle_new_user` trigger
-  from `00123_team_hub_auth.sql` auto-links them on first sign-in.
+- `supabase_migrations.schema_migrations` has 17 rows at version ≥ 00500.
+- `feature_flags` table created.
+- Team Hub has 20 real issues + 25 real todos (seed was correctly skipped).
+- **Founder linkage**: Dan is linked. Allen / Matt / Scott still need to
+  sign in at the Hub login page once — the `handle_new_user` trigger
+  (now at `00515_team_hub_auth.sql`) will auto-link them.
 
-### What landed on the branch for Chunk 2 (un-merged)
+## Outstanding Work
 
-- **13 migration renames** to free slots `00503–00515` (collision cleanup).
-  Full map in `chunk-2-runbook.md`.
-- **`00505_hub_skills.sql` rewritten** — CREATE TYPE wrapped in
-  `DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL; END $$` blocks,
-  CREATE TABLE uses `IF NOT EXISTS`, RLS uses `DROP POLICY IF EXISTS`
-  → CREATE pattern. Now fully idempotent.
-- **`00516_feature_flags.sql`** — codifies the chunk-1 manual table creation
-  so fresh Supabase projects get it via `db push`.
-- **`_consolidated_00110-00117.sql`** moved to
-  `supabase/migrations/archive/` — was a backup, not a real migration.
+### Auto-running, watch for
 
-### Chunk 2 ops for user to run (CLI, from packages/fleet-dashboard)
+1. **Version Packages PR** — when PR #66 (Chunk 6) merged, the Release
+   workflow should have detected two pending changesets
+   (`@pandotic/universal-cms` + `@pandotic/skill-library`) and opened a
+   "chore: version packages" PR. Merging that PR publishes
+   `@pandotic/universal-cms@0.2.0` + `@pandotic/skill-library@0.2.0` to
+   GitHub Packages. Check:
+   https://github.com/pandotic/universal-cms/pulls?q=is%3Apr+version+packages
+   If it didn't appear, the "Report changesets outputs" step at the
+   bottom of the release run logs has the diagnostic. See `docs/RELEASE.md`
+   § Troubleshooting.
 
-```bash
-supabase migration repair --status applied 00506 00511 00513 00514 00515 00516
-supabase db push
-```
+### Optional, documented, skippable
 
-Expected: 8 idempotent migrations apply (`00503, 00504, 00505, 00507,
-00508, 00509, 00510, 00512`), 6 marked as already-applied. If CLI throws
-the `SUPABASE_DB_PASSWORD` error again, fallback SQL block in
-`chunk-2-runbook.md` does the repair step via dashboard.
+2. **Founder sign-ins** — ask Allen / Matt / Scott to log into the Hub once
+   so `public.users.auth_user_id` gets populated. No SQL needed.
+3. **Granola pg_cron auto-sync** — runbook at `docs/GRANOLA-CRON.md`. Three
+   prereqs (pg_cron + pg_net extensions, service-role key in Vault), then
+   `supabase db query --linked --file supabase/manual/schedule-granola-sync.sql`.
+4. **Migration history reconciliation** — runbook at `docs/MIGRATION-RECONCILIATION.md`.
+   Not urgent. Trigger when Stage 2+ sites report drift or when we want to
+   ship a publishable schema.
 
-### Remaining from the Chunk plan (not started)
+### Unblocked, ready for Stage 1
 
-- **Chunk 3:** wire `@pandotic/skill-library` into root + Netlify build chain
-  (package builds clean locally; issue is just missing `dist/` at deploy time).
-- **Chunk 4:** decide on `@universal-cms/admin-core` / `admin-ui` — 8 files
-  still import from them; either port into cms-core and delete, or formally
-  adopt (add to CI + changesets + release workflow). Also the
-  `.changeset/initial-release.md` only versions one of six publishable
-  packages.
-- **Chunk 5:** cruft — `packages/admin-extraction/`, `packages/promptkit/`
-  (spec-only dir), broken `packages/Settings SKILL.md` symlink,
-  `/Skill Onboarding/` loose docs.
+Once the Version Packages PR merges and the initial publish succeeds, the
+10-site rollout (see older resume point below for the plan doc) can proceed.
+Stage 1 greenfield pilot needs:
+- A new empty repo set up per the prompt in the old rollout plan.
+- `.npmrc` in the consumer repo pointing at `https://npm.pkg.github.com`
+  (snippet in `PUBLISHING.md` / `docs/RELEASE.md`).
+- `NODE_AUTH_TOKEN` env var set locally + in Netlify.
 
 ---
 
