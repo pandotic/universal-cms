@@ -63,17 +63,37 @@ export function useMeeting(id: string) {
   })
 }
 
+export interface ArchivedMeeting extends Meeting {
+  // Joined via meeting_transcripts; first sentence is surfaced on the list.
+  ai_summary: string | null
+}
+
 export function useArchivedMeetings() {
   return useQuery({
     queryKey: ['meetings', 'archived'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('meetings')
-        .select('*')
+        .select('*, meeting_transcripts(ai_summary)')
         .eq('status', 'archived')
         .order('meeting_date', { ascending: false })
       if (error) throw error
-      return data as Meeting[]
+
+      // Supabase returns the joined table as an object for 1:1 relationships
+      // (meeting_transcripts.meeting_id is UNIQUE) or an array otherwise;
+      // normalize to a flat ai_summary string on each row.
+      type JoinRow = Meeting & {
+        meeting_transcripts:
+          | { ai_summary: string | null }
+          | { ai_summary: string | null }[]
+          | null
+      }
+      return (data as JoinRow[]).map((row) => {
+        const mt = row.meeting_transcripts
+        const ai_summary = Array.isArray(mt) ? mt[0]?.ai_summary ?? null : mt?.ai_summary ?? null
+        const { meeting_transcripts: _mt, ...meeting } = row
+        return { ...meeting, ai_summary } as ArchivedMeeting
+      })
     },
   })
 }

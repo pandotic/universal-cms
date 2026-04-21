@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTeamUser } from "@/hooks/team-hub/useTeamUser";
 import {
   AlertTriangle,
   BarChart3,
@@ -36,6 +37,10 @@ interface NavLink {
   label: string;
   icon: LucideIcon;
   external?: boolean;
+  // If true, link is only rendered for authenticated users with a row in
+  // public.users (i.e. founders). Used for /team-hub to avoid exposing the
+  // access-denied panel to ops-only Hub admins.
+  foundersOnly?: boolean;
 }
 
 interface NavGroup {
@@ -55,7 +60,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "Team",
     links: [
-      { href: "/team-hub", label: "Team Hub", icon: CalendarClock },
+      { href: "/team-hub", label: "Team Hub", icon: CalendarClock, foundersOnly: true },
     ],
   },
   {
@@ -136,7 +141,19 @@ interface Props {
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
   const pathname = usePathname();
+  const { isMember: isFounder, loading: teamUserLoading } = useTeamUser();
   const width = collapsed ? "w-14" : "w-64";
+
+  // Filter out foundersOnly links for non-founders. Also hide while loading
+  // so non-founders never see the link flash on first render.
+  const visibleGroups = GROUPS
+    .map((group) => ({
+      ...group,
+      links: group.links.filter(
+        (link) => !link.foundersOnly || (!teamUserLoading && isFounder),
+      ),
+    }))
+    .filter((group) => group.links.length > 0);
 
   return (
     <>
@@ -182,7 +199,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
-          {GROUPS.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.label} className="mb-4">
               {!collapsed && (
                 <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
