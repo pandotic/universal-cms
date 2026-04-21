@@ -3,8 +3,8 @@ import { MODULE_REGISTRY, getModuleInfo, getModulesByCategory } from "../registr
 import { modulePresets } from "../config";
 
 describe("MODULE_REGISTRY", () => {
-  it("contains exactly 30 modules", () => {
-    expect(MODULE_REGISTRY.length).toBe(31);
+  it("contains exactly 35 modules", () => {
+    expect(MODULE_REGISTRY.length).toBe(35);
   });
 
   it("has unique module names", () => {
@@ -30,7 +30,7 @@ describe("MODULE_REGISTRY", () => {
   });
 
   it("categories are valid values", () => {
-    const validCategories = ["content", "directory", "career", "engagement", "seo", "tools", "forms", "system"];
+    const validCategories = ["content", "directory", "career", "engagement", "seo", "tools", "forms", "users", "system"];
     for (const mod of MODULE_REGISTRY) {
       expect(validCategories).toContain(mod.category);
     }

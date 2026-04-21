@@ -39,6 +39,12 @@ export type CmsModuleName =
   // Forms & Lead Capture
   | "forms"
   | "ctaManager"
+  // Users & Organizations
+  | "businessEntities"
+  | "linkedinAuth"
+  | "vendorProfiles"
+  // Media & Content Extensions
+  | "videos"
   // System
   | "errorLog"
   | "activityLog"
@@ -52,6 +58,12 @@ export interface CmsNavItem {
   href: string;
   icon?: string;
   module?: CmsModuleName; // Only show if module is enabled
+  /**
+   * Roles allowed to see this item. When omitted, any authenticated admin
+   * user can see the link. When provided, the item only renders if the
+   * current user has one of the listed roles.
+   */
+  allowedRoles?: CmsRole[];
 }
 
 export interface CmsNavGroup {
@@ -97,9 +109,13 @@ export interface CmsConfig {
 
 export const MODULE_MIGRATIONS: Record<CmsModuleName, string[]> = {
   // Content & Pages
-  contentPages: ["00004_content_pages"],
+  contentPages: [
+    "00004_content_pages",
+    "00031_content_page_tags",
+    "00041_content_page_display_options",
+  ],
   landingPages: ["00004_content_pages"], // uses same table with type='landing'
-  mediaLibrary: ["00005_media_library"],
+  mediaLibrary: ["00005_media_library", "00040_media_meta_overlay"],
   listicles: ["00009_listicles"],
   brandGuide: [], // stored in site_settings (no extra migration)
   // Directory & Taxonomy
@@ -130,6 +146,20 @@ export const MODULE_MIGRATIONS: Record<CmsModuleName, string[]> = {
   // Forms & Lead Capture
   forms: ["00022_forms_and_leads"],
   ctaManager: ["00022_forms_and_leads"],
+  // Users & Organizations
+  businessEntities: [
+    "00032_business_entities",
+    "00033_companies_universal_profile",
+    "00034_company_enrichment",
+    "00035_company_claims_submissions",
+    "00036_tighten_companies_insert_rls",
+    "00038_consolidate_company_columns",
+    "00039_claim_token_expiry",
+  ],
+  linkedinAuth: [], // Supabase Auth handles LinkedIn OIDC natively
+  vendorProfiles: ["00037_company_vendor_profiles"],
+  // Media & Content Extensions
+  videos: ["00030_video_content"],
   // System
   errorLog: ["00018_error_log"],
   activityLog: ["00007_activity_log"],
@@ -154,12 +184,14 @@ export type ModulePreset = {
 
 const ALL_MODULES: CmsModuleName[] = [
   "contentPages", "landingPages", "mediaLibrary", "listicles", "brandGuide",
+  "videos",
   "directory", "categories", "frameworks", "glossary", "certifications",
   "careerHub", "reviews", "affiliates", "clickAnalytics", "merchants",
   "ratings", "forms", "ctaManager", "seo", "redirects", "linkChecker",
   "internalLinks", "imagesSeo", "compareTools", "assessmentTool",
-  "resourcesPage", "smallBusinessPage", "errorLog", "activityLog",
-  "bulkImport", "apiUsage",
+  "resourcesPage", "smallBusinessPage",
+  "businessEntities", "linkedinAuth", "vendorProfiles",
+  "errorLog", "activityLog", "bulkImport", "apiUsage",
 ];
 
 export const modulePresets = {
@@ -209,6 +241,8 @@ export const modulePresets = {
       "affiliates",
       "clickAnalytics",
       "ratings",
+      "businessEntities",
+      "vendorProfiles",
       "seo",
       "redirects",
       "linkChecker",

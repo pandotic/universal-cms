@@ -8,7 +8,7 @@ export interface ModuleInfo {
   name: CmsModuleName;
   label: string;
   description: string;
-  category: "content" | "directory" | "career" | "engagement" | "seo" | "tools" | "forms" | "system";
+  category: "content" | "directory" | "career" | "engagement" | "seo" | "tools" | "forms" | "users" | "system";
   migrations: string[];
   dataExport?: string;
   adminPath?: string;
@@ -59,6 +59,15 @@ export const MODULE_REGISTRY: ModuleInfo[] = [
     category: "content",
     migrations: MODULE_MIGRATIONS.brandGuide,
     adminPath: "/admin/brand-guide",
+  },
+  {
+    name: "videos",
+    label: "Videos",
+    description: "HeyGen-style AI video generation pipeline with approval workflow and transcripts.",
+    category: "content",
+    migrations: MODULE_MIGRATIONS.videos,
+    dataExport: "./data/videos",
+    adminPath: "/admin/videos",
   },
 
   // ─── Directory ────────────────────────────────────────────────────────────
@@ -257,6 +266,33 @@ export const MODULE_REGISTRY: ModuleInfo[] = [
     migrations: MODULE_MIGRATIONS.ctaManager,
     dataExport: "./data/cta-blocks",
     adminPath: "/admin/cta-manager",
+  },
+
+  // ─── Users & Organizations ────────────────────────────────────────────────
+  {
+    name: "businessEntities",
+    label: "Companies",
+    description: "Company profiles, user ↔ company linking, enrichment pipeline, claim workflow, and submission review.",
+    category: "users",
+    migrations: MODULE_MIGRATIONS.businessEntities,
+    dataExport: "./data/companies",
+    adminPath: "/admin/companies",
+  },
+  {
+    name: "linkedinAuth",
+    label: "LinkedIn Sign-in",
+    description: "Sign-in with LinkedIn via Supabase OIDC — no dedicated migration, configured in Supabase Auth.",
+    category: "users",
+    migrations: MODULE_MIGRATIONS.linkedinAuth,
+  },
+  {
+    name: "vendorProfiles",
+    label: "Vendor Profiles",
+    description: "Products, pricing, integrations, and target-market extension on company profiles.",
+    category: "users",
+    migrations: MODULE_MIGRATIONS.vendorProfiles,
+    dataExport: "./data/vendor-profiles",
+    adminPath: "/admin/companies",
   },
 
   // ─── System ───────────────────────────────────────────────────────────────
