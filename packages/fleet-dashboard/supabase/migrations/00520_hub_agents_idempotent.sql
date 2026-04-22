@@ -85,13 +85,24 @@ BEGIN
   END IF;
 END $$;
 
-ALTER TABLE hub_agent_runs ALTER COLUMN status SET DEFAULT 'pending';
+-- Explicit ::text cast forces the default expression to be typed as text,
+-- preventing Postgres from inferring an enum type when an identically-named
+-- value exists in a still-present enum type in the schema.
+ALTER TABLE hub_agent_runs ALTER COLUMN status SET DEFAULT 'pending'::text;
 
--- ─── Drop obsolete enum types (now nothing references them) ──────────────
+-- ─── Drop obsolete enum types (skip if still referenced) ─────────────────
+-- These types are harmless if left as zombies. Try to drop, swallow the
+-- dependent_objects_still_exist exception so the rest of the migration
+-- (indexes, RLS, triggers) still runs.
 
-DROP TYPE IF EXISTS agent_type;
-DROP TYPE IF EXISTS agent_run_status;
-DROP TYPE IF EXISTS agent_trigger;
+DO $$ BEGIN DROP TYPE agent_type;
+EXCEPTION WHEN undefined_object OR dependent_objects_still_exist THEN NULL; END $$;
+
+DO $$ BEGIN DROP TYPE agent_run_status;
+EXCEPTION WHEN undefined_object OR dependent_objects_still_exist THEN NULL; END $$;
+
+DO $$ BEGIN DROP TYPE agent_trigger;
+EXCEPTION WHEN undefined_object OR dependent_objects_still_exist THEN NULL; END $$;
 
 -- ─── CHECK constraints (added only if not already present) ───────────────
 
