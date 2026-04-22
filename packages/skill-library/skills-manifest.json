@@ -232,6 +232,17 @@
     "path": "skills/marketing-skeptical-reviewer"
   },
   {
+    "id": "marketing-long-form-writer",
+    "name": "Marketing — Long-Form Writer",
+    "icon": "BookOpen",
+    "category": "Marketing Ops",
+    "description": "Draft a 1,500–3,000-word blog post grounded in a property's brand voice, SEO keyword, and playbook. Submits the draft to hub_content_pipeline in qa_review state and opens a pending hub_content_qa_reviews row pointing at the Skeptical Reviewer. Refuses to draft when no brand voice brief exists (quality floor).",
+    "triggers": ["write longform", "/write-longform", "draft a blog", "long-form content", "write a post", "draft a post"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-long-form-writer"
+  },
+  {
     "id": "close-session",
     "name": "Close Session",
     "icon": "Wrench",
