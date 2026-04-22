@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "seed-brands": "tsx scripts/seed-brands.ts",
+    "register-marketing-agents": "tsx scripts/register-marketing-agents.ts",
     "brand-profile-helper": "tsx scripts/skill-helpers/brand-profile-helper.ts",
     "marketing-plan-helper": "tsx scripts/skill-helpers/marketing-plan-helper.ts",
     "skeptical-reviewer-helper": "tsx scripts/skill-helpers/skeptical-reviewer-helper.ts",
