@@ -5,7 +5,7 @@ A self-contained API service, secrets, and project budget tracker. Drop into any
 ## What's Included
 
 ```
-packages/api-central/
+api-central/
 ├── src/
 │   ├── APICentral.tsx        # Main page component (self-contained)
 │   ├── types/api-central.ts  # All TypeScript interfaces

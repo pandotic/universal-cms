@@ -2,18 +2,24 @@ import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import { cmsConfig } from "@/cms.config";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createAdminClient();
-  const siteUrl = cmsConfig.siteUrl.replace(/\/$/, "");
-  const entries: MetadataRoute.Sitemap = [];
+export const dynamic = "force-dynamic";
 
-  // Homepage
-  entries.push({
-    url: siteUrl,
-    lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 1.0,
-  });
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = cmsConfig.siteUrl.replace(/\/$/, "");
+  const entries: MetadataRoute.Sitemap = [
+    {
+      url: siteUrl,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+  ];
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return entries;
+  }
+
+  const supabase = await createAdminClient();
 
   // Content pages (published articles, guides, etc.)
   if (cmsConfig.modules.contentPages) {

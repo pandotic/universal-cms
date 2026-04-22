@@ -4,6 +4,8 @@
     "test": "pnpm --filter @pandotic/universal-cms test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/skill-library build",
+    "build:all": "pnpm --filter @pandotic/universal-cms build && pnpm --filter @pandotic/skill-library build && pnpm --filter @pandotic/fleet-dashboard build && pnpm --filter universal-cms-template build",
+    "verify": "pnpm -r typecheck && pnpm test && pnpm build:all",
     "ai-context": "tsx scripts/generate-ai-context.ts",
     "ai-context:check": "tsx scripts/generate-ai-context.ts --check",
     "changeset": "changeset",

@@ -20,9 +20,17 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -r --filter '@pandotic/universal-cms' --filter '@pandotic/skill-library' typecheck
+      - run: pnpm -r typecheck
       - run: pnpm test
       - run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Build fleet-dashboard (Hub)
+        run: pnpm --filter @pandotic/fleet-dashboard build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Build template
+        run: pnpm --filter universal-cms-template build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
 
