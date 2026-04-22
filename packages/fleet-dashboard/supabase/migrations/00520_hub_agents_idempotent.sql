@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS hub_agent_runs (
   created_at    timestamptz NOT NULL DEFAULT now()
 );
 
+-- Unconditionally drop the status default. The DEFAULT 'pending'::agent_run_status
+-- expression keeps an enum dependency even after ALTER COLUMN TYPE, which blocks
+-- DROP TYPE agent_run_status below. Dropping + re-setting as plain text fixes it
+-- on re-runs where the column was converted but the default wasn't cleaned up.
+ALTER TABLE hub_agent_runs ALTER COLUMN status DROP DEFAULT;
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -78,6 +84,8 @@ BEGIN
     ALTER TABLE hub_agent_runs ALTER COLUMN triggered_by TYPE text USING triggered_by::text;
   END IF;
 END $$;
+
+ALTER TABLE hub_agent_runs ALTER COLUMN status SET DEFAULT 'pending';
 
 -- ─── Drop obsolete enum types (now nothing references them) ──────────────
 
