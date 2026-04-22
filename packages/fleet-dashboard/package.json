@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
     "seed-brands": "tsx scripts/seed-brands.ts",
     "brand-profile-helper": "tsx scripts/skill-helpers/brand-profile-helper.ts",
     "marketing-plan-helper": "tsx scripts/skill-helpers/marketing-plan-helper.ts"
@@ -31,6 +32,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

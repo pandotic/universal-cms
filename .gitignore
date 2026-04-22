@@ -9,3 +9,6 @@ out/
 next-env.d.ts
 .turbo/
 *.tsbuildinfo
+playwright-report/
+test-results/
+playwright/.cache/

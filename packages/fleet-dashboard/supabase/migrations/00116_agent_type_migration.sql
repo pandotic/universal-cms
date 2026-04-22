@@ -48,12 +48,17 @@ ALTER TABLE hub_agents ADD CONSTRAINT hub_agents_agent_type_check
   ));
 
 -- Also convert agent_run_status and agent_trigger enums to text for consistency
+-- Drop column defaults first so DROP TYPE can succeed (defaults retain enum type ref).
+ALTER TABLE hub_agent_runs ALTER COLUMN status DROP DEFAULT;
 ALTER TABLE hub_agent_runs ALTER COLUMN status TYPE TEXT USING status::TEXT;
+ALTER TABLE hub_agent_runs ALTER COLUMN status SET DEFAULT 'pending';
 DROP TYPE IF EXISTS agent_run_status;
 ALTER TABLE hub_agent_runs ADD CONSTRAINT hub_agent_runs_status_check
   CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled'));
 
+ALTER TABLE hub_agent_runs ALTER COLUMN triggered_by DROP DEFAULT;
 ALTER TABLE hub_agent_runs ALTER COLUMN triggered_by TYPE TEXT USING triggered_by::TEXT;
+ALTER TABLE hub_agent_runs ALTER COLUMN triggered_by SET DEFAULT 'manual';
 DROP TYPE IF EXISTS agent_trigger;
 ALTER TABLE hub_agent_runs ADD CONSTRAINT hub_agent_runs_triggered_by_check
   CHECK (triggered_by IN ('schedule', 'manual', 'webhook'));
