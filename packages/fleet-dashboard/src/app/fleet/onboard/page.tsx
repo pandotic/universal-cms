@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -39,6 +39,14 @@ interface GithubRepo {
   updated_at: string;
 }
 
+interface DetectResult {
+  hasCms: boolean;
+  cmsVersion: string | null;
+  detectedPlatform: string;
+  enabledModules: string[];
+  projectName: string | null;
+}
+
 const PLATFORMS: PlatformOption[] = [
   { id: "nextjs_supabase", label: "Next.js + Supabase", description: "Full-stack app with CMS support", icon: FileCode, needsGithub: true },
   { id: "wordpress", label: "WordPress", description: "WordPress site — marketing only", icon: Globe, needsGithub: false },
@@ -58,6 +66,10 @@ const CATEGORIES = [
   { value: "internal_tool", label: "Internal Tool" },
 ];
 
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────
 
 export default function OnboardPage() {
@@ -65,32 +77,27 @@ export default function OnboardPage() {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createProgress, setCreateProgress] = useState<{ done: number; total: number; current: string } | null>(null);
 
   // Step 1: Platform
   const [platform, setPlatform] = useState<PlatformType | null>(null);
 
-  // Step 2: Connect
+  // Step 2: Connect (GitHub)
   const [ghToken, setGhToken] = useState<string>("");
   const [repos, setRepos] = useState<GithubRepo[]>([]);
   const [loadingRepos, setLoadingRepos] = useState(false);
-  const [selectedRepo, setSelectedRepo] = useState<string>("");
+  const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
   const [repoSearch, setRepoSearch] = useState("");
 
-  // Step 2: Detection
-  const [detecting, setDetecting] = useState(false);
-  const [detected, setDetected] = useState<{
-    hasCms: boolean;
-    cmsVersion: string | null;
-    detectedPlatform: string;
-    enabledModules: string[];
-    projectName: string | null;
-  } | null>(null);
+  // Step 2: Detection (one result per selected repo)
+  const [detectedByRepo, setDetectedByRepo] = useState<Record<string, DetectResult>>({});
+  const [detectingRepos, setDetectingRepos] = useState<Set<string>>(new Set());
 
-  // Step 2 alt: Manual
+  // Step 2 alt: Manual (single project)
   const [manualName, setManualName] = useState("");
   const [manualUrl, setManualUrl] = useState("");
 
-  // Step 3: Configure
+  // Step 3: Configure (shared for multi-repo, or single for manual)
   const [projectName, setProjectName] = useState("");
   const [projectUrl, setProjectUrl] = useState("");
   const [category, setCategory] = useState("");
@@ -110,72 +117,158 @@ export default function OnboardPage() {
   async function loadRepos() {
     if (!ghToken) return;
     setLoadingRepos(true);
+    setError(null);
     try {
       const res = await fetch(`/api/github/repos?token=${encodeURIComponent(ghToken)}`);
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
       setRepos(json.data ?? []);
       if (typeof window !== "undefined") localStorage.setItem("gh_token", ghToken);
-    } catch {
-      setError("Failed to load GitHub repos");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load GitHub repos");
     }
     setLoadingRepos(false);
   }
 
   async function detectCms(repoFullName: string) {
-    setDetecting(true);
+    setDetectingRepos((prev) => new Set(prev).add(repoFullName));
     try {
       const res = await fetch(
         `/api/github/detect?token=${encodeURIComponent(ghToken)}&repo=${encodeURIComponent(repoFullName)}`
       );
       const json = await res.json();
       if (json.data) {
-        setDetected(json.data);
-        if (json.data.projectName) setProjectName(json.data.projectName);
-        if (json.data.detectedPlatform && json.data.detectedPlatform !== "other") {
-          setPlatform(json.data.detectedPlatform as PlatformType);
-        }
+        setDetectedByRepo((prev) => ({ ...prev, [repoFullName]: json.data }));
       }
     } catch {
       // detection failed — non-critical
     }
-    setDetecting(false);
+    setDetectingRepos((prev) => {
+      const next = new Set(prev);
+      next.delete(repoFullName);
+      return next;
+    });
+  }
+
+  function toggleRepo(fullName: string) {
+    setSelectedRepos((prev) => {
+      if (prev.includes(fullName)) {
+        return prev.filter((r) => r !== fullName);
+      }
+      if (!detectedByRepo[fullName] && !detectingRepos.has(fullName)) {
+        detectCms(fullName);
+      }
+      return [...prev, fullName];
+    });
+  }
+
+  function toggleSelectAllVisible() {
+    const visibleNames = filteredRepos.map((r) => r.full_name);
+    const allSelected = visibleNames.every((n) => selectedRepos.includes(n));
+    if (allSelected) {
+      setSelectedRepos((prev) => prev.filter((n) => !visibleNames.includes(n)));
+    } else {
+      const toAdd = visibleNames.filter((n) => !selectedRepos.includes(n));
+      toAdd.forEach((n) => {
+        if (!detectedByRepo[n] && !detectingRepos.has(n)) detectCms(n);
+      });
+      setSelectedRepos((prev) => Array.from(new Set([...prev, ...visibleNames])));
+    }
   }
 
   async function handleSubmit() {
     setSaving(true);
     setError(null);
 
-    const repo = repos.find((r) => r.full_name === selectedRepo);
-    const name = needsGithub ? (projectName || repo?.name || "") : (projectName || manualName);
-    const url = needsGithub ? (projectUrl || repo?.html_url || "") : (projectUrl || manualUrl);
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const commonFields = {
+      business_category: category || null,
+      ownership_type: ownership,
+      client_name: ownership === "client" ? clientName : null,
+      domains: domains ? domains.split(",").map((d) => d.trim()).filter(Boolean) : [],
+      status: "active",
+      onboarding_status: "complete",
+    };
 
     try {
-      const res = await fetch("/api/properties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          slug,
-          url,
-          property_type: platform === "mindpal" ? "app" : "site",
-          platform_type: platform,
-          github_repo: repo?.full_name ?? null,
-          github_default_branch: repo?.default_branch ?? "main",
-          cms_installed: detected?.hasCms ?? false,
-          enabled_modules: detected?.enabledModules ?? [],
-          onboarding_status: "complete",
-          business_category: category || null,
-          ownership_type: ownership,
-          client_name: ownership === "client" ? clientName : null,
-          domains: domains ? domains.split(",").map((d) => d.trim()).filter(Boolean) : [],
-          status: "active",
-        }),
-      });
+      if (needsGithub) {
+        // Multi-project creation from selected repos
+        const reposToCreate = repos.filter((r) => selectedRepos.includes(r.full_name));
+        if (reposToCreate.length === 0) {
+          throw new Error("No repositories selected");
+        }
 
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.error || `HTTP ${res.status}`);
+        setCreateProgress({ done: 0, total: reposToCreate.length, current: "" });
+        const failures: string[] = [];
+
+        for (let i = 0; i < reposToCreate.length; i++) {
+          const repo = reposToCreate[i];
+          const detected = detectedByRepo[repo.full_name];
+          const detectedType = detected?.detectedPlatform as PlatformType | undefined;
+          const effectivePlatform: PlatformType =
+            detectedType && detectedType !== "other" ? detectedType : (platform as PlatformType);
+
+          setCreateProgress({ done: i, total: reposToCreate.length, current: repo.full_name });
+
+          const res = await fetch("/api/properties", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: repo.name,
+              slug: slugify(repo.name),
+              url: repo.html_url,
+              property_type: effectivePlatform === "mindpal" ? "app" : "site",
+              platform_type: effectivePlatform,
+              github_repo: repo.full_name,
+              github_default_branch: repo.default_branch ?? "main",
+              cms_installed: detected?.hasCms ?? false,
+              enabled_modules: detected?.enabledModules ?? [],
+              ...commonFields,
+            }),
+          });
+
+          if (!res.ok) {
+            const json = await res.json().catch(() => ({}));
+            failures.push(`${repo.full_name}: ${json.error || `HTTP ${res.status}`}`);
+          }
+        }
+
+        setCreateProgress({ done: reposToCreate.length, total: reposToCreate.length, current: "" });
+
+        if (failures.length === reposToCreate.length) {
+          throw new Error(`All projects failed to create:\n${failures.join("\n")}`);
+        }
+        if (failures.length > 0) {
+          setError(`Created ${reposToCreate.length - failures.length} of ${reposToCreate.length}. Failures:\n${failures.join("\n")}`);
+          setSaving(false);
+          return;
+        }
+      } else {
+        // Single manual project
+        const name = projectName || manualName;
+        const url = projectUrl || manualUrl;
+        const res = await fetch("/api/properties", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            slug: slugify(name),
+            url,
+            property_type: platform === "mindpal" ? "app" : "site",
+            platform_type: platform,
+            github_repo: null,
+            github_default_branch: "main",
+            cms_installed: false,
+            enabled_modules: [],
+            ...commonFields,
+          }),
+        });
+
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.error || `HTTP ${res.status}`);
+        }
       }
 
       router.push("/fleet?tab=business");
@@ -185,15 +278,22 @@ export default function OnboardPage() {
     setSaving(false);
   }
 
-  const filteredRepos = repos.filter((r) =>
-    !repoSearch || r.full_name.toLowerCase().includes(repoSearch.toLowerCase())
+  const filteredRepos = useMemo(
+    () =>
+      repos.filter((r) =>
+        !repoSearch || r.full_name.toLowerCase().includes(repoSearch.toLowerCase())
+      ),
+    [repos, repoSearch]
   );
+
+  const allVisibleSelected =
+    filteredRepos.length > 0 && filteredRepos.every((r) => selectedRepos.includes(r.full_name));
 
   // ─── Step Validation ──────────────────────────────────────────────────
 
   const canAdvanceStep1 = !!platform;
-  const canAdvanceStep2 = needsGithub ? !!selectedRepo : (!!manualName && !!manualUrl);
-  const canSubmit = !!(projectName || (needsGithub ? selectedRepo : manualName));
+  const canAdvanceStep2 = needsGithub ? selectedRepos.length > 0 : (!!manualName && !!manualUrl);
+  const canSubmit = needsGithub ? selectedRepos.length > 0 : !!(projectName || manualName);
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -232,7 +332,7 @@ export default function OnboardPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">
+        <div className="mb-4 whitespace-pre-wrap rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -270,7 +370,11 @@ export default function OnboardPage() {
       {/* Step 2: Connect (GitHub) */}
       {step === 2 && needsGithub && (
         <div className="space-y-4">
-          <h2 className="text-lg font-medium text-white">Connect GitHub Repository</h2>
+          <h2 className="text-lg font-medium text-white">Connect GitHub Repositories</h2>
+          <p className="text-xs text-zinc-500">
+            Select one or more repos to register as projects. Each will be created with the
+            settings from the next step.
+          </p>
 
           <div>
             <label className="mb-1 block text-xs font-medium text-zinc-400">GitHub Token</label>
@@ -291,78 +395,107 @@ export default function OnboardPage() {
                 Load Repos
               </button>
             </div>
+            <p className="mt-1 text-xs text-zinc-600">
+              Missing repos? Fine-grained tokens only expose repositories you explicitly
+              selected when creating the token. For org repos, your token may also need SSO
+              authorization.
+            </p>
           </div>
 
           {repos.length > 0 && (
             <>
-              <div>
+              <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={repoSearch}
                   onChange={(e) => setRepoSearch(e.target.value)}
                   placeholder="Search repos..."
-                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+                  className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
                 />
+                <button
+                  onClick={toggleSelectAllVisible}
+                  className="whitespace-nowrap rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800"
+                >
+                  {allVisibleSelected ? "Clear all" : "Select all"}
+                </button>
               </div>
-              <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 p-2">
-                {filteredRepos.map((repo) => (
-                  <button
-                    key={repo.full_name}
-                    onClick={() => {
-                      setSelectedRepo(repo.full_name);
-                      setProjectName(repo.name);
-                      setProjectUrl(repo.html_url);
-                      detectCms(repo.full_name);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                      selectedRepo === repo.full_name
-                        ? "bg-white/10 text-white"
-                        : "text-zinc-300 hover:bg-zinc-800"
-                    }`}
-                  >
-                    <div>
-                      <span className="font-medium">{repo.full_name}</span>
-                      {repo.description && (
-                        <p className="mt-0.5 text-xs text-zinc-500 line-clamp-1">{repo.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      {repo.language && <span>{repo.language}</span>}
-                      {repo.private && <span className="rounded bg-zinc-800 px-1.5 py-0.5">Private</span>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
 
-          {/* Detection result */}
-          {detecting && (
-            <div className="flex items-center gap-2 text-sm text-zinc-500">
-              <Loader2 className="h-4 w-4 animate-spin" /> Detecting CMS...
-            </div>
-          )}
-          {detected && !detecting && (
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-              <div className="flex items-center gap-2 text-sm">
-                {detected.hasCms ? (
-                  <>
-                    <Check className="h-4 w-4 text-emerald-400" />
-                    <span className="text-emerald-400">CMS detected</span>
-                    <span className="text-zinc-500">v{detected.cmsVersion}</span>
-                    {detected.enabledModules.length > 0 && (
-                      <span className="text-zinc-500">· {detected.enabledModules.length} modules</span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <span className="h-4 w-4 text-center text-zinc-600">—</span>
-                    <span className="text-zinc-500">No CMS installed</span>
-                    <span className="text-zinc-600">· {detected.detectedPlatform}</span>
-                  </>
+              <div className="flex items-center justify-between text-xs text-zinc-500">
+                <span>
+                  {repos.length} repo{repos.length === 1 ? "" : "s"} loaded
+                  {repoSearch ? ` · ${filteredRepos.length} match` : ""}
+                </span>
+                <span className="text-zinc-400">
+                  {selectedRepos.length} selected
+                </span>
+              </div>
+
+              <div className="max-h-80 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 p-2">
+                {filteredRepos.map((repo) => {
+                  const isSelected = selectedRepos.includes(repo.full_name);
+                  const detected = detectedByRepo[repo.full_name];
+                  const isDetecting = detectingRepos.has(repo.full_name);
+                  return (
+                    <label
+                      key={repo.full_name}
+                      className={`flex w-full cursor-pointer items-start gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                        isSelected ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-zinc-800"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleRepo(repo.full_name)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-600 bg-zinc-800 text-emerald-500 focus:ring-0 focus:ring-offset-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-medium">{repo.full_name}</span>
+                          {repo.private && (
+                            <span className="shrink-0 rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-500">
+                              Private
+                            </span>
+                          )}
+                          {repo.language && (
+                            <span className="shrink-0 text-xs text-zinc-500">{repo.language}</span>
+                          )}
+                        </div>
+                        {repo.description && (
+                          <p className="mt-0.5 truncate text-xs text-zinc-500">{repo.description}</p>
+                        )}
+                        {isSelected && (
+                          <p className="mt-1 text-xs">
+                            {isDetecting ? (
+                              <span className="flex items-center gap-1 text-zinc-500">
+                                <Loader2 className="h-3 w-3 animate-spin" /> Detecting CMS…
+                              </span>
+                            ) : detected ? (
+                              detected.hasCms ? (
+                                <span className="text-emerald-400">
+                                  CMS v{detected.cmsVersion}
+                                  {detected.enabledModules.length > 0
+                                    ? ` · ${detected.enabledModules.length} modules`
+                                    : ""}
+                                </span>
+                              ) : (
+                                <span className="text-zinc-500">
+                                  No CMS · {detected.detectedPlatform}
+                                </span>
+                              )
+                            ) : null}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+                {filteredRepos.length === 0 && (
+                  <div className="p-4 text-center text-xs text-zinc-500">
+                    No repos match "{repoSearch}"
+                  </div>
                 )}
               </div>
-            </div>
+            </>
           )}
         </div>
       )}
@@ -399,29 +532,52 @@ export default function OnboardPage() {
       {/* Step 3: Configure */}
       {step === 3 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-medium text-white">Configure Project</h2>
+          <h2 className="text-lg font-medium text-white">
+            {needsGithub && selectedRepos.length > 1
+              ? `Configure ${selectedRepos.length} Projects`
+              : "Configure Project"}
+          </h2>
+          {needsGithub && selectedRepos.length > 1 && (
+            <p className="text-xs text-zinc-500">
+              These settings will be applied to all selected projects. Project name and URL
+              are derived from each repo.
+            </p>
+          )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">Project Name</label>
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
-              />
+          {/* Single-project name/url — only shown for manual or single-repo flows */}
+          {(!needsGithub || selectedRepos.length === 1) && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-400">Project Name</label>
+                <input
+                  type="text"
+                  value={
+                    needsGithub
+                      ? (repos.find((r) => r.full_name === selectedRepos[0])?.name ?? projectName)
+                      : projectName
+                  }
+                  onChange={(e) => setProjectName(e.target.value)}
+                  readOnly={needsGithub}
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-400">URL</label>
+                <input
+                  type="text"
+                  value={
+                    needsGithub
+                      ? (repos.find((r) => r.full_name === selectedRepos[0])?.html_url ?? projectUrl)
+                      : projectUrl
+                  }
+                  onChange={(e) => setProjectUrl(e.target.value)}
+                  readOnly={needsGithub}
+                  placeholder="https://..."
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+                />
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">URL</label>
-              <input
-                type="text"
-                value={projectUrl}
-                onChange={(e) => setProjectUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
-              />
-            </div>
-          </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -463,7 +619,9 @@ export default function OnboardPage() {
           )}
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">Domains (comma-separated)</label>
+            <label className="mb-1 block text-xs font-medium text-zinc-400">
+              Domains (comma-separated, applied to every project)
+            </label>
             <input
               type="text"
               value={domains}
@@ -471,6 +629,11 @@ export default function OnboardPage() {
               placeholder="example.com, www.example.com"
               className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
             />
+            {needsGithub && selectedRepos.length > 1 && (
+              <p className="mt-1 text-xs text-zinc-600">
+                Leave blank if each project has its own domain — you can set them later.
+              </p>
+            )}
           </div>
 
           {/* Summary */}
@@ -481,22 +644,51 @@ export default function OnboardPage() {
                 <dt className="text-zinc-500">Platform:</dt>
                 <dd className="text-zinc-300">{selectedPlatform?.label}</dd>
               </div>
-              {selectedRepo && (
+              {needsGithub ? (
                 <div className="flex gap-2">
-                  <dt className="text-zinc-500">Repo:</dt>
-                  <dd className="text-zinc-300">{selectedRepo}</dd>
+                  <dt className="text-zinc-500">
+                    Repo{selectedRepos.length === 1 ? "" : "s"}:
+                  </dt>
+                  <dd className="flex-1 text-zinc-300">
+                    {selectedRepos.length === 0 ? (
+                      "—"
+                    ) : selectedRepos.length === 1 ? (
+                      selectedRepos[0]
+                    ) : (
+                      <ul className="space-y-0.5">
+                        {selectedRepos.map((r) => (
+                          <li key={r} className="truncate">• {r}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </dd>
                 </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500">Name:</dt>
+                    <dd className="text-zinc-300">{projectName || "—"}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500">URL:</dt>
+                    <dd className="text-zinc-300">{projectUrl || "—"}</dd>
+                  </div>
+                </>
               )}
-              <div className="flex gap-2">
-                <dt className="text-zinc-500">Name:</dt>
-                <dd className="text-zinc-300">{projectName || "—"}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="text-zinc-500">URL:</dt>
-                <dd className="text-zinc-300">{projectUrl || "—"}</dd>
-              </div>
             </dl>
           </div>
+
+          {createProgress && createProgress.total > 0 && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>
+                  Creating {createProgress.done} of {createProgress.total}
+                  {createProgress.current ? ` · ${createProgress.current}` : ""}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -525,7 +717,13 @@ export default function OnboardPage() {
             className="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-            {saving ? "Creating..." : "Create Project"}
+            {saving
+              ? needsGithub && selectedRepos.length > 1
+                ? `Creating ${selectedRepos.length}…`
+                : "Creating…"
+              : needsGithub && selectedRepos.length > 1
+                ? `Create ${selectedRepos.length} Projects`
+                : "Create Project"}
           </button>
         )}
       </div>
