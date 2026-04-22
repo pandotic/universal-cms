@@ -1,5 +1,45 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Team Hub dedupe + /skills reconcile (Apr 22, 2026)
+
+**PR #81** (branch `claude/fix-issues-dark-mode-Xs1md`) fixes the two bugs
+flagged that morning:
+
+- **Team Hub duplicate issues.** New migration `00518_team_hub_unique_open.sql`
+  adds partial unique indexes on `issues` / `todos` keyed to
+  `(lower(btrim(title/description)), submitter_id/owner_id) WHERE status='open'`.
+  Resolved / dropped rows don't block reopens. Hooks catch Postgres 23505
+  and surface "Already on the open list" info toasts instead of silently
+  failing.
+- **`/skills` console error.** Root cause was schema drift —
+  `00107_hub_skill_versions.sql` was marked applied via `migration repair`
+  but never actually ran against the live Hub DB, so `hub_skills` was
+  missing `scope` / `manifest_id` / `content_path` / `component_ids` and
+  the `hub_skill_versions` table didn't exist. `listSkills()` filtered on
+  a non-existent column → 500. Forward-only idempotent reconcile in
+  `00519_hub_skills_scope_reconcile.sql`.
+- **SQL applied** to the Hub project (`rimbgolutrxpmwsoswhq`) via the
+  Supabase SQL editor — dedupe + both migrations ran cleanly.
+
+### Outstanding from this session — Branch backlog
+
+Only **`claude/improve-website-ux-f77go`** remains as a real cleanup
+candidate (pandotic-site typography tweaks, noted in the Apr 21 session
+wrap below). The other branches I initially flagged
+(`pandotic-team-hub-KMsMW`, `add-error-logging-8u1mK`,
+`plan-skill-onboarding-8drJN`) were all already archived via PR #75 +
+superseders — see the "Archive branches" section below. Updated plan at
+**`docs/plans/2026-04-22-branch-backlog-cleanup.md`**.
+
+### Smoke tests still to do manually
+
+- Submit the same issue twice rapidly in `/team-hub` → second submit
+  should show "Already on the open issues list" and not create a twin row.
+- `/skills` → no console error; "Sync Manifest" populates rows with
+  `scope='fleet'` and `manifest_id` set.
+
+---
+
 ## Session wrap — Hub bug fixes + template build repair (Apr 21, 2026)
 
 Five PRs shipped this session, starting from a user report that

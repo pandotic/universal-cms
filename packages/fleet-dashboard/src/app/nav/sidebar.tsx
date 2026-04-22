@@ -23,7 +23,6 @@ import {
   Megaphone,
   Share2,
   ShieldCheck,
-  ShoppingBag,
   Sparkles,
   Target,
   Users,
@@ -69,7 +68,6 @@ const GROUPS: NavGroup[] = [
     label: "Build",
     links: [
       { href: "/skills", label: "Skills", icon: Zap },
-      { href: "/skill-store", label: "Skill Store", icon: ShoppingBag },
       { href: "/agents", label: "Agents", icon: Bot },
       { href: "/playbooks", label: "Playbooks", icon: ListChecks },
       { href: "/modules", label: "Modules", icon: Wrench },

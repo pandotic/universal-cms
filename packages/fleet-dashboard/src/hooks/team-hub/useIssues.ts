@@ -78,7 +78,14 @@ export function useCreateIssue() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        if (error.code === '23505') {
+          const dup = new Error('This issue is already on the open list') as Error & { code: string }
+          dup.code = 'duplicate_open'
+          throw dup
+        }
+        throw error
+      }
       return data
     },
     onSuccess: () => {
