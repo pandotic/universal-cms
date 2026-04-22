@@ -2,7 +2,7 @@
 
 ## Session wrap — Hub bug fixes + template build repair (Apr 21, 2026)
 
-Four PRs shipped this session, starting from a user report that
+Five PRs shipped this session, starting from a user report that
 `pandhub.netlify.app` crashed on every page with
 "No QueryClient set, use QueryClientProvider to set one".
 
@@ -13,14 +13,16 @@ Four PRs shipped this session, starting from a user report that
 | #73 | fix(hub): lift QueryClientProvider to root layout | Sidebar calls `useTeamUser` (react-query) at the root, but the provider was scoped to `/team-hub/layout.tsx`. Every non-team-hub page crashed. Fix: new `src/app/providers.tsx` wraps `NavShell` in the root layout; `team-hub/layout.tsx` simplified. |
 | #74 | fix(template): unblock compilation after chunks 3+4 port | Admin port into cms-core stripped `"use client"` from bundled output. Extended the post-build patcher to tag `dist/components/admin/index.js` and `dist/components/theme/index.js`; split `components/theme` into client (`./components/theme`) + server (`./components/theme/server`) so `ThemeInjector` (an async Server Component) lives separately from `ThemeProvider`/`ThemeToggle`. Bumped template's `@supabase/supabase-js` to `^2.102.1` to match cms-core; excluded the broken-since-inception `template/admin-integrated/` from typecheck. |
 | #75 | feat(team-hub): auto-built Fleet review agenda + initiatives model | Rebased the long-lived Phase 2 Team Hub branch. New `hub_initiatives` entity (migration `00517`), `/initiatives` admin pages, `FleetReviewSection` replacing the old Command Center placeholder, pure-function flag derivation in `cms-core/src/data/hub-fleet-review.ts`. Sidebar gains an "Initiatives" link (founders only). |
+| #78 | chore + fix(template): delete admin-integrated demo, validate ErrorSeverity route params | Deleted the broken-since-inception `template/admin-integrated/` demo (all its panels live in fleet-dashboard anyway) and fixed the pre-existing `ErrorSeverity`/`ErrorCategory` type coercion in `template/src/app/api/admin/errors/route.ts` using the fleet-dashboard VALID_* + `.includes()` pattern. Template build now typechecks clean. |
 | #69 | feat(cms): add company profiles, media-meta overlay, display options, videos | Not opened this session — fixed the `ai-context-drift` CI failure by merging main into the branch and regenerating `AI_CONTEXT.md` + `llms-full.txt` via `pnpm ai-context`. |
 
 ### Live state after this session
 
 - `pandhub.netlify.app` loads without the QueryClient error.
 - `cms-core` builds cleanly; 66/66 tests pass.
-- `template/` compiles (typecheck still fails on one pre-existing issue — see below).
+- `template/` compile + typecheck both clean.
 - Sidebar now gates both `/team-hub` and `/initiatives` to founders.
+
 
 ## Outstanding Work
 
@@ -66,30 +68,29 @@ does the rest. No SQL needed.
   `docs/MIGRATION-RECONCILIATION.md`. Trigger when Stage 2+ sites report
   drift or when we want to ship a publishable schema.
 
-### Flagged for a future session (not urgent)
+### Archive branches preserving deleted work
 
-- **`template/admin-integrated/`** was added in commit `ab21575` and has
-  been broken since inception — it references
-  `@pandotic/admin-ui` / `@pandotic/admin-core` workspace packages that
-  never existed in this repo. PR #74 excluded it from the template
-  typecheck so the main template can build, but the folder is still on
-  disk. Either port its demos to `@pandotic/universal-cms/components/admin`
-  or delete the folder.
-- **`template/src/app/api/admin/errors/route.ts`** has a pre-existing
-  `ErrorSeverity` type coercion error that blocks
-  `pnpm --filter universal-cms-template build` at the typecheck phase.
-  Template compile phase passes thanks to PR #74. Trivial fix: coerce
-  `severity` / `category` URL params through the enum.
+Three archive branches preserve the commit history of stale branches
+already deleted via GitHub UI. They live at `refs/heads/archive/…` on
+origin and are safe to leave alone indefinitely. If anything needs
+restoring: `git checkout -b <original-name> archive/<original-name>`
+and push.
+- `archive/claude/pandotic-team-hub-KMsMW` (original content landed via
+  the rebased Phase 2 branch that merged as PR #75).
+- `archive/claude/add-error-logging-8u1mK` (original content superseded
+  by PR #54, error-logging v2).
+- `archive/claude/plan-skill-onboarding-8drJN` (original content —
+  playbooks types, marketing-ops migrations, roadmap — all landed on
+  main via later PRs; renames absorbed during chunk 2 renumbering).
 
-### Stale branches safe to delete
+### Remaining branches to triage
 
-After the 4 PRs above merged, these remote branches are superseded:
-- `claude/add-error-logging-8u1mK` (PR #54 shipped v2)
-- `claude/chunk-3-skill-library-build-chain` (merged via PR #63)
-- `claude/chunk-4-admin-core-decision` (merged via PR #64)
-- `claude/chunk-6-release-pipeline` (merged via PR #66)
-- `claude/pandotic-team-hub-KMsMW` (superseded by the rebased Phase 2
-  branch that merged as PR #75)
+- `claude/improve-website-ux-f77go` (3+ days idle) — has ~147 LOC of
+  pandotic-site typography tweaks distinct from PR #48. Rebase + PR if
+  wanted, else delete.
+- `claude/fix-issues-dark-mode-Xs1md` — parallel-session active work
+  (team-hub dark-mode polish, skills schema reconcile). Leave alone;
+  that session needs to rebase onto current main before PR.
 
 ### Unblocked — ready for Stage 1
 
