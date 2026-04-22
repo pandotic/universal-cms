@@ -1,6 +1,29 @@
 # Universal CMS — Project Context for Claude
 
-## ⚡ Resume Point — Team Hub dedupe + /skills reconcile (Apr 22, 2026)
+## ⚡ Resume Point — Fleet onboard multi-select + repo pagination (Apr 22, 2026, pm)
+
+**PR #82** (branch `claude/fix-repo-loading-multiselect-ov3rU`, merged)
+fixes the `/fleet/onboard` GitHub step:
+
+- **Pagination.** `app/api/github/repos/route.ts` now loops
+  `/user/repos?per_page=100&page=N` up to 20 pages (~2,000 repos) instead
+  of returning only page 1. The user was seeing just 2 repos — most
+  likely a fine-grained token scoped to 2 repos or an org without SSO
+  authorization; pagination removes the 100-repo ceiling either way and
+  a hint under the token input explains both causes.
+- **Multi-select.** `app/fleet/onboard/page.tsx` swaps the single-select
+  repo picker for checkboxes with a "Select all" toggle, runs CMS
+  detection per selected repo (`detectedByRepo` map), and on submit
+  sequentially POSTs `/api/properties` for each repo with per-repo
+  progress + partial-failure reporting. Shared settings (category,
+  ownership, client, domains) apply to every project; name/URL derive
+  from each repo. Manual (non-GitHub) flow stays single-project.
+- Smoke test to run locally: load onboard with a PAT that has ≥3 repos,
+  multi-select, confirm each project lands in `/fleet?tab=business`.
+
+---
+
+## Resume Point — Team Hub dedupe + /skills reconcile (Apr 22, 2026, am)
 
 **PR #81** (branch `claude/fix-issues-dark-mode-Xs1md`) fixes the two bugs
 flagged that morning:
