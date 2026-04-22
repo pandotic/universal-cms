@@ -2,16 +2,17 @@
 -- 00520_hub_agents_idempotent.sql
 -- Reconciles hub_agents + hub_agent_runs with code.
 --
--- Migrations 00104_agents.sql and 00116_agent_type_migration.sql
--- were marked applied via `migration repair` but never actually
--- ran against the live Hub DB (same drift pattern as 00107 /
--- 00519 for hub_skills). Net schema is TEXT columns with CHECK
--- constraints (post-00116 form), skipping the intermediate enum.
+-- Historical context: migration 00104 created the tables with
+-- agent_type/status/triggered_by as enum types. Migration 00116
+-- was supposed to convert those to TEXT+CHECK but was marked
+-- "applied" via migration repair without actually running against
+-- the live Hub DB (same drift pattern as 00107/00519 for skills).
+-- Net target: TEXT columns with CHECK constraints.
 --
--- Fully idempotent — safe to re-run.
+-- Fully idempotent — safe to re-run from any state.
 -- ============================================================
 
--- ─── hub_agents ───────────────────────────────────────────────────────────
+-- ─── hub_agents table (created if missing, with TEXT types) ──────────────
 
 CREATE TABLE IF NOT EXISTS hub_agents (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,7 +30,63 @@ CREATE TABLE IF NOT EXISTS hub_agents (
   UNIQUE (property_id, slug)
 );
 
--- Add CHECK constraint only if it doesn't already exist
+-- If the table pre-existed with enum columns (from 00104), convert to TEXT
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'hub_agents'
+      AND column_name = 'agent_type'
+      AND data_type = 'USER-DEFINED'
+  ) THEN
+    ALTER TABLE hub_agents ALTER COLUMN agent_type TYPE text USING agent_type::text;
+  END IF;
+END $$;
+
+-- ─── hub_agent_runs table (created if missing, with TEXT types) ──────────
+
+CREATE TABLE IF NOT EXISTS hub_agent_runs (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_id      uuid NOT NULL REFERENCES hub_agents(id) ON DELETE CASCADE,
+  status        text NOT NULL DEFAULT 'pending',
+  started_at    timestamptz,
+  completed_at  timestamptz,
+  result        jsonb,
+  error_message text,
+  triggered_by  text NOT NULL,
+  property_id   uuid NOT NULL REFERENCES hub_properties(id) ON DELETE CASCADE,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'hub_agent_runs'
+      AND column_name = 'status'
+      AND data_type = 'USER-DEFINED'
+  ) THEN
+    ALTER TABLE hub_agent_runs ALTER COLUMN status TYPE text USING status::text;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'hub_agent_runs'
+      AND column_name = 'triggered_by'
+      AND data_type = 'USER-DEFINED'
+  ) THEN
+    ALTER TABLE hub_agent_runs ALTER COLUMN triggered_by TYPE text USING triggered_by::text;
+  END IF;
+END $$;
+
+-- ─── Drop obsolete enum types (now nothing references them) ──────────────
+
+DROP TYPE IF EXISTS agent_type;
+DROP TYPE IF EXISTS agent_run_status;
+DROP TYPE IF EXISTS agent_trigger;
+
+-- ─── CHECK constraints (added only if not already present) ───────────────
+
 DO $$ BEGIN
   ALTER TABLE hub_agents ADD CONSTRAINT hub_agents_agent_type_check
     CHECK (agent_type IN (
@@ -52,25 +109,6 @@ DO $$ BEGIN
     ));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE INDEX IF NOT EXISTS idx_hub_agents_property_id ON hub_agents(property_id);
-CREATE INDEX IF NOT EXISTS idx_hub_agents_agent_type  ON hub_agents(agent_type);
-CREATE INDEX IF NOT EXISTS idx_hub_agents_enabled     ON hub_agents(enabled);
-
--- ─── hub_agent_runs ───────────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS hub_agent_runs (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  agent_id      uuid NOT NULL REFERENCES hub_agents(id) ON DELETE CASCADE,
-  status        text NOT NULL DEFAULT 'pending',
-  started_at    timestamptz,
-  completed_at  timestamptz,
-  result        jsonb,
-  error_message text,
-  triggered_by  text NOT NULL,
-  property_id   uuid NOT NULL REFERENCES hub_properties(id) ON DELETE CASCADE,
-  created_at    timestamptz NOT NULL DEFAULT now()
-);
-
 DO $$ BEGIN
   ALTER TABLE hub_agent_runs ADD CONSTRAINT hub_agent_runs_status_check
     CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled'));
@@ -80,6 +118,12 @@ DO $$ BEGIN
   ALTER TABLE hub_agent_runs ADD CONSTRAINT hub_agent_runs_triggered_by_check
     CHECK (triggered_by IN ('schedule', 'manual', 'webhook'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- ─── Indexes ──────────────────────────────────────────────────────────────
+
+CREATE INDEX IF NOT EXISTS idx_hub_agents_property_id ON hub_agents(property_id);
+CREATE INDEX IF NOT EXISTS idx_hub_agents_agent_type  ON hub_agents(agent_type);
+CREATE INDEX IF NOT EXISTS idx_hub_agents_enabled     ON hub_agents(enabled);
 
 CREATE INDEX IF NOT EXISTS idx_hub_agent_runs_agent_id_created_at
   ON hub_agent_runs(agent_id, created_at);
