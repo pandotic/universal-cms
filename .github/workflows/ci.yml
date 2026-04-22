@@ -20,11 +20,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -r typecheck
-      - run: pnpm test
-      - run: pnpm build
+      - name: Build cms-core + skill-library (typecheck prereq — downstream packages resolve subpaths via dist)
+        run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+      - run: pnpm -r typecheck
+      - run: pnpm test
       - name: Build fleet-dashboard (Hub)
         run: pnpm --filter @pandotic/fleet-dashboard build
         env:
@@ -70,6 +71,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build cms-core + skill-library (workspace prereqs)
         run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
       - name: Install Playwright browsers
         run: pnpm --filter @pandotic/fleet-dashboard exec playwright install --with-deps chromium
       - name: Run Playwright smokes
