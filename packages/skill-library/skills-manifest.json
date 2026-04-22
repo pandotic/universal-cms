@@ -243,6 +243,17 @@
     "path": "skills/marketing-long-form-writer"
   },
   {
+    "id": "marketing-repurposing-specialist",
+    "name": "Marketing — Repurposing Specialist",
+    "icon": "Component",
+    "category": "Marketing Ops",
+    "description": "Atomize an approved blog post into up to 9 child pieces — 5 platform-rotated social posts (linkedin, twitter, instagram, facebook, linkedin), 1 newsletter excerpt, and 3 quote cards — each a hub_content_pipeline row linked via source_content_id and gated by the Skeptical Reviewer. Honors playbook gates (socialStrategy=skip, newsletterEnabled=false) to produce only what the property's playbook permits.",
+    "triggers": ["repurpose", "/repurpose", "atomize blog", "break down the post", "turn the post into social"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-repurposing-specialist"
+  },
+  {
     "id": "close-session",
     "name": "Close Session",
     "icon": "Wrench",

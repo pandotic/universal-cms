@@ -12,7 +12,8 @@
     "brand-profile-helper": "tsx scripts/skill-helpers/brand-profile-helper.ts",
     "marketing-plan-helper": "tsx scripts/skill-helpers/marketing-plan-helper.ts",
     "skeptical-reviewer-helper": "tsx scripts/skill-helpers/skeptical-reviewer-helper.ts",
-    "long-form-writer-helper": "tsx scripts/skill-helpers/long-form-writer-helper.ts"
+    "long-form-writer-helper": "tsx scripts/skill-helpers/long-form-writer-helper.ts",
+    "repurposing-helper": "tsx scripts/skill-helpers/repurposing-helper.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
