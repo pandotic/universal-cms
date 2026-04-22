@@ -221,6 +221,17 @@
     "path": "skills/marketing-director"
   },
   {
+    "id": "marketing-skeptical-reviewer",
+    "name": "Marketing — Skeptical Reviewer",
+    "icon": "Shield",
+    "category": "Marketing Ops",
+    "description": "QA gate for every piece of content in the Pandotic marketing pipeline. Scores factual claims, hallucination risk, brand-voice match, AI tells, CTA clarity, grammar, and per-content-type rules. Writes to hub_content_qa_reviews and flips hub_content_pipeline.status to approved (auto-pilot) or needs_human_review (default).",
+    "triggers": ["skeptical review", "/skeptical-review", "QA pipeline item", "gate the draft", "review the latest draft", "flag content"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-skeptical-reviewer"
+  },
+  {
     "id": "close-session",
     "name": "Close Session",
     "icon": "Wrench",
