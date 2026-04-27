@@ -40,6 +40,34 @@ superseders — see the "Archive branches" section below. Updated plan at
 
 ---
 
+## Session wrap — Platform stabilization + Phase 3 marketing skills (Apr 22, 2026)
+
+Shipped as **PR #83** (merged) + its CI followup in **PR #84**.
+8 commits total covering platform stabilization, Phase 3 marketing
+skills, and CI hardening — kicked off from a user request for a
+stabilization plan, worked phase-by-phase with a QA step after each.
+
+### What shipped
+
+| Commits | Theme | Notes |
+|---|---|---|
+| `bf50278` | P0 stabilization | `template/sitemap.ts` → `force-dynamic` + env guard. CI gained fleet-dashboard + template build coverage. Deleted stale `packages/api-central/` duplicate. README stopped referencing deleted `admin-core`/`admin-ui` packages. Added root `build:all` + `verify` scripts. |
+| `9d1b3e5` | P1 hardening | `scripts/validate-migrations.sh` + CI postgres-service job — cold-applies all 30 hub migrations. Surfaced 3 real bugs along the way: 00112 invalid `ALTER FUNCTION IF EXISTS` syntax (wrapped in DO block); 00112 + 00116 dropped enum types without dropping column defaults (DROP DEFAULT before DROP TYPE). New Playwright smoke harness for the Hub exercising the missing-config redirect flow. Surfaced + fixed `useTeamUser` SSR crash. |
+| `d4ff115` → `9fac61c` | Marketing Ops Phase 3 (4 commits) | Skeptical Reviewer, Long-Form Writer, Repurposing Specialist skills + helpers + `register-marketing-agents.ts`. All 5 Phase 3 skills now registered. |
+| `150d234` | CI fix | Reordered validate job to build before typecheck (downstream subpaths resolve via `dist/`). Added 6GB heap to e2e's pnpm build step. |
+| PR #84 (`150212c`, `13fe5ae`) | 00116 followup | Parallel session iterated further on the hub_agent_runs enum→text conversion — unconditional DROP DEFAULT + SET DEFAULT 'pending'::text + DROP TYPE wrapped in exception handler. |
+
+### Live state after this session
+
+- cms-core tests 66/66 pass.
+- Full workspace typechecks clean (`pnpm -r typecheck`).
+- `pnpm build:all` from a cleaned dist completes end-to-end.
+- CI jobs: `validate` × 2 node versions, `migrations` (cold-applies 30),
+  `e2e` (Playwright smokes), `ai-context-drift`.
+- 3 new marketing skills live in `packages/skill-library/skills/marketing-*`.
+
+---
+
 ## Session wrap — Hub bug fixes + template build repair (Apr 21, 2026)
 
 Five PRs shipped this session, starting from a user report that
@@ -66,6 +94,35 @@ Five PRs shipped this session, starting from a user report that
 
 ## Outstanding Work
 
+### Phase 3 marketing skills — validation sequence (unblocked)
+
+All 5 skills shipped via PR #83. To validate end-to-end on SPEED:
+
+1. **Manual prereq** — seed SPEED's brand voice brief (SQL or Hub UI).
+   Every content-producing skill refuses without one.
+2. Run `pnpm --filter @pandotic/fleet-dashboard register-marketing-agents`
+   once to upsert `hub_agents` rows for SPEED covering all 5 skills.
+3. Validation flow: `/build-brand-profile speed` →
+   `/marketing-plan speed` →
+   `/write-longform speed --topic "…" --keyword "…"` →
+   `/skeptical-review {id}` → UI approve → `/repurpose {id}` →
+   `/skeptical-review` each child.
+4. Success criterion: steps 3–4 complete without manual SQL fixups.
+
+### Stabilization followups (next session)
+
+- **P1.8 — Stage 1 publish unblock.** Flip the "Allow GitHub Actions to
+  create and approve pull requests" repo setting per `docs/RELEASE.md`
+  § Pre-flight. Gated on user action.
+- **P2.10 — Hub Phase 3e–g onboarding** per
+  `docs/FLEET_DASHBOARD_ROADMAP.md`: GitHub OAuth (replace PAT paste),
+  repo auto-detect, module preset picker.
+- **P2.11 — Phase 4 CMS Deploy Wizard** (`/fleet/deploy`).
+- **Migration cold-apply tech debt.** 00502 / 00504 / 00508 allowlisted
+  in `scripts/validate-migrations.sh` under `SKIP_MIGRATIONS`. Production
+  unaffected; fix requires splitting RLS policies into post-table
+  migrations.
+
 ### Manual ops to run (PR #75 aftermath)
 
 1. **Apply migration `00517_team_hub_initiatives.sql`** to the Hub Supabase
@@ -78,10 +135,7 @@ Five PRs shipped this session, starting from a user report that
 2. **Seed initiatives.** Paste
    `packages/fleet-dashboard/supabase/seed-initiatives.sql` into
    https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new and
-   run. Idempotent — seeds the 6 original agenda items (ASU GSV, Gaia,
-   CJ/McLeod, SCE, Burning Man, education vertical).
-3. *(Optional)* dedupe existing team-hub issues/todos using the SQL block
-   in `packages/fleet-dashboard/README.md`.
+   run.
 
 ### Watch-for: Version Packages PR (carried over)
 

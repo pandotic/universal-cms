@@ -64,19 +64,16 @@ SQL
 # the preamble; the lexical pass will then succeed because the actual
 # CREATE TABLE bodies use IF NOT EXISTS, making re-runs idempotent.
 PRE_APPLY=(
-  "00102_hub_users.sql"     # 00100, 00101 RLS policies reference hub_users
-  "00100_hub_properties.sql" # 00505 references hub_properties
-  "00505_hub_skills.sql"    # 00107 FKs reference hub_skills
+  "00102_hub_users.sql"           # 00100, 00101 RLS policies reference hub_users
+  "00100_hub_properties.sql"      # 00505 references hub_properties
+  "00505_hub_skills.sql"          # 00107 FKs reference hub_skills
+  "00521_api_central_bridge.sql"  # 00504 FK references api_secrets
 )
 
-# Migrations that depend on data outside this repo (api_secrets, etc.)
-# or have other unresolvable cold-apply issues. CI still catches
-# regressions in every other migration.
-SKIP_MIGRATIONS=(
-  "00502_rbac_mapping.sql"             # refs hub_group_properties created elsewhere
-  "00504_hub_api_key_assignments.sql"  # FK refs api_secrets (external schema)
-  "00508_fix_hub_users_rls_recursion.sql" # depends on 00502 skip
-)
+# Migrations with unresolvable cold-apply issues. Empty today — all prior
+# skip entries have been resolved: 00502/00508 fixed in PR #81+#84,
+# 00504 unblocked by adding 00521_api_central_bridge.sql to PRE_APPLY.
+SKIP_MIGRATIONS=()
 
 is_skipped() {
   local n="$1"

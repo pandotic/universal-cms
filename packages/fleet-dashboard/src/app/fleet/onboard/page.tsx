@@ -14,6 +14,11 @@ import {
   Monitor,
   Loader2,
 } from "lucide-react";
+import { modulePresets } from "@pandotic/universal-cms/config";
+
+type PresetKey = keyof typeof modulePresets;
+
+const PRESET_ORDER: PresetKey[] = ["appMarketing", "blog", "directory", "full"];
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -104,6 +109,7 @@ export default function OnboardPage() {
   const [ownership, setOwnership] = useState("pandotic");
   const [clientName, setClientName] = useState("");
   const [domains, setDomains] = useState("");
+  const [preset, setPreset] = useState<PresetKey | null>(null);
 
   // Load GitHub token from localStorage
   useEffect(() => {
@@ -223,7 +229,10 @@ export default function OnboardPage() {
               github_repo: repo.full_name,
               github_default_branch: repo.default_branch ?? "main",
               cms_installed: detected?.hasCms ?? false,
-              enabled_modules: detected?.enabledModules ?? [],
+              enabled_modules: preset
+                ? [...modulePresets[preset].modules]
+                : (detected?.enabledModules ?? []),
+              preset: preset ?? null,
               ...commonFields,
             }),
           });
@@ -260,7 +269,8 @@ export default function OnboardPage() {
             github_repo: null,
             github_default_branch: "main",
             cms_installed: false,
-            enabled_modules: [],
+            enabled_modules: preset ? [...modulePresets[preset].modules] : [],
+            preset: preset ?? null,
             ...commonFields,
           }),
         });
@@ -636,6 +646,60 @@ export default function OnboardPage() {
             )}
           </div>
 
+          {/* Module preset picker (CMS-capable platforms only) */}
+          {platform === "nextjs_supabase" && (
+            <div>
+              <label className="mb-2 block text-xs font-medium text-zinc-400">
+                CMS Module Preset
+                <span className="ml-2 font-normal text-zinc-600">
+                  Optional — picks a default module set for new sites. Overrides any auto-detected modules.
+                </span>
+              </label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setPreset(null)}
+                  className={`rounded-md border px-3 py-2 text-left text-sm transition ${
+                    preset === null
+                      ? "border-violet-500 bg-violet-500/10 text-white"
+                      : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                  }`}
+                >
+                  <div className="font-medium">None / use detected</div>
+                  <div className="mt-0.5 text-xs text-zinc-500">
+                    Leave modules empty (or use auto-detected from GitHub).
+                  </div>
+                </button>
+                {PRESET_ORDER.map((key) => {
+                  const p = modulePresets[key];
+                  const active = preset === key;
+                  return (
+                    <button
+                      type="button"
+                      key={key}
+                      onClick={() => setPreset(key)}
+                      className={`rounded-md border px-3 py-2 text-left text-sm transition ${
+                        active
+                          ? "border-violet-500 bg-violet-500/10 text-white"
+                          : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium">{p.name}</span>
+                        <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                          {p.modules.length} modules
+                        </span>
+                      </div>
+                      <div className="mt-0.5 line-clamp-2 text-xs text-zinc-500">
+                        {p.description}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Summary */}
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <h3 className="text-xs font-medium text-zinc-400">Summary</h3>
@@ -674,6 +738,14 @@ export default function OnboardPage() {
                     <dd className="text-zinc-300">{projectUrl || "—"}</dd>
                   </div>
                 </>
+              )}
+              {platform === "nextjs_supabase" && preset && (
+                <div className="flex gap-2">
+                  <dt className="text-zinc-500">Preset:</dt>
+                  <dd className="text-zinc-300">
+                    {modulePresets[preset].name} ({modulePresets[preset].modules.length} modules)
+                  </dd>
+                </div>
               )}
             </dl>
           </div>
