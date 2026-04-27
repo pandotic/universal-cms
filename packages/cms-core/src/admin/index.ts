@@ -61,3 +61,19 @@ export {
   useFeatureFlags,
   useAdminSettings,
 } from './hooks.js';
+
+// Module Registry
+export type {
+  AdminLayerKey,
+  AdminLayer,
+  AdminModule,
+  AdminModulePreviewRow,
+} from './modules.js';
+export {
+  ADMIN_LAYERS,
+  ADMIN_MODULES,
+  getAdminModule,
+  getAdminLayer,
+  getAdminModulesByLayer,
+  listAdminModuleIds,
+} from './modules.js';
