@@ -1,5 +1,45 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Phase 3 + Phase 4 reconciles shipped (Apr 27, 2026)
+
+Three PRs landed this session, all on the same drift theme — Hub-side
+features (types/data/UI) had been built across earlier branches but the
+backing migrations were marked applied via `migration repair` without
+actually running on the live Hub DB.
+
+| PR | Title | What shipped |
+|---|---|---|
+| #81 | team-hub dedupe + /skills reconcile | Partial unique indexes on issues/todos for `status='open'` (`00518`); 23505 toast handling in DumpModal; `00519` reconcile that finally adds `hub_skills.scope` + `manifest_id` + `content_path` + `component_ids` and creates `hub_skill_versions`. |
+| #84 | phase 3 agent workflows reconcile | `00520` idempotent reconcile for `hub_agents` + `hub_agent_runs` (enum→text conversion via `information_schema` detection, with explicit `DROP DEFAULT` / `SET DEFAULT 'pending'::text` and exception-swallowing `DROP TYPE` to handle the enum-default dependency trap). 14 data layer tests. |
+| #85 | phase 4 social content reconcile | `00521` consolidates four source migrations (00105 base, 00106 trigger, 00111 voice modeling + visual identity, 00112 `hub_social_content` → `hub_content_pipeline` rename). 15 data layer tests. |
+
+**Test count**: 66 → 98 in `cms-core`.
+
+**Live Hub DB state**: PRs #81 + #84 had their SQL applied during the
+session (took 3 iterations on `00520` to handle the enum-default trap).
+**`00521` from PR #85 has NOT been applied yet** — paste it into the
+Supabase SQL editor before the Phase 4 UI is exercised.
+
+### Drift pattern playbook
+
+If any other below-500 migration is suspected to be in the same state
+(marked applied via repair, not actually run), the recipe is:
+
+1. Forward-only idempotent migration in the 005xx series.
+2. `CREATE TABLE IF NOT EXISTS` with target (post-final-migration) column types.
+3. `ADD COLUMN IF NOT EXISTS` for every column added by intermediate migrations.
+4. For enum→text conversions: detect via
+   `information_schema.columns WHERE data_type = 'USER-DEFINED'`,
+   unconditionally `DROP DEFAULT` if the column has one, `ALTER TYPE`,
+   then `SET DEFAULT 'value'::text` with explicit cast.
+5. `DROP TYPE` wrapped in
+   `EXCEPTION WHEN undefined_object OR dependent_objects_still_exist THEN NULL`
+   so zombies don't abort the rest of the migration.
+6. `DROP POLICY IF EXISTS` for both old and new policy names before
+   `CREATE POLICY` (handles renames).
+
+---
+
 ## ⚡ Resume Point — Team Hub dedupe + /skills reconcile (Apr 22, 2026)
 
 **PR #81** (branch `claude/fix-issues-dark-mode-Xs1md`) fixes the two bugs
@@ -243,88 +283,27 @@ All migrations have been applied to the Pandotic Hub Supabase project (`rimbgolu
 - The `package.json` `build` script includes `pnpm --filter @pandotic/universal-cms build` as a safeguard so cms-core is always built first regardless of what Netlify command runs
 - The `netlify.toml` uses `--filter @pandotic/universal-cms build && --filter @pandotic/pandotic-site build` to build cms-core first
 
-## Remaining Phases — TODO for Next Sessions
+## Phases 3 & 4 — Shipped Apr 27, 2026
 
-### Phase 3: Agent Workflows
-Configure and monitor automated tasks (SEO audit, broken links, dependency updates) per property.
+### Phase 3: Agent Workflows ✅
+Per-property automated tasks (SEO audit, broken links, dependency
+updates, etc.). Hub stores definitions + run history; external runners
+execute and report back via `/api/webhooks/agent-run`. Shipped via
+PR #84 (`00520_hub_agents_idempotent.sql` applied to live Hub DB).
+- Tables: `hub_agents`, `hub_agent_runs`
+- Types/data: `cms-core/src/types/agent.ts`, `cms-core/src/data/hub-agents.ts`
+- API: `/api/agents`, `/api/agents/[id]`, `/api/agents/[id]/runs`, `/api/webhooks/agent-run`
+- UI: `/agents`, `/agents/[id]`, `/properties/[slug]/agents`
 
-**Migration:** `00104_agents.sql`
-- `hub_agents` table: id, name, slug, description, agent_type (enum: seo_audit, broken_links, dependency_update, custom), config (jsonb), enabled (boolean), schedule (cron expression text), property_id (FK to hub_properties), created_by (FK to hub_users), created_at, updated_at
-- `hub_agent_runs` table: id, agent_id (FK to hub_agents), status (enum: pending, running, completed, failed, cancelled), started_at, completed_at, result (jsonb), error_message (text), triggered_by (enum: schedule, manual, webhook), property_id (FK), created_at
-- Indexes on agent_id + created_at, property_id, status
-- RLS: authenticated read all, super_admin/group_admin write
-
-**Types:** `packages/cms-core/src/types/agent.ts`
-- `AgentType` = "seo_audit" | "broken_links" | "dependency_update" | "content_freshness" | "ssl_monitor" | "custom"
-- `AgentRunStatus` = "pending" | "running" | "completed" | "failed" | "cancelled"
-- `AgentTrigger` = "schedule" | "manual" | "webhook"
-- `HubAgent` interface: id, name, slug, description, agent_type, config, enabled, schedule, property_id, created_by, created_at, updated_at
-- `HubAgentRun` interface: id, agent_id, status, started_at, completed_at, result, error_message, triggered_by, property_id, created_at
-
-**Data:** `packages/cms-core/src/data/hub-agents.ts`
-- `listAgents(client, filters?)` — filter by property_id, agent_type, enabled
-- `getAgentById(client, id)`, `getAgentBySlug(client, slug)`
-- `createAgent(client, agent)`, `updateAgent(client, id, updates)`, `deleteAgent(client, id)`
-- `listAgentRuns(client, agentId, filters?)` — with pagination, status filter
-- `createAgentRun(client, run)`, `updateAgentRun(client, id, updates)`
-- `getLatestRun(client, agentId)`
-
-**Pages in fleet-dashboard:**
-- `/agents` — list all agents across properties, with status indicators (last run status, schedule, enabled/disabled)
-- `/agents/[id]` — agent detail: config editor, run history, manual trigger button
-- `/properties/[slug]/agents` — property-scoped agent list
-
-**API routes:**
-- `/api/agents` — GET (list), POST (create)
-- `/api/agents/[id]` — GET, PUT, DELETE
-- `/api/agents/[id]/runs` — GET (list runs), POST (trigger manual run)
-- `/api/webhooks/agent-run` — POST (external executors report run status, authenticated via API key)
-
-**Exports to add:**
-- `packages/cms-core/package.json`: `"./types/agent"`, `"./data/hub-agents"`
-- `packages/cms-core/tsup.config.ts`: matching entries
-
-**Note:** Hub manages agent state only; actual execution happens in consuming projects or external runners.
-
-### Phase 4: Social Content
-Brand voice management and social content creation per property.
-
-**Migration:** `00105_social_content.sql`
-- `hub_brand_voice_briefs` table: id, property_id (FK to hub_properties), name, platform (text), tone (text[]), audience (text), key_messages (text[]), dos (text[]), donts (text[]), example_posts (jsonb), metadata (jsonb), created_by (FK to hub_users), created_at, updated_at
-- `hub_social_content` table: id, property_id (FK), brief_id (FK to hub_brand_voice_briefs, nullable), platform (enum: twitter, linkedin, instagram, facebook, tiktok, youtube, other), content_type (enum: post, thread, story, reel, article), title (text), body (text), media_urls (text[]), hashtags (text[]), status (enum: draft, review, approved, published, archived), scheduled_for (timestamptz), published_at (timestamptz), metadata (jsonb), created_by (FK), created_at, updated_at
-- Indexes on property_id, platform, status, brief_id
-- RLS: authenticated read, super_admin/group_admin write
-
-**Types:** `packages/cms-core/src/types/social.ts`
-- `SocialPlatform` = "twitter" | "linkedin" | "instagram" | "facebook" | "tiktok" | "youtube" | "other"
-- `SocialContentType` = "post" | "thread" | "story" | "reel" | "article"
-- `SocialContentStatus` = "draft" | "review" | "approved" | "published" | "archived"
-- `BrandVoiceBrief` interface
-- `SocialContentItem` interface
-
-**Data:** `packages/cms-core/src/data/hub-social.ts`
-- Brief CRUD: `listBriefs`, `getBriefById`, `createBrief`, `updateBrief`, `deleteBrief`
-- Content CRUD: `listSocialContent(client, filters?)`, `getSocialContentById`, `createSocialContent`, `updateSocialContent`, `deleteSocialContent`
-- Filters: by property_id, platform, status, brief_id
-
-**Pages in fleet-dashboard:**
-- `/social` — overview dashboard: content counts by status, recent activity
-- `/social/content` — content list with filters (platform, status), create/edit forms
-- `/social/brand-voice` — list of brand voice briefs by property
-- `/social/brand-voice/[propertySlug]` — edit brief for a specific property
-- `/social/generate` — AI-assisted content generation (future, uses Claude API with brand voice brief as context)
-
-**API routes:**
-- `/api/social/briefs` — GET, POST
-- `/api/social/briefs/[id]` — GET, PUT, DELETE
-- `/api/social/content` — GET, POST
-- `/api/social/content/[id]` — GET, PUT, DELETE
-
-**Exports to add:**
-- `packages/cms-core/package.json`: `"./types/social"`, `"./data/hub-social"`
-- `packages/cms-core/tsup.config.ts`: matching entries
-
-**Note:** No direct social media API posting; manual content management with future AI generation via Claude API.
+### Phase 4: Social Content ✅
+Brand voice briefs + multi-channel content pipeline per property.
+Shipped via PR #85 — but **`00521_hub_social_idempotent.sql` not yet
+applied to live Hub DB**, run it via the Supabase SQL editor before
+exercising the `/social` UI.
+- Tables: `hub_brand_voice_briefs`, `hub_content_pipeline` (renamed from `hub_social_content`)
+- Types/data: `cms-core/src/types/social.ts`, `cms-core/src/data/hub-social.ts`
+- API: `/api/social/briefs`, `/api/social/content`, `/api/social/generate`, `/api/social/stats`
+- UI: `/social`, `/social/content`, `/social/brand-voice`, `/social/generate`
 
 ## PMF Evaluator Micro-App Integration (Future)
 The PMF Evaluator (standalone Next.js 16 app on Netlify) will be embedded in the Hub via iframe at `/tools/pmf-evaluator`. Communication via `window.postMessage`. Separate Netlify deployment, independent deploy cycles. See conversation history for full integration spec.
