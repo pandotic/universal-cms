@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ADMIN_LAYER_MODULES, MODULE_FIXTURES } from "../_fixtures";
-
-type LayerKey = keyof typeof ADMIN_LAYER_MODULES;
+import {
+  type AdminLayerKey,
+  getAdminLayer,
+  getAdminModulesByLayer,
+} from "@pandotic/universal-cms/admin/modules";
 
 interface Props {
-  layer: LayerKey;
+  layer: AdminLayerKey;
 }
 
 export function LayerPreview({ layer }: Props) {
-  const { title, description, modules } = ADMIN_LAYER_MODULES[layer];
+  const { title, description } = getAdminLayer(layer);
+  const modules = getAdminModulesByLayer(layer);
 
   return (
     <div className="space-y-6">
@@ -34,46 +37,42 @@ export function LayerPreview({ layer }: Props) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {modules.map((key) => {
-          const fixture = MODULE_FIXTURES[key];
-          if (!fixture) return null;
-          return (
-            <Link
-              key={key}
-              href={`/cms/${layer}/${key}`}
-              className="group flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-white group-hover:text-white">
-                    {fixture.label}
-                  </h3>
-                  <p className="mt-0.5 text-xs text-zinc-500">{key}</p>
-                </div>
-                <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-                  {fixture.rows.length} items
-                </span>
+        {modules.map((mod) => (
+          <Link
+            key={mod.id}
+            href={`/cms/${layer}/${mod.id}`}
+            className="group flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-white group-hover:text-white">
+                  {mod.label}
+                </h3>
+                <p className="mt-0.5 text-xs text-zinc-500">{mod.id}</p>
               </div>
-              <p className="mt-2 text-xs text-zinc-400">{fixture.description}</p>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                {mod.previewRows.length} items
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-zinc-400">{mod.description}</p>
 
-              <ul className="mt-3 space-y-1.5 border-t border-zinc-800/60 pt-3">
-                {fixture.rows.slice(0, 3).map((row, i) => (
-                  <li
-                    key={i}
-                    className="flex items-baseline justify-between gap-3 text-xs"
-                  >
-                    <span className="truncate text-zinc-300">{row.title}</span>
-                    {row.status && (
-                      <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
-                        {row.status}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Link>
-          );
-        })}
+            <ul className="mt-3 space-y-1.5 border-t border-zinc-800/60 pt-3">
+              {mod.previewRows.slice(0, 3).map((row, i) => (
+                <li
+                  key={i}
+                  className="flex items-baseline justify-between gap-3 text-xs"
+                >
+                  <span className="truncate text-zinc-300">{row.title}</span>
+                  {row.status && (
+                    <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+                      {row.status}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Link>
+        ))}
       </div>
     </div>
   );

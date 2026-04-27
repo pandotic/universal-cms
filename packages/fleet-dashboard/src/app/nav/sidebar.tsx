@@ -82,22 +82,9 @@ const GROUPS: NavGroup[] = [
       { href: "/marketing-ops/pipeline", label: "Content Pipeline", icon: ListChecks },
       { href: "/marketing-ops/link-building", label: "Link Building", icon: Link2 },
       { href: "/marketing-ops/qa", label: "QA & Reviews", icon: ShieldCheck },
-    ],
-  },
-  {
-    label: "Content",
-    links: [
       { href: "/cms/projects", label: "Projects", icon: Briefcase },
       { href: "/cms/content", label: "Pages & Blog", icon: FileText },
       { href: "/social", label: "Social", icon: Share2 },
-    ],
-  },
-  {
-    label: "CMS Admin",
-    links: [
-      { href: "/cms/marketing-cms", label: "Marketing CMS", icon: Megaphone },
-      { href: "/cms/app-admin", label: "App Admin", icon: LayoutDashboard },
-      { href: "/cms/group-admin", label: "Group Admin", icon: ShieldCheck },
     ],
   },
   {
