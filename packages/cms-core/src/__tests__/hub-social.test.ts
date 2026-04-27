@@ -265,13 +265,13 @@ describe("getScheduledContent", () => {
 
   it("queries hub_content_pipeline for scheduled items", async () => {
     const { client } = createMockClient([]);
-    await getScheduledContent(client);
+    await getScheduledContent(client, "prop-1");
     expect(client.from).toHaveBeenCalledWith("hub_content_pipeline");
   });
 
   it("returns empty array when nothing scheduled", async () => {
     const { client } = createMockClient(null);
-    const result = await getScheduledContent(client);
+    const result = await getScheduledContent(client, "prop-1");
     expect(result).toEqual([]);
   });
 });
