@@ -1,5 +1,30 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Stabilization handoff (Apr 23, 2026)
+
+PR #87 merged the platform stabilization tail end (preset picker +
+`00521_api_central_bridge.sql` + empty `SKIP_MIGRATIONS`). Five concrete items
+remain on the original "stabilize and harden the platform" plan, fully scoped
+in **`docs/plans/2026-04-23-stabilization-handoff.md`**:
+
+1. Cosmetic — rename `00521_hub_social_idempotent.sql` → `00522_*` (5 min). PR
+   #85 and PR #87 collided on the same migration number; validator is green
+   but the smell is real.
+2. **P1.8 — Stage 1 publish unblock** (gated on user toggling a GitHub repo
+   setting per `docs/RELEASE.md`). Until this happens, P2.11 has nothing to
+   install.
+3. P2.10e — GitHub OAuth flow (~1 day; replace PAT paste + new
+   `00522_user_github_tokens.sql`).
+4. P2.10f — Richer repo auto-detect (~0.5 day; sniff `cms.config.ts` and
+   default the preset picker).
+5. P2.11 — CMS Deploy Wizard at `/fleet/deploy` (~1.5 days; depends on Items
+   2+3+4).
+
+Suggested order: Item 1 → Item 4 → Item 3 → Item 5. P1.8 is human-gated and
+lives outside this critical path.
+
+---
+
 ## ⚡ Resume Point — Team Hub dedupe + /skills reconcile (Apr 22, 2026)
 
 **PR #81** (branch `claude/fix-issues-dark-mode-Xs1md`) fixes the two bugs
