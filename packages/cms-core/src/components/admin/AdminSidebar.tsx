@@ -72,12 +72,21 @@ export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSideb
   const pathname = usePathname();
   const cmsConfig = useCmsConfig();
 
-  const filteredNav = cmsConfig.adminNav
+  const inactiveMode = cmsConfig.inactiveModulesMode ?? "hide";
+  const previewBase = (cmsConfig.inactiveModulePreviewBase ?? "/admin/modules").replace(/\/$/, "");
+
+  // In `'hide'` mode (default), nav items for disabled modules are filtered
+  // out entirely. In `'preview'` mode, they pass through and are rendered
+  // greyed-out, linking to a per-module preview page so operators can see
+  // every module the universal CMS ships.
+  const visibleNav = cmsConfig.adminNav
     .map((group: CmsNavGroup) => ({
       ...group,
-      items: group.items.filter(
-        (item: CmsNavItem) => !item.module || cmsConfig.modules[item.module]
-      ),
+      items: group.items.filter((item: CmsNavItem) => {
+        if (!item.module) return true;
+        if (cmsConfig.modules[item.module]) return true;
+        return inactiveMode === "preview";
+      }),
     }))
     .filter((group: CmsNavGroup) => group.items.length > 0);
 
@@ -121,7 +130,7 @@ export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSideb
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-3">
-        {filteredNav.map((group) => (
+        {visibleNav.map((group) => (
           <div key={group.group} className="mb-4">
             {!collapsed && (
               <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-foreground-tertiary">
@@ -132,33 +141,61 @@ export function AdminSidebar({ collapsed = false, onToggleCollapse }: AdminSideb
             <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon ? iconMap[item.icon] : null;
+                const isInactive =
+                  !!item.module && !cmsConfig.modules[item.module];
+                const href = isInactive
+                  ? `${previewBase}/${item.module}`
+                  : item.href;
                 const isActive =
-                  item.href === "/admin"
+                  href === "/admin"
                     ? pathname === "/admin"
-                    : pathname.startsWith(item.href);
+                    : pathname.startsWith(href);
 
                 return (
                   <li key={item.href}>
                     <Link
-                      href={item.href}
+                      href={href}
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
                         isActive
                           ? "bg-surface-tertiary text-foreground"
-                          : "text-foreground-secondary hover:bg-surface-secondary hover:text-foreground",
+                          : isInactive
+                            ? "text-foreground-tertiary hover:bg-surface-secondary hover:text-foreground-secondary"
+                            : "text-foreground-secondary hover:bg-surface-secondary hover:text-foreground",
                         collapsed && "justify-center px-0"
                       )}
-                      title={collapsed ? item.label : undefined}
+                      title={
+                        collapsed
+                          ? isInactive
+                            ? `${item.label} (not enabled)`
+                            : item.label
+                          : isInactive
+                            ? "Module not enabled — click to preview"
+                            : undefined
+                      }
                     >
                       {Icon && (
                         <Icon
                           className={cn(
                             "h-4 w-4 shrink-0",
-                            isActive ? "text-foreground" : "text-foreground-tertiary"
+                            isActive
+                              ? "text-foreground"
+                              : isInactive
+                                ? "text-foreground-tertiary/60"
+                                : "text-foreground-tertiary"
                           )}
                         />
                       )}
-                      {!collapsed && <span className="truncate">{item.label}</span>}
+                      {!collapsed && (
+                        <span className="flex min-w-0 flex-1 items-center gap-2">
+                          <span className="truncate">{item.label}</span>
+                          {isInactive && (
+                            <span className="shrink-0 rounded-full bg-surface-secondary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground-tertiary">
+                              Off
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 );
