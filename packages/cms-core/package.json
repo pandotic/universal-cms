@@ -161,6 +161,11 @@
       "types": "./dist/admin/hooks.d.ts",
       "development": "./src/admin/hooks.ts"
     },
+    "./admin/modules": {
+      "import": "./dist/admin/modules.js",
+      "types": "./dist/admin/modules.d.ts",
+      "development": "./src/admin/modules.ts"
+    },
     "./components/ui": {
       "import": "./dist/components/ui/index.js",
       "types": "./dist/components/ui/index.d.ts",

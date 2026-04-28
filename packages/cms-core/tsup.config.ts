@@ -87,6 +87,7 @@ export default defineConfig({
     "admin/rbac": "src/admin/rbac.ts",
     "admin/services": "src/admin/services.ts",
     "admin/hooks": "src/admin/hooks.ts",
+    "admin/modules": "src/admin/modules.ts",
   },
   format: ["esm"],
   dts: true,
