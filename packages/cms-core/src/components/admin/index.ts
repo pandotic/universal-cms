@@ -18,6 +18,8 @@ export { PlatformAdminRoute } from "./shared/PlatformAdminRoute.js";
 export type { PlatformAdminRouteProps } from "./shared/PlatformAdminRoute.js";
 export { EntityManagementPanel } from "./shared/EntityManagementPanel.js";
 export type { EntityManagementPanelProps } from "./shared/EntityManagementPanel.js";
+export { ModulePreviewPanel } from "./shared/ModulePreviewPanel.js";
+export type { ModulePreviewPanelProps } from "./shared/ModulePreviewPanel.js";
 
 // Platform-tier admin panels (ported from @universal-cms/admin-ui)
 export { UserManagementPanel } from "./platform/UserManagementPanel.js";
