@@ -9,6 +9,11 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ManifestSkill, ManifestKnowledgebase, SkillScope } from "../types/index";
+// Static imports so bundlers (Next.js / esbuild / tsup) inline the JSON
+// into the output. Filesystem walking via import.meta.url doesn't survive
+// serverless bundling — the JSON files aren't traced into the function.
+import skillsManifestData from "../../skills-manifest.json";
+import kbManifestData from "../../knowledgebases-manifest.json";
 
 // ─── File Loading ─────────────────────────────────────────────────────────
 
@@ -23,17 +28,11 @@ export function getPackageRoot(): string {
 }
 
 export function loadSkillsManifest(): ManifestSkill[] {
-  const root = getPackageRoot();
-  const filePath = resolve(root, "skills-manifest.json");
-  if (!existsSync(filePath)) return [];
-  return JSON.parse(readFileSync(filePath, "utf8"));
+  return skillsManifestData as ManifestSkill[];
 }
 
 export function loadKBManifest(): ManifestKnowledgebase[] {
-  const root = getPackageRoot();
-  const filePath = resolve(root, "knowledgebases-manifest.json");
-  if (!existsSync(filePath)) return [];
-  return JSON.parse(readFileSync(filePath, "utf8"));
+  return kbManifestData as ManifestKnowledgebase[];
 }
 
 export function getSkillContent(skillId: string): string | null {

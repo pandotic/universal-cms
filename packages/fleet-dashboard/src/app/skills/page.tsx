@@ -40,12 +40,18 @@ const scopeColors: Record<string, string> = {
   both: 'bg-amber-500/20 text-amber-400',
 };
 
+type SyncStatus =
+  | { kind: 'idle' }
+  | { kind: 'success'; created: number; updated: number; unchanged: number }
+  | { kind: 'error'; message: string };
+
 export default function SkillsPage() {
   const [skills, setSkills] = useState<SkillEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ScopeTab>('all');
   const [search, setSearch] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({ kind: 'idle' });
 
   const fetchSkills = async (scope?: string) => {
     setLoading(true);
@@ -65,11 +71,25 @@ export default function SkillsPage() {
 
   const syncManifest = async () => {
     setSyncing(true);
+    setSyncStatus({ kind: 'idle' });
     try {
-      await fetch('/api/skills/sync', { method: 'POST' });
-      await fetchSkills(activeTab);
-    } catch {
-      // silent
+      const res = await fetch('/api/skills/sync', { method: 'POST' });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSyncStatus({
+          kind: 'error',
+          message: json?.error ?? `Sync failed (HTTP ${res.status})`,
+        });
+      } else {
+        const { created = 0, updated = 0, unchanged = 0 } = json?.data ?? {};
+        setSyncStatus({ kind: 'success', created, updated, unchanged });
+        await fetchSkills(activeTab);
+      }
+    } catch (e) {
+      setSyncStatus({
+        kind: 'error',
+        message: e instanceof Error ? e.message : 'Sync failed',
+      });
     }
     setSyncing(false);
   };
@@ -129,6 +149,23 @@ export default function SkillsPage() {
           </button>
         </div>
       </div>
+
+      {/* Sync status */}
+      {syncStatus.kind === 'success' && (
+        <div className="mb-4 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+          Synced manifest — {syncStatus.created} created, {syncStatus.updated} updated, {syncStatus.unchanged} unchanged.
+          {syncStatus.created === 0 && syncStatus.updated === 0 && syncStatus.unchanged === 0 && (
+            <span className="ml-1 text-emerald-200/80">
+              (Manifest was empty — check that <code>skills-manifest.json</code> is bundled with the deploy.)
+            </span>
+          )}
+        </div>
+      )}
+      {syncStatus.kind === 'error' && (
+        <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          {syncStatus.message}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mb-4 flex gap-1 rounded-lg bg-zinc-900 p-1">
