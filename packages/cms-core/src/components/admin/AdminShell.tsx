@@ -34,6 +34,21 @@ interface AdminShellProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
+  /**
+   * Identity displayed in the user dropdown. When omitted, the dropdown
+   * falls back to the legacy `Admin` / `admin@cms.com` placeholder so
+   * existing consumers continue to render without changes.
+   */
+  userInfo?: {
+    name?: string | null;
+    email?: string | null;
+  };
+  /**
+   * Click handler for the dropdown's Sign out item. Pass a function that
+   * signs the user out and (typically) redirects to the login page. When
+   * omitted, the menu item is a no-op — preserving existing behaviour.
+   */
+  onSignOut?: () => void | Promise<void>;
 }
 
 function buildBreadcrumbs(pathname: string) {
@@ -52,7 +67,13 @@ function buildBreadcrumbs(pathname: string) {
   return crumbs;
 }
 
-export function AdminShell({ children, title, description }: AdminShellProps) {
+export function AdminShell({
+  children,
+  title,
+  description,
+  userInfo,
+  onSignOut,
+}: AdminShellProps) {
   const cmsConfig = useCmsConfig();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -226,13 +247,15 @@ export function AdminShell({ children, title, description }: AdminShellProps) {
           {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full bg-active text-xs font-semibold text-foreground-secondary hover:bg-border-strong transition-colors">
-              A
+              {(userInfo?.name?.[0] ?? userInfo?.email?.[0] ?? "A").toUpperCase()}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium text-foreground">Admin</p>
+                <p className="text-sm font-medium text-foreground">
+                  {userInfo?.name ?? "Admin"}
+                </p>
                 <p className="text-xs text-foreground-secondary">
-                  admin@cms.com
+                  {userInfo?.email ?? "admin@cms.com"}
                 </p>
               </div>
               <DropdownMenuSeparator />
@@ -243,7 +266,14 @@ export function AdminShell({ children, title, description }: AdminShellProps) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem destructive onClick={() => {}}>
+              <DropdownMenuItem
+                destructive
+                onClick={() => {
+                  if (onSignOut) {
+                    void onSignOut();
+                  }
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign out
               </DropdownMenuItem>
