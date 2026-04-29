@@ -16,12 +16,12 @@ interface PersonalItem {
 }
 
 export function PersonalAlerts() {
-  const { user } = useTeamUser();
+  const { teamUser } = useTeamUser();
   const [items, setItems] = useState<PersonalItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!teamUser) return;
 
     const supabase = createClient();
     const fetchPersonalItems = async () => {
@@ -36,7 +36,7 @@ export function PersonalAlerts() {
             .from("todos")
             .select("id, description, due_date, owner_id")
             .eq("status", "open")
-            .eq("owner_id", user.id)
+            .eq("owner_id", teamUser.id)
             .limit(3),
           supabase
             .from("hub_initiatives")
@@ -76,7 +76,7 @@ export function PersonalAlerts() {
     };
 
     fetchPersonalItems();
-  }, [user]);
+  }, [teamUser]);
 
   const grouped = useMemo(() => {
     return {
