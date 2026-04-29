@@ -237,7 +237,7 @@ does the rest. No SQL needed.
 
 ### Archive branches preserving deleted work
 
-Three archive branches preserve the commit history of stale branches
+Two archive branches preserve the commit history of stale branches
 already deleted via GitHub UI. They live at `refs/heads/archive/…` on
 origin and are safe to leave alone indefinitely. If anything needs
 restoring: `git checkout -b <original-name> archive/<original-name>`
@@ -246,18 +246,11 @@ and push.
   the rebased Phase 2 branch that merged as PR #75).
 - `archive/claude/add-error-logging-8u1mK` (original content superseded
   by PR #54, error-logging v2).
-- `archive/claude/plan-skill-onboarding-8drJN` (original content —
-  playbooks types, marketing-ops migrations, roadmap — all landed on
-  main via later PRs; renames absorbed during chunk 2 renumbering).
 
-### Remaining branches to triage
-
-- `claude/improve-website-ux-f77go` (3+ days idle) — has ~147 LOC of
-  pandotic-site typography tweaks distinct from PR #48. Rebase + PR if
-  wanted, else delete.
-- `claude/fix-issues-dark-mode-Xs1md` — parallel-session active work
-  (team-hub dark-mode polish, skills schema reconcile). Leave alone;
-  that session needs to rebase onto current main before PR.
+Note: `claude/plan-skill-onboarding-8drJN`, `claude/platform-stabilization-plan-bzGVS`,
+and `claude/fix-repo-loading-multiselect-ov3rU` were deleted directly via the
+GitHub UI (Apr 29) without archive refs — content of all three was already on
+main before deletion.
 
 ### Unblocked — ready for Stage 1
 
