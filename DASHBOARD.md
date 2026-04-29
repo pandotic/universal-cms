@@ -32,7 +32,6 @@ universal-cms/
 │   ├── cms-core/          # @pandotic/universal-cms (publishable npm package)
 │   ├── fleet-dashboard/   # @pandotic/fleet-dashboard (Pandotic Hub, Next.js 16)
 │   ├── skill-library/     # @pandotic/skill-library (marketing skills + deploy adapters)
-│   └── admin-schema/      # @universal-cms/admin-schema (legacy reference SQL)
 ├── apps/
 │   ├── pandotic-site/     # @pandotic/pandotic-site (marketing site)
 │   └── dashboard/         # @universal-cms/dashboard (legacy Vite admin — do not extend)

@@ -6,7 +6,7 @@ Publishable packages (workspace):
 - `@pandotic/universal-cms` (cms-core)
 - `@pandotic/skill-library`
 
-Internal-only (not published): `@pandotic/fleet-dashboard`, `@pandotic/pandotic-site`, `@universal-cms/admin-schema`.
+Internal-only (not published): `@pandotic/fleet-dashboard`, `@pandotic/pandotic-site`.
 
 ---
 
