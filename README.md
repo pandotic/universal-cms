@@ -9,8 +9,7 @@ universal-cms/
 ├── packages/
 │   ├── cms-core/          # @pandotic/universal-cms — the CMS npm package
 │   ├── fleet-dashboard/   # @pandotic/fleet-dashboard — Pandotic Hub (Next.js 16)
-│   ├── skill-library/     # @pandotic/skill-library — marketing skills + deployment adapters
-│   └── admin-schema/      # @universal-cms/admin-schema — legacy admin SQL migrations (reference)
+│   └── skill-library/     # @pandotic/skill-library — marketing skills + deployment adapters
 ├── apps/
 │   ├── pandotic-site/     # @pandotic/pandotic-site — marketing site (Next.js)
 │   └── dashboard/         # @universal-cms/dashboard — legacy Vite admin (superseded by fleet-dashboard)

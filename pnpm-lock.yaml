@@ -125,8 +125,6 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
 
-  packages/admin-schema: {}
-
   packages/cms-core:
     dependencies:
       '@radix-ui/react-dialog':

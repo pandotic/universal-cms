@@ -615,7 +615,7 @@ USING (
 
 ## Database Schema Requirements
 
-Your Supabase project must have these core tables (provided in admin-schema migrations):
+Your Supabase project must have these core tables (consolidated into `packages/fleet-dashboard/supabase/migrations/00500_admin_schema_integration.sql`):
 
 ### user_profiles
 ```sql
