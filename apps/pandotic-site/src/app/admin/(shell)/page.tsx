@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ACTIVE_MODULES_SOURCE } from "@/cms.config";
 
 interface CountRow {
   total: number;
@@ -74,11 +75,9 @@ export default function AdminOverviewPage() {
           About this admin
         </h2>
         <p className="mt-1 text-xs text-foreground-secondary">
-          Pandotic.ai activates a small subset of the universal CMS modules
-          (Content Pages today). Other modules — Media Library, Brand Guide,
-          SEO, Redirects, Forms, plus the App Admin layer — appear in the
-          sidebar greyed out and link to a sample preview. To switch one on
-          for this site, manage it from{" "}
+          Pandotic.ai activates a small subset of the universal CMS modules.
+          Other modules appear in the sidebar greyed out and link to a sample
+          preview. To switch one on for this site, manage it from{" "}
           <a
             href="https://pandhub.netlify.app/properties/pandotic-site/modules"
             target="_blank"
@@ -86,11 +85,36 @@ export default function AdminOverviewPage() {
             className="text-foreground underline underline-offset-2"
           >
             Pandotic Hub → Properties → Modules
-          </a>
-          .
+          </a>{" "}
+          and trigger a redeploy.
         </p>
+        <ActivationSource />
       </div>
     </div>
+  );
+}
+
+function ActivationSource() {
+  const { source, generatedAt } = ACTIVE_MODULES_SOURCE;
+  if (source === "hub") {
+    return (
+      <p className="mt-3 text-[11px] text-foreground-tertiary">
+        Module activations were synced from Hub
+        {generatedAt
+          ? ` at ${new Date(generatedAt).toLocaleString()}`
+          : ""}
+        . Trigger a new build to pick up changes.
+      </p>
+    );
+  }
+  return (
+    <p className="mt-3 text-[11px] text-amber-300/80">
+      Hub sync skipped — using local fallback in{" "}
+      <span className="font-mono">cms.config.ts</span>. Set{" "}
+      <span className="font-mono">HUB_SUPABASE_URL</span> +{" "}
+      <span className="font-mono">HUB_SUPABASE_ANON_KEY</span> in the build
+      environment to enable Hub-driven activation.
+    </p>
   );
 }
 

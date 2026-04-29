@@ -4,16 +4,19 @@ import {
   ADMIN_MODULES,
   type AdminLayerKey,
 } from "@pandotic/universal-cms/admin/modules";
+import {
+  HUB_ENABLED_MODULES,
+  HUB_GENERATED_AT,
+} from "./cms.config.generated";
 
 // ─── Active modules ─────────────────────────────────────────────────────────
-// Every module the universal CMS ships appears in the sidebar. Modules that
-// are `true` here are wired to real data; everything else stays visible but
-// greyed-out, linking to a sample preview at /admin/modules/{id}. As we
-// activate more modules on pandotic.ai (or as ESGsource/HomeDoc improvements
-// land back in cms-core), flip the flag here to switch a module from
-// preview to live.
+// Source of truth in production = Pandotic Hub (Properties → Modules).
+// `scripts/sync-cms-config.mjs` runs at build time, fetches the property's
+// `enabled_modules` row, and writes ./cms.config.generated.ts. When the Hub
+// is unreachable or env vars are unset (e.g. local dev), the build falls
+// through to the local fallback below so devs always have a working admin.
 
-const ACTIVE_MODULES: Partial<Record<CmsModuleName, boolean>> = {
+const ACTIVE_MODULES_FALLBACK: Partial<Record<CmsModuleName, boolean>> = {
   contentPages: true,
 };
 
@@ -29,9 +32,24 @@ const ALL_MODULES: CmsModuleName[] = [
   "errorLog", "activityLog", "bulkImport", "apiUsage",
 ];
 
+const activeModules: Partial<Record<CmsModuleName, boolean>> =
+  HUB_ENABLED_MODULES != null
+    ? Object.fromEntries(HUB_ENABLED_MODULES.map((m) => [m, true]))
+    : ACTIVE_MODULES_FALLBACK;
+
 const modules = Object.fromEntries(
-  ALL_MODULES.map((m) => [m, ACTIVE_MODULES[m] ?? false]),
+  ALL_MODULES.map((m) => [m, activeModules[m] ?? false]),
 ) as Record<CmsModuleName, boolean>;
+
+/** Where pandotic-site got its module activation state from on the last
+ * build — surfaced on the admin overview page so operators can see whether
+ * they're looking at Hub-driven config or the local fallback. */
+export const ACTIVE_MODULES_SOURCE: {
+  source: "hub" | "fallback";
+  generatedAt: string | null;
+} = HUB_ENABLED_MODULES != null
+  ? { source: "hub", generatedAt: HUB_GENERATED_AT }
+  : { source: "fallback", generatedAt: null };
 
 // ─── Sidebar nav ────────────────────────────────────────────────────────────
 // Top section is pandotic-site-specific (Overview, Projects). The remaining
