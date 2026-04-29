@@ -8,6 +8,7 @@ import {
 } from "@pandotic/universal-cms/data/projects";
 import type { Project } from "@pandotic/universal-cms/types/projects";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ProjectSectionsEditor } from "./ProjectSectionsEditor";
 
 type EditableFields = Pick<
   Project,
@@ -300,6 +301,18 @@ function ProjectEditor({
           </button>
         </div>
       </form>
+
+      <div className="border-t border-border pt-6">
+        <h2 className="text-lg font-semibold text-foreground">Sections</h2>
+        <p className="mt-1 text-sm text-foreground-secondary">
+          Markdown content for each section type. Saved into{" "}
+          <span className="font-mono text-xs">project_sections</span> and
+          parsed by template renderers (case-study, features, proof points, …).
+        </p>
+        <div className="mt-4">
+          <ProjectSectionsEditor projectId={project.id} />
+        </div>
+      </div>
     </div>
   );
 }
