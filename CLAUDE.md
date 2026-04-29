@@ -1,5 +1,40 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Repo hygiene cleanup (Apr 29, 2026)
+
+A full-repo hygiene audit ran (`CLEANUP_AUDIT.md` on main) and drove
+PR #98 (4-phase cleanup) and PR #97 (residual unmerged work from
+`claude/prepare-cms-npm-deploy-JeW0c`). Both merged.
+
+**Shipped:**
+- Deleted dead root-level `api-central/` (~3,000 LOC, no inbound imports).
+- Untracked `.DS_Store`, removed `reference/` from `.gitignore` (it's
+  tracked by design).
+- Moved 7 stale top-level planning docs to `docs/archive/`. Rewrote
+  `DASHBOARD.md` (901→194 lines) and `ROADMAP.md` (240→83 lines) to
+  reflect current state. Fixed `README.md` `@universal-cms/admin-core`
+  → `@pandotic/universal-cms/admin`.
+- Renamed migration filename collisions: `00521_hub_social_idempotent`
+  → `00522_*` and template `00025_api_usage_tracking` → `00027_*`.
+  Updated `packages/cms-core/src/config.ts` + `docs/module-catalog.md`.
+- Closed PR #86 (doc-only, superseded). Created 3 archive branches.
+
+**Residual items** scoped in **`docs/plans/2026-04-29-cleanup-followups.md`**:
+
+1. Three superseded branches still on remote (`claude/platform-stabilization-plan-bzGVS`,
+   `claude/fix-repo-loading-multiselect-ov3rU`, `claude/plan-skill-onboarding-8drJN`).
+   Local git proxy blocks `git push --delete`; needs GitHub UI deletion
+   or another mechanism.
+2. Two new branches to triage (`claude/media-library-and-seo-panels`,
+   `claude/admin-polish-and-marketing-panels`) — surfaced after the audit,
+   both 0 ahead at last check.
+3. Live-DB row update for the `00521 → 00522` rename in
+   `supabase_migrations.schema_migrations` if `supabase db push` is ever
+   re-run against the live Hub.
+4. `CLEANUP_AUDIT.md` at repo root — decide: keep / delete / archive.
+
+---
+
 ## ⚡ Resume Point — Stabilization handoff (Apr 23, 2026)
 
 PR #87 merged the platform stabilization tail end (preset picker +
