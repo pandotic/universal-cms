@@ -28,10 +28,10 @@ The admin packages implement a three-tier permission model:
 | Group Admin | `org_admin` | Manages a specific organization and its members |
 | Entity Admin | `entity_admin` | Manages specific entities they own or are assigned |
 
-**Entity Adapter Pattern**: Apps define an `EntityAdapter` to tell the admin system what their domain entity is (e.g., "Home" in HomeDoc, "Concert" in ConcertBucket). The admin-ui components render list/detail views based on this adapter.
+**Entity Adapter Pattern**: Apps define an `EntityAdapter` to tell the admin system what their domain entity is (e.g., "Home" in HomeDoc, "Concert" in ConcertBucket). The admin components render list/detail views based on this adapter.
 
 ```typescript
-import type { EntityAdapter } from '@universal-cms/admin-core';
+import type { EntityAdapter } from '@pandotic/universal-cms/admin';
 
 const myAdapter: EntityAdapter = {
   entityName: 'Widget',
@@ -182,7 +182,7 @@ pnpm install
 # Typecheck everything
 pnpm -r typecheck
 
-# Tests (66 in cms-core)
+# Tests (98 in cms-core)
 pnpm test
 
 # Build the publishable packages

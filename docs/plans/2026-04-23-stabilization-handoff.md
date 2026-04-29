@@ -33,36 +33,23 @@ hardening plan" request. Across PRs #83, #84, and #87 we shipped:
 
 ## What's left (priority order)
 
-### 1. ⚠️ Cosmetic — 00521 migration number collision (5 min)
+### 1. ✅ DONE — 00521 migration number collision
 
-**Problem.** Both PR #85 and PR #87 introduced a `00521_*.sql`:
-- `00521_api_central_bridge.sql` (PR #87, this branch's work)
-- `00521_hub_social_idempotent.sql` (PR #85, parallel session)
+Resolved during repo hygiene cleanup: `00521_hub_social_idempotent.sql` was
+renamed to `00522_hub_social_idempotent.sql`. The `api_central_bridge`
+migration kept `00521_*` because it's pre-applied by the validator and has
+a hard ordering requirement.
 
-Both landed on main. Validator is green (37 cold-apply, 0 failures) because
-the two files don't conflict semantically and lexical ordering by full filename
-is deterministic, but the number collision is a smell.
+A parallel template-tree collision was also resolved at the same time:
+`template/supabase/migrations/00025_api_usage_tracking.sql` was renamed to
+`00027_api_usage_tracking.sql` (`00026_tracking_and_webmaster.sql` already
+held the next slot). `packages/cms-core/src/config.ts` and
+`docs/module-catalog.md` were updated to match.
 
-**Fix.** Rename `00521_hub_social_idempotent.sql` → `00522_hub_social_idempotent.sql`.
-The api_central bridge has a hard ordering requirement (must run before 00504's
-FK references resolve in the validator's pre-apply path), so it should keep the
-lower number. Update `scripts/validate-migrations.sh` only if the rename
-changes which file the `PRE_APPLY` array points at (it does not — only
-`00521_api_central_bridge.sql` is pre-applied).
-
-**QA.** Re-run the validator end-to-end with a fresh Postgres. Should still
-report `applied 37, skipped 4 (pre-applied), failed 0`.
-
-**Caveat.** Renaming a migration that's already been applied to the live Hub
-(`rimbgolutrxpmwsoswhq`) creates a checksum/history mismatch. Two options:
-1. Document in the commit that the rename only affects cold-apply, and the
-   live Hub's `supabase_migrations.schema_migrations` table will need a manual
-   `UPDATE` to reflect the new filename if anyone ever runs `supabase db push`
-   against it.
-2. Skip the rename — it's a smell, not a bug. If you decide it's not worth
-   the production-history hassle, drop this item.
-
-I lean toward option 1 (it's a real ergonomic win for cold-apply ordering).
+**Live-DB caveat.** If `00521_hub_social_idempotent.sql` was already applied
+to the live Hub (`rimbgolutrxpmwsoswhq`), its `supabase_migrations.schema_migrations`
+row needs a manual `UPDATE` to reflect the new filename if anyone runs
+`supabase db push` against it.
 
 ---
 

@@ -80,7 +80,7 @@ Universal CMS has 35 modules organized into 9 categories. Each module is indepen
 | `errorLog` | Application error tracking | `00018_error_log.sql` |
 | `activityLog` | Admin action audit trail | `00007_activity_log.sql` |
 | `bulkImport` | Bulk data import from CSV/JSON | (no dedicated migration) |
-| `apiUsage` | API usage tracking and quotas | `00025_api_usage_tracking.sql` |
+| `apiUsage` | API usage tracking and quotas | `00027_api_usage_tracking.sql` |
 
 ## Presets
 
