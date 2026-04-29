@@ -2,9 +2,12 @@
 
 ## ⚡ Resume Point — Repo hygiene cleanup (Apr 29, 2026)
 
-A full-repo hygiene audit ran (`CLEANUP_AUDIT.md` on main) and drove
-PR #98 (4-phase cleanup) and PR #97 (residual unmerged work from
-`claude/prepare-cms-npm-deploy-JeW0c`). Both merged.
+A full-repo hygiene audit ran (now archived as
+`docs/archive/CLEANUP_AUDIT-2026-04-29.md`) and drove PR #98 (4-phase
+cleanup), PR #97 (residual unmerged work from
+`claude/prepare-cms-npm-deploy-JeW0c`), plus a wrap-up PR on
+`claude/audit-repo-hygiene-dS45f` (audit archive + admin-schema
+deletion). All merged.
 
 **Shipped:**
 - Deleted dead root-level `api-central/` (~3,000 LOC, no inbound imports).
@@ -18,6 +21,13 @@ PR #98 (4-phase cleanup) and PR #97 (residual unmerged work from
   → `00522_*` and template `00025_api_usage_tracking` → `00027_*`.
   Updated `packages/cms-core/src/config.ts` + `docs/module-catalog.md`.
 - Closed PR #86 (doc-only, superseded). Created 3 archive branches.
+- **Wrap-up PR:** Archived `CLEANUP_AUDIT.md` →
+  `docs/archive/CLEANUP_AUDIT-2026-04-29.md`. Deleted dead workspace
+  package `packages/admin-schema/` (zero non-self imports; content fully
+  inlined into `packages/fleet-dashboard/supabase/migrations/00500_admin_schema_integration.sql`).
+  Updated `README.md` + `DASHBOARD.md` repo-tree diagrams,
+  `docs/RELEASE.md` package list, and `docs/ADMIN_UI_INTEGRATION_GUIDE.md`
+  schema-source pointer.
 
 **Residual items** scoped in **`docs/plans/2026-04-29-cleanup-followups.md`**:
 
@@ -25,13 +35,14 @@ PR #98 (4-phase cleanup) and PR #97 (residual unmerged work from
    `claude/fix-repo-loading-multiselect-ov3rU`, `claude/plan-skill-onboarding-8drJN`).
    Local git proxy blocks `git push --delete`; needs GitHub UI deletion
    or another mechanism.
-2. Two new branches to triage (`claude/media-library-and-seo-panels`,
-   `claude/admin-polish-and-marketing-panels`) — surfaced after the audit,
-   both 0 ahead at last check.
+2. Three new branches to triage (`claude/media-library-and-seo-panels`,
+   `claude/admin-polish-and-marketing-panels`, plus
+   `claude/investigate-repo-hygiene-tCc4C` surfaced during wrap-up) —
+   all surfaced after the audit; first two were 0 ahead at last check,
+   third not yet inspected.
 3. Live-DB row update for the `00521 → 00522` rename in
    `supabase_migrations.schema_migrations` if `supabase db push` is ever
    re-run against the live Hub.
-4. `CLEANUP_AUDIT.md` at repo root — decide: keep / delete / archive.
 
 ---
 

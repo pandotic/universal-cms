@@ -50,8 +50,9 @@ Both showed 0 ahead in the screenshot, suggesting empty/abandoned. Confirm befor
 | Live-DB row update for the `00521 → 00522` rename | Same. The `supabase_migrations.schema_migrations` row needs `UPDATE` to match the new filename if anyone runs `supabase db push` after. |
 | SQL drift: `OPS_RUNBOOK.md` + `docs/archive/skill-onboarding/marketing-ops-master-spec.md` vs live `hub_properties` columns | Column-by-column compare; not pure hygiene. |
 | Pending changesets (`.changeset/initial-release.md`, `.changeset/skill-library-initial.md`) | Gated on the GitHub repo-setting flip per `docs/RELEASE.md` § Pre-flight (P1.8 in CLAUDE.md). Not a code change. |
-| `packages/admin-schema/` | README calls it "legacy reference"; original audit found no code consumers. Confirm with deeper grep before proposing deletion. |
-| `CLEANUP_AUDIT.md` at repo root | Historical record. Decide: leave / delete / move to `docs/archive/`. |
+| ~~`packages/admin-schema/`~~ | **DONE** — deleted in the wrap-up PR after confirming zero non-self imports + content fully inlined into `00500_admin_schema_integration.sql`. |
+| ~~`CLEANUP_AUDIT.md` at repo root~~ | **DONE** — moved to `docs/archive/CLEANUP_AUDIT-2026-04-29.md` in the wrap-up PR. |
+| New branch `claude/investigate-repo-hygiene-tCc4C` | Surfaced after the audit by an Explore agent during wrap-up. Not yet inspected. Likely a parallel session's branch. Triage like the other two new branches in §2. |
 
 ---
 
