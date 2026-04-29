@@ -36,6 +36,10 @@ export { LandingPagesPanel } from "./panels/LandingPagesPanel.js";
 export type { LandingPagesPanelProps } from "./panels/LandingPagesPanel.js";
 export { BrandGuidePanel } from "./panels/BrandGuidePanel.js";
 export type { BrandGuidePanelProps } from "./panels/BrandGuidePanel.js";
+export { MediaLibraryPanel } from "./panels/MediaLibraryPanel.js";
+export type { MediaLibraryPanelProps } from "./panels/MediaLibraryPanel.js";
+export { SEOPanel } from "./panels/SEOPanel.js";
+export type { SEOPanelProps } from "./panels/SEOPanel.js";
 
 // Platform-tier admin panels (ported from @universal-cms/admin-ui)
 export { UserManagementPanel } from "./platform/UserManagementPanel.js";
