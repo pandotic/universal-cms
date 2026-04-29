@@ -1,5 +1,36 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — Skill library blank-page fix (Apr 29, 2026)
+
+**PR #92** (branch `claude/fix-skill-library-display-mxyCB`, merged) makes
+the `/skills` "Sync Manifest" button actually populate the table on the
+deployed Hub. Two compounding bugs:
+
+- **Manifest JSON wasn't bundled.** `manifest-sync.ts` located
+  `skills-manifest.json` via filesystem walking from `import.meta.url`.
+  Next.js doesn't trace that JSON into the serverless bundle, so
+  `loadSkillsManifest()` returned `[]` on Netlify and the sync wrote 0
+  rows. Worked fine in dev (source files reachable), silently no-op'd
+  in prod. Fix: replace the FS walk with static
+  `import skillsManifestData from "../../skills-manifest.json"` —
+  esbuild/webpack inline the data into the chunk. Verified: built
+  `dist/chunk-*.js` now contains all 24 manifest entries.
+- **Sync errors were swallowed.** The page's `syncManifest` had
+  `catch { /* silent */ }` and never inspected the response, so a 0-row
+  result looked identical to a successful sync. Fix: surface
+  `created/updated/unchanged` counts in an emerald banner on success and
+  the error message in a red banner on failure. Empty-manifest case
+  gets an explicit "check that skills-manifest.json is bundled" hint.
+
+`getPackageRoot` / `getSkillContent` are kept for SKILL.md content
+hashing — sync still creates rows when content is missing (hash falls
+back to `""`).
+
+This resolves the "/skills smoke test" entry that was outstanding from
+the Apr 22 session wrap.
+
+---
+
 ## ⚡ Resume Point — Phase 3 + Phase 4 reconciles shipped (Apr 27, 2026)
 
 Three PRs landed this session, all on the same drift theme — Hub-side
@@ -76,8 +107,9 @@ superseders — see the "Archive branches" section below. Updated plan at
 
 - Submit the same issue twice rapidly in `/team-hub` → second submit
   should show "Already on the open issues list" and not create a twin row.
-- `/skills` → no console error; "Sync Manifest" populates rows with
-  `scope='fleet'` and `manifest_id` set.
+- ~~`/skills` → no console error; "Sync Manifest" populates rows.~~
+  ✅ Resolved by PR #92 (Apr 29). User confirmed sync now populates the
+  grid; 24 skills visible.
 
 ---
 
