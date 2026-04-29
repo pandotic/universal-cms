@@ -49,6 +49,11 @@ const myAdapter: EntityAdapter = {
 
 ## Quick Start
 
+> **Standing up a new site that consumes the published package?**
+> See [`docs/CONSUMER_ONBOARDING.md`](./docs/CONSUMER_ONBOARDING.md) for
+> the greenfield runbook (PAT setup, `.npmrc`, Supabase, Netlify).
+> The steps below are for working **inside this monorepo**.
+
 ### 1. Clone and install
 
 ```bash
