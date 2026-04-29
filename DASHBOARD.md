@@ -104,7 +104,7 @@ Schema: `00104_agents.sql`, hardened by `00520_hub_agents_idempotent.sql` (PR #8
 
 API surface: `/api/social/briefs`, `/api/social/content`, `/api/social/generate`, `/api/social/stats`. UI at `/social`, `/social/content`, `/social/brand-voice`, `/social/generate`.
 
-Schema: `00105_social_content.sql`, generalized into `00112_unified_content_pipeline.sql`. The idempotent reconcile `00521_hub_social_idempotent.sql` may not yet be applied to the live Hub DB — see `CLAUDE.md` Outstanding Work.
+Schema: `00105_social_content.sql`, generalized into `00112_unified_content_pipeline.sql`. The idempotent reconcile `00522_hub_social_idempotent.sql` may not yet be applied to the live Hub DB — see `CLAUDE.md` Outstanding Work.
 
 ---
 

@@ -41,7 +41,7 @@ Sniff `cms.config.ts` from the chosen repo and pre-select the matching module pr
 
 End-to-end "create a new Pandotic site" flow: pick preset → create repo → install package → seed content → first deploy. Depends on P1.8 (publish), P2.10e (OAuth), P2.10f (detection). Estimate: ~1.5 days.
 
-Suggested order: rename `00521_hub_social_idempotent.sql` → `00522_*` (cosmetic, 5 min) → P2.10f → P2.10e → P2.11. P1.8 is human-gated and runs in parallel.
+Suggested order: P2.10f → P2.10e → P2.11. P1.8 is human-gated and runs in parallel. (The `00521`/`00522` migration-number collision was resolved during repo hygiene cleanup.)
 
 ### Phase 3 marketing skills — validation sequence (unblocked)
 
@@ -60,7 +60,7 @@ Success = steps 3–4 complete without manual SQL fixups.
 | Item | Why |
 |---|---|
 | **Stage 1 npm publish** | Gated on the GitHub repo-setting flip above. |
-| **Live-DB applied state** for `00521_hub_social_idempotent.sql` and `00517_team_hub_initiatives.sql` | Apply via Supabase SQL editor when convenient; not gating any code work. |
+| **Live-DB applied state** for `00522_hub_social_idempotent.sql` and `00517_team_hub_initiatives.sql` | Apply via Supabase SQL editor when convenient; not gating any code work. |
 | **Migration cold-apply tech debt** | Three migrations have forward references that the validator pre-applies (see `scripts/validate-migrations.sh` `PRE_APPLY` list). Production unaffected; cleanup requires splitting RLS policies into post-table migrations. |
 | **Founder Hub sign-ins** | Allen / Matt / Scott each need to log into the Hub once so `public.users.auth_user_id` populates via the `handle_new_user` trigger. No code work. |
 

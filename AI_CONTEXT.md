@@ -423,9 +423,9 @@ ones listed by `getRequiredMigrations(cmsConfig)`.
 | `00022_forms_and_leads` | ============================================================================ — `forms`, `form_submissions`, `cta_blocks` |
 | `00023_ai_conversations` | AI conversation persistence for the CMS chat assistant — `ai_conversations` |
 | `00024_theme_customization` | Theme customization settings |
-| `00025_api_usage_tracking` | API Usage Tracking — `api_usage`, `api_keys`, `api_audit` |
 | `00025_projects` | Projects showcase tables — `projects`, `project_sections` |
 | `00026_tracking_and_webmaster` | Tracking & Webmaster verification settings |
+| `00027_api_usage_tracking` | API Usage Tracking — `api_usage`, `api_keys`, `api_audit` |
 | `00030_video_content` | Video content generation tables for HeyGen integration — `videos`, `video_generation_log` |
 | `00031_content_page_tags` | Add tags column to content_pages for blog/insights categorization |
 | `00032_business_entities` | Business Entities: companies + user_companies — `companies`, `user_companies` |
