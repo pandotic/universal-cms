@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   getAllContentPages,
   updateContentPage,
@@ -59,14 +60,22 @@ export default function ContentPagesAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Content Pages
-        </h1>
-        <p className="mt-1 text-sm text-foreground-secondary">
-          Articles, guides, landing pages, and custom routes. {pages.length}{" "}
-          total.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Content Pages
+          </h1>
+          <p className="mt-1 text-sm text-foreground-secondary">
+            Articles, guides, landing pages, and custom routes. {pages.length}{" "}
+            total.
+          </p>
+        </div>
+        <Link
+          href="/admin/content/new"
+          className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-foreground-secondary"
+        >
+          New page
+        </Link>
       </div>
 
       {error && (
@@ -104,9 +113,12 @@ export default function ContentPagesAdminPage() {
                   className="transition-colors hover:bg-surface-secondary/40"
                 >
                   <td className="px-4 py-3">
-                    <span className="font-medium text-foreground">
+                    <Link
+                      href={`/admin/content/edit?id=${page.id}`}
+                      className="font-medium text-foreground hover:underline"
+                    >
                       {page.title}
-                    </span>
+                    </Link>
                     <p className="mt-0.5 text-xs text-foreground-tertiary">
                       /{page.slug}
                     </p>
@@ -134,6 +146,12 @@ export default function ContentPagesAdminPage() {
                       : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/admin/content/edit?id=${page.id}`}
+                      className="mr-3 text-xs text-foreground-secondary transition-colors hover:text-foreground"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(page)}
                       className="text-xs text-foreground-tertiary transition-colors hover:text-red-400"
