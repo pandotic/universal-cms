@@ -196,6 +196,20 @@ All 5 skills shipped via PR #83. To validate end-to-end on SPEED:
    https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new and
    run.
 
+### Hub `schema_migrations` tracker drift
+
+Surfaced Apr 30 while verifying the `00521 → 00522` rename row. The Hub's
+migration tracker has rows only through `00516`; `00517`–`00522` were
+applied as raw SQL via the editor and never registered. `supabase db push
+--linked` and `supabase db pull --linked` both refuse to run until the
+tracker is reconciled. Database schema itself is correct — only the
+tracker is out of sync. **Do not** run the CLI's suggested
+`supabase migration repair --status reverted <v>` commands; that would
+mark applied changes as reverted.
+
+Full reconcile plan with verification SQL + remediation steps:
+**`docs/plans/2026-04-30-migration-tracker-reconcile.md`**.
+
 ### Watch-for: Version Packages PR (carried over)
 
 When PR #66 merged, the Release workflow should have opened a
