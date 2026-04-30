@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireHubRole, apiError } from "@pandotic/universal-cms/middleware";
+import { modulePresets, type CmsModuleName } from "@pandotic/universal-cms/config";
+
+function recommendPreset(detectedModules: string[]): string | null {
+  if (detectedModules.length === 0) return null;
+
+  let bestMatch = { key: null as string | null, score: 0 };
+
+  for (const [key, preset] of Object.entries(modulePresets)) {
+    // Count how many detected modules are in this preset
+    const matchCount = detectedModules.filter((m) =>
+      preset.modules.includes(m as CmsModuleName)
+    ).length;
+
+    // Score: intersection size / union size (Jaccard similarity)
+    const unionSize = new Set([
+      ...detectedModules,
+      ...preset.modules,
+    ]).size;
+    const score = matchCount / unionSize;
+
+    if (score > bestMatch.score) {
+      bestMatch = { key, score };
+    }
+  }
+
+  return bestMatch.score > 0 ? bestMatch.key : null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,6 +106,9 @@ export async function GET(request: NextRequest) {
       // No CMS config found
     }
 
+    // Recommend a preset based on detected modules
+    const recommendedPreset = recommendPreset(enabledModules);
+
     return NextResponse.json({
       data: {
         hasCms: !!cmsVersion,
@@ -88,6 +118,7 @@ export async function GET(request: NextRequest) {
         hasNextjs,
         hasSupabase,
         enabledModules,
+        recommendedPreset,
         projectName: packageJson?.name ?? null,
       },
     });

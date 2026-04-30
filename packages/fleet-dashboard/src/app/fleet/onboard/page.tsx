@@ -49,6 +49,7 @@ interface DetectResult {
   cmsVersion: string | null;
   detectedPlatform: string;
   enabledModules: string[];
+  recommendedPreset: string | null;
   projectName: string | null;
 }
 
@@ -119,6 +120,19 @@ export default function OnboardPage() {
 
   const selectedPlatform = PLATFORMS.find((p) => p.id === platform);
   const needsGithub = selectedPlatform?.needsGithub ?? false;
+
+  // Auto-select preset based on first detected repo with a recommendation
+  useEffect(() => {
+    if (preset === null && selectedRepos.length > 0) {
+      for (const repoName of selectedRepos) {
+        const detected = detectedByRepo[repoName];
+        if (detected?.recommendedPreset) {
+          setPreset(detected.recommendedPreset as PresetKey);
+          break;
+        }
+      }
+    }
+  }, [detectedByRepo, selectedRepos, preset]);
 
   async function loadRepos() {
     if (!ghToken) return;
@@ -673,6 +687,7 @@ export default function OnboardPage() {
                 {PRESET_ORDER.map((key) => {
                   const p = modulePresets[key];
                   const active = preset === key;
+                  const isRecommended = selectedRepos.length > 0 && selectedRepos.some((r) => detectedByRepo[r]?.recommendedPreset === key);
                   return (
                     <button
                       type="button"
@@ -686,9 +701,16 @@ export default function OnboardPage() {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium">{p.name}</span>
-                        <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-400">
-                          {p.modules.length} modules
-                        </span>
+                        <div className="flex items-center gap-1">
+                          {isRecommended && (
+                            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400 font-medium">
+                              Suggested
+                            </span>
+                          )}
+                          <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                            {p.modules.length} modules
+                          </span>
+                        </div>
                       </div>
                       <div className="mt-0.5 line-clamp-2 text-xs text-zinc-500">
                         {p.description}
