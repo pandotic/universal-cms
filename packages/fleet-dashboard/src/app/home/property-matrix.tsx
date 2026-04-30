@@ -47,6 +47,7 @@ export function PropertyMatrix() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // ── URL sync helpers ─────────────────────────────────────────────────────
   function pushParams(updates: Record<string, string>) {
@@ -163,8 +164,6 @@ export function PropertyMatrix() {
   if (loading && !data) {
     return <MatrixSkeleton />;
   }
-
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <div className="space-y-5">

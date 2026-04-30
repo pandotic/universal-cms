@@ -24,7 +24,6 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
-  Target,
   Users,
   Wrench,
   X,
@@ -61,7 +60,6 @@ const GROUPS: NavGroup[] = [
     label: "Team",
     links: [
       { href: "/team-hub", label: "Team Hub", icon: CalendarClock, foundersOnly: true },
-      { href: "/initiatives", label: "Initiatives", icon: Target, foundersOnly: true },
     ],
   },
   {
