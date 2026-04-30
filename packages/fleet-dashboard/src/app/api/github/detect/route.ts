@@ -38,13 +38,14 @@ export async function GET(request: NextRequest) {
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get("token");
+    // Support both OAuth cookie and query param (for backward compatibility)
+    const token = request.cookies.get("github_token")?.value || searchParams.get("token");
     const repo = searchParams.get("repo"); // owner/name format
 
     if (!token || !repo) {
       return NextResponse.json(
-        { error: "token and repo parameters required" },
-        { status: 400 }
+        { error: "GitHub token and repo required. Use /api/github/oauth/authorize to login." },
+        { status: 401 }
       );
     }
 

@@ -14,10 +14,14 @@ export async function GET(request: NextRequest) {
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
-    const ghToken = searchParams.get("token");
+    // Support both OAuth cookie and query param (for backward compatibility)
+    const ghToken = request.cookies.get("github_token")?.value || searchParams.get("token");
 
     if (!ghToken) {
-      return NextResponse.json({ error: "GitHub token required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "GitHub token required. Use /api/github/oauth/authorize to login." },
+        { status: 401 }
+      );
     }
 
     const all: any[] = [];

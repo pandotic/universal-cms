@@ -94,6 +94,8 @@ export default function OnboardPage() {
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
   const [repoSearch, setRepoSearch] = useState("");
+  const [githubAuth, setGithubAuth] = useState<{ authenticated: boolean; login?: string; name?: string; avatar_url?: string } | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Step 2: Detection (one result per selected repo)
   const [detectedByRepo, setDetectedByRepo] = useState<Record<string, DetectResult>>({});
@@ -112,10 +114,44 @@ export default function OnboardPage() {
   const [domains, setDomains] = useState("");
   const [preset, setPreset] = useState<PresetKey | null>(null);
 
-  // Load GitHub token from localStorage
+  // Check OAuth status on mount and handle OAuth callback
   useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/github/oauth/status");
+        const data = await res.json();
+        setGithubAuth(data);
+        if (data.authenticated) {
+          // Auto-load repos if authenticated via OAuth
+          const reposRes = await fetch("/api/github/repos");
+          const reposJson = await reposRes.json();
+          if (reposJson.data) {
+            setRepos(reposJson.data);
+          }
+        }
+      } catch {
+        // Auth check failed, user will need to manually auth or enter token
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+
+    checkAuth();
+
+    // Check for OAuth callback errors in URL
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const oauthError = params.get("oauth_error");
+      if (oauthError) {
+        setError(`GitHub OAuth error: ${oauthError}`);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    // Also support legacy localStorage token for backward compatibility
     const stored = typeof window !== "undefined" ? localStorage.getItem("gh_token") : null;
-    if (stored) setGhToken(stored);
+    if (stored && !githubAuth?.authenticated) setGhToken(stored);
   }, []);
 
   const selectedPlatform = PLATFORMS.find((p) => p.id === platform);
@@ -135,29 +171,52 @@ export default function OnboardPage() {
   }, [detectedByRepo, selectedRepos, preset]);
 
   async function loadRepos() {
-    if (!ghToken) return;
-    setLoadingRepos(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/github/repos?token=${encodeURIComponent(ghToken)}`);
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.error || `HTTP ${res.status}`);
+    if (ghToken) {
+      // Using legacy token input (backward compatibility)
+      setLoadingRepos(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/github/repos?token=${encodeURIComponent(ghToken)}`);
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error || `HTTP ${res.status}`);
+        }
+        setRepos(json.data ?? []);
+        if (typeof window !== "undefined") localStorage.setItem("gh_token", ghToken);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load GitHub repos");
       }
-      setRepos(json.data ?? []);
-      if (typeof window !== "undefined") localStorage.setItem("gh_token", ghToken);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load GitHub repos");
+      setLoadingRepos(false);
+    } else if (githubAuth?.authenticated) {
+      // Already authenticated via OAuth, just fetch
+      setLoadingRepos(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/github/repos");
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error || `HTTP ${res.status}`);
+        }
+        setRepos(json.data ?? []);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load GitHub repos");
+      }
+      setLoadingRepos(false);
     }
-    setLoadingRepos(false);
   }
 
   async function detectCms(repoFullName: string) {
     setDetectingRepos((prev) => new Set(prev).add(repoFullName));
     try {
-      const res = await fetch(
-        `/api/github/detect?token=${encodeURIComponent(ghToken)}&repo=${encodeURIComponent(repoFullName)}`
-      );
+      // Build query params based on available auth
+      let url = `/api/github/detect?repo=${encodeURIComponent(repoFullName)}`;
+      if (ghToken) {
+        // Legacy token input
+        url += `&token=${encodeURIComponent(ghToken)}`;
+      }
+      // Otherwise rely on OAuth cookie
+
+      const res = await fetch(url);
       const json = await res.json();
       if (json.data) {
         setDetectedByRepo((prev) => ({ ...prev, [repoFullName]: json.data }));
@@ -400,31 +459,99 @@ export default function OnboardPage() {
             settings from the next step.
           </p>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">GitHub Token</label>
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={ghToken}
-                onChange={(e) => setGhToken(e.target.value)}
-                placeholder="ghp_..."
-                className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
-              />
+          {checkingAuth ? (
+            <div className="flex items-center gap-2 text-sm text-zinc-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Checking authentication…
+            </div>
+          ) : githubAuth?.authenticated ? (
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {githubAuth.avatar_url && (
+                    <img
+                      src={githubAuth.avatar_url}
+                      alt={githubAuth.login}
+                      className="h-8 w-8 rounded-full"
+                    />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-white">
+                      Logged in as {githubAuth.login}
+                    </p>
+                    {githubAuth.name && (
+                      <p className="text-xs text-zinc-400">{githubAuth.name}</p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    await fetch("/api/github/oauth/logout", { method: "POST" });
+                    setGithubAuth({ authenticated: false });
+                    setRepos([]);
+                  }}
+                  className="text-xs text-zinc-500 hover:text-zinc-300"
+                >
+                  Logout
+                </button>
+              </div>
               <button
                 onClick={loadRepos}
-                disabled={!ghToken || loadingRepos}
-                className="flex items-center gap-2 rounded-md bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-50"
+                disabled={loadingRepos}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
               >
                 {loadingRepos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
-                Load Repos
+                Load Repositories
               </button>
             </div>
-            <p className="mt-1 text-xs text-zinc-600">
-              Missing repos? Fine-grained tokens only expose repositories you explicitly
-              selected when creating the token. For org repos, your token may also need SSO
-              authorization.
-            </p>
-          </div>
+          ) : (
+            <>
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+                <button
+                  onClick={() => {
+                    window.location.href = "/api/github/oauth/authorize";
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-100"
+                >
+                  <Github className="h-4 w-4" />
+                  Login with GitHub
+                </button>
+                <p className="mt-3 text-xs text-zinc-500">
+                  Grant access to view your repositories. We only request read-only access to repos and user info.
+                </p>
+              </div>
+
+              <details className="text-xs">
+                <summary className="cursor-pointer text-zinc-500 hover:text-zinc-400">
+                  Or use a GitHub token (legacy)
+                </summary>
+                <div className="mt-2 space-y-2 pt-2 border-t border-zinc-800">
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      value={ghToken}
+                      onChange={(e) => setGhToken(e.target.value)}
+                      placeholder="ghp_..."
+                      className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={loadRepos}
+                      disabled={!ghToken || loadingRepos}
+                      className="flex items-center gap-2 rounded-md bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-50"
+                    >
+                      {loadingRepos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
+                      Load Repos
+                    </button>
+                  </div>
+                  <p className="text-zinc-600">
+                    Missing repos? Fine-grained tokens only expose repositories you explicitly
+                    selected when creating the token. For org repos, your token may also need SSO
+                    authorization.
+                  </p>
+                </div>
+              </details>
+            </>
+          )}
 
           {repos.length > 0 && (
             <>
