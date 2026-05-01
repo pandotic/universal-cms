@@ -41,7 +41,7 @@ export function PersonalAlerts() {
           supabase
             .from("hub_initiatives")
             .select("id, name, stage")
-            .eq("owner_id", user.id)
+            .eq("owner_id", teamUser.id)
             .neq("stage", "archived")
             .limit(2),
         ]);
