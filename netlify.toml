@@ -1,6 +1,6 @@
 # Pandotic Hub — deployed from packages/fleet-dashboard
 [build]
-  command = "pnpm install && pnpm --filter @pandotic/fleet-dashboard... build"
+  command = "pnpm install && pnpm build:all"
   publish = "packages/fleet-dashboard/.next"
 
 [build.environment]
