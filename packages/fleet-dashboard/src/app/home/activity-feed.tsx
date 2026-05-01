@@ -90,10 +90,10 @@ export function ActivityFeed() {
                     <>
                       <span>·</span>
                       <Link
-                        href={`/properties?highlight=${entry.property_id}`}
+                        href="/fleet"
                         className="hover:text-zinc-400"
                       >
-                        view property
+                        view fleet
                       </Link>
                     </>
                   )}

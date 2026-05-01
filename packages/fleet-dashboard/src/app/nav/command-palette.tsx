@@ -17,9 +17,8 @@ interface Property {
 }
 
 const ROUTES = [
-  { href: "/", label: "Overview", icon: LayoutDashboard, group: "Pages" },
+  { href: "/", label: "Alerts", icon: LayoutDashboard, group: "Pages" },
   { href: "/fleet", label: "Fleet Matrix", icon: Globe, group: "Pages" },
-  { href: "/properties", label: "Properties", icon: Globe, group: "Pages" },
   { href: "/skills", label: "Skills", icon: Zap, group: "Pages" },
   { href: "/skill-store", label: "Skill Store", icon: ShoppingBag, group: "Pages" },
   { href: "/agents", label: "Agents", icon: Bot, group: "Pages" },

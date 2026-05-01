@@ -51,9 +51,8 @@ const GROUPS: NavGroup[] = [
   {
     label: "Workspace",
     links: [
-      { href: "/", label: "Overview", icon: LayoutDashboard },
+      { href: "/", label: "Alerts", icon: LayoutDashboard },
       { href: "/fleet", label: "Fleet Matrix", icon: Globe },
-      { href: "/properties", label: "Properties", icon: Globe },
     ],
   },
   {

@@ -1,4 +1,4 @@
-export type Lens = "ops" | "developer" | "marketing" | "business";
+export type Lens = "overview" | "developer" | "marketing" | "business";
 export type OwnerFilter = "all" | "personal" | "pandotic" | "client";
 export type Density = "compact" | "comfortable";
 

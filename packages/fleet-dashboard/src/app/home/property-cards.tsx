@@ -85,7 +85,7 @@ function PropertyCard({ property, selected, onToggle, onPeek, lens, index }: {
 
       {/* Lens-specific details */}
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        {lens === "ops" && (
+        {lens === "overview" && (
           <>
             <Detail label="Health" value={health.label} valueClass={health.text} />
             <Detail label="Modules" value={String(property.enabled_modules.length)} />
