@@ -45,6 +45,9 @@ export interface HubContentPipelineItem {
   scheduled_for: string | null;
   published_at: string | null;
   metadata: Record<string, unknown>;
+  // Media engine additions (00522)
+  synced_at: string | null;
+  media_status: import("./hub-media-assets").MediaStatus | null;
   created_by: string;
   created_at: string;
   updated_at: string;
