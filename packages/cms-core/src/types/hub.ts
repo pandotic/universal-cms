@@ -90,6 +90,8 @@ export interface HubProperty {
   package_version: string | null;
   target_package_version: string | null;
   last_module_sync_at: string | null;
+  // Per-property HMAC secret for /api/webhooks/agent-run authentication (00522)
+  webhook_secret: string | null;
   created_at: string;
   updated_at: string;
 }

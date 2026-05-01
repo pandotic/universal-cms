@@ -401,6 +401,16 @@
       "types": "./dist/data/hub-skill-contract.d.ts",
       "development": "./src/data/hub-skill-contract.ts"
     },
+    "./types/hub-media-assets": {
+      "import": "./dist/types/hub-media-assets.js",
+      "types": "./dist/types/hub-media-assets.d.ts",
+      "development": "./src/types/hub-media-assets.ts"
+    },
+    "./data/hub-media": {
+      "import": "./dist/data/hub-media.js",
+      "types": "./dist/data/hub-media.d.ts",
+      "development": "./src/data/hub-media.ts"
+    },
     "./error-logging": {
       "import": "./dist/error-logging/index.js",
       "types": "./dist/error-logging/index.d.ts",

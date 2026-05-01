@@ -74,6 +74,8 @@ export default defineConfig({
     "data/hub-marketing-ops": "src/data/hub-marketing-ops.ts",
     "data/hub-marketing-playbooks": "src/data/hub-marketing-playbooks.ts",
     "data/hub-skill-contract": "src/data/hub-skill-contract.ts",
+    "types/hub-media-assets": "src/types/hub-media-assets.ts",
+    "data/hub-media": "src/data/hub-media.ts",
     "error-logging/index": "src/error-logging/index.ts",
     "error-logging/server": "src/error-logging/server.ts",
     "types/promptkit": "src/types/promptkit.ts",

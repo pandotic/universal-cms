@@ -44,7 +44,9 @@ export type AgentType =
   | "social_profile_creator"
   | "directory_submission_agent"
   | "review_site_claimer"
-  | "link_monitoring_agent";
+  | "link_monitoring_agent"
+  // Managed Agents (media engine)
+  | "media_generator";
 
 export type AgentRunStatus =
   | "pending"
@@ -89,10 +91,13 @@ export interface HubAgentRun {
   error_message: string | null;
   triggered_by: AgentTrigger;
   property_id: string;
+  session_id: string | null; // Anthropic Managed Agents sesn_... for SSE resume
   created_at: string;
 }
 
-export type HubAgentRunInsert = Omit<HubAgentRun, "id" | "created_at">;
+export type HubAgentRunInsert = Omit<HubAgentRun, "id" | "created_at" | "session_id"> & {
+  session_id?: string | null;
+};
 
 export type HubAgentRunUpdate = Partial<
   Omit<HubAgentRun, "id" | "agent_id" | "property_id" | "triggered_by" | "created_at">
