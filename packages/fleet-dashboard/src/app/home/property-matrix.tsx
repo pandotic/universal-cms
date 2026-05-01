@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RefreshCcw } from "lucide-react";
 import { AttentionStrip } from "./attention-strip";
 import { MatrixFilters } from "./matrix-filters";
@@ -33,10 +33,11 @@ function useLocalStorage<T>(key: string, initial: T): [T, (v: T) => void] {
 
 export function PropertyMatrix() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
 
   // ── State ────────────────────────────────────────────────────────────────
-  const [lens, setLensState] = useState<Lens>((params.get("lens") as Lens) ?? "ops");
+  const [lens, setLensState] = useState<Lens>((params.get("lens") as Lens) ?? "overview");
   const [owner, setOwnerState] = useState<OwnerFilter>((params.get("owner") as OwnerFilter) ?? "all");
   const [query, setQueryState] = useState(params.get("q") ?? "");
   const [sort, setSort] = useState<SortConfig>(null);
@@ -55,7 +56,7 @@ export function PropertyMatrix() {
     Object.entries(updates).forEach(([k, v]) => {
       if (v) next.set(k, v); else next.delete(k);
     });
-    router.replace(`/?${next.toString()}`, { scroll: false });
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }
 
   function setLens(l: Lens) { setLensState(l); pushParams({ lens: l }); }
@@ -299,7 +300,7 @@ function LensHeaders({ lens, sort, onSort }: { lens: Lens; sort: SortConfig; onS
   const th = (label: string, key: string) => (
     <SortableTh key={key} label={label} sortKey={key} currentSort={sort} onSort={onSort} />
   );
-  if (lens === "ops") return <>{[th("Health", "health"), th("Modules", "modules"), th("Last deploy", "deploy"), th("URL", "url")]}</>;
+  if (lens === "overview") return <>{[th("Health", "health"), th("Modules", "modules"), th("Last deploy", "deploy"), th("URL", "url")]}</>;
   if (lens === "developer") return <>{[th("Version", "version"), th("Update", "upgrade"), th("Skills", "skills"), th("Modules", "modules")]}</>;
   if (lens === "marketing") return <>{[th("Active services", "mkt_active"), th("Planned", "mkt_planned"), th("Stage", "stage"), th("Domains", "domains")]}</>;
   return <>{[th("Ownership", "owner"), th("Stage", "stage"), th("LLC", "llc"), th("Category", "category")]}</>;

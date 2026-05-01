@@ -50,7 +50,7 @@ export function PropertyRow({ property, selected, onToggle, onPeek, lens, index,
         </button>
       </td>
 
-      {lens === "ops" && <OpsColumns property={property} health={health} py={py} />}
+      {lens === "overview" && <OverviewColumns property={property} health={health} py={py} />}
       {lens === "developer" && <DevColumns property={property} cms={cms} upgrade={upgrade} skills={skills} py={py} />}
       {lens === "marketing" && <MktColumns property={property} marketing={marketing} py={py} />}
       {lens === "business" && <BizColumns property={property} py={py} />}
@@ -58,7 +58,7 @@ export function PropertyRow({ property, selected, onToggle, onPeek, lens, index,
   );
 }
 
-function OpsColumns({ property, health, py }: { property: Property; health: ReturnType<typeof healthMeta>; py: string }) {
+function OverviewColumns({ property, health, py }: { property: Property; health: ReturnType<typeof healthMeta>; py: string }) {
   return (
     <>
       <td className={`px-3 ${py}`}>

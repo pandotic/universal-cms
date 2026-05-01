@@ -1,10 +1,10 @@
 "use client";
 
-import { Bot, Briefcase, Filter, Megaphone, Search, Wrench, type LucideIcon } from "lucide-react";
+import { Briefcase, Filter, LayoutGrid, Megaphone, Search, Wrench, type LucideIcon } from "lucide-react";
 import type { Density, Lens, OwnerFilter } from "./types";
 
 const LENSES: { id: Lens; label: string; Icon: LucideIcon; hint: string }[] = [
-  { id: "ops", label: "Operations", Icon: Wrench, hint: "Health · deploys · uptime" },
+  { id: "overview", label: "Overview", Icon: LayoutGrid, hint: "Health · deploys · status" },
   { id: "developer", label: "Developer", Icon: Wrench, hint: "Versions · skills · modules" },
   { id: "marketing", label: "Marketing", Icon: Megaphone, hint: "Services · content · brand" },
   { id: "business", label: "Business", Icon: Briefcase, hint: "Stage · ownership · LLC" },
