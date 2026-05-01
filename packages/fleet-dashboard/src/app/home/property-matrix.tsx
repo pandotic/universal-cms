@@ -2,17 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { RefreshCcw } from "lucide-react";
+import { Check, Plus, RefreshCcw, RefreshCw, X } from "lucide-react";
 import { AttentionStrip } from "./attention-strip";
 import { MatrixFilters } from "./matrix-filters";
 import { PropertyPeek } from "./property-peek";
-import { PropertyRow, SortableTh } from "./property-row";
+import { PropertyRow, SortableTh, type RowHandlers } from "./property-row";
 import { PropertyCards } from "./property-cards";
 import { BulkBar } from "./bulk-bar";
 import { BulkActionDialog } from "./bulk-action-dialog";
 import { SavedViews } from "./saved-views";
+import { RegisterPackageModal } from "./register-package-modal";
 import { sortProperties } from "./matrix-utils";
 import type { ByPropertyIndex, DashboardData, Density, Lens, OwnerFilter, Property, SortConfig } from "./types";
+
+type Toast = { message: string; type: "success" | "error" };
 
 function useLocalStorage<T>(key: string, initial: T): [T, (v: T) => void] {
   const [val, setVal] = useState<T>(() => {
@@ -49,6 +52,15 @@ export function PropertyMatrix() {
   const [loading, setLoading] = useState(true);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // ── URL sync helpers ─────────────────────────────────────────────────────
   function pushParams(updates: Record<string, string>) {
@@ -85,6 +97,158 @@ export function PropertyMatrix() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ── Action handlers ──────────────────────────────────────────────────────
+  const handleSync = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/deployments/sync", { method: "POST" });
+      const json = await res.json();
+      const summary = json.data?.summary;
+      fetchData();
+      if (summary) {
+        setToast({
+          message: `Synced ${summary.synced} of ${summary.total} properties${
+            summary.unreachable > 0 ? ` · ${summary.unreachable} unreachable` : ""
+          }`,
+          type: summary.unreachable > 0 ? "error" : "success",
+        });
+      } else if (!res.ok) {
+        setToast({ message: json.error ?? "Sync failed", type: "error" });
+      }
+    } catch {
+      setToast({ message: "Sync failed — check network.", type: "error" });
+    }
+    setSyncing(false);
+  }, [fetchData]);
+
+  const handleTogglePin = useCallback(async (deploymentId: string, currentlyPinned: boolean) => {
+    try {
+      await fetch(`/api/deployments/${deploymentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned: !currentlyPinned }),
+      });
+      fetchData();
+      setToast({ message: currentlyPinned ? "Version unpinned" : "Version pinned", type: "success" });
+    } catch {
+      setToast({ message: "Failed to update pin", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleUpgrade = useCallback(async (_deploymentId: string, propertyId: string) => {
+    const ghToken = typeof window !== "undefined" ? localStorage.getItem("gh_token") : null;
+    if (!ghToken) {
+      setToast({ message: "GitHub token required — connect via /fleet/onboard first", type: "error" });
+      return;
+    }
+    try {
+      const res = await fetch("/api/fleet/upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyIds: [propertyId], ghToken }),
+      });
+      const json = await res.json();
+      const result = json.data?.results?.[0];
+      if (result?.status === "upgraded") {
+        fetchData();
+        setToast({ message: "Upgrade PR created", type: "success" });
+      } else {
+        setToast({ message: result?.error ?? "Upgrade failed", type: "error" });
+      }
+    } catch {
+      setToast({ message: "Upgrade failed", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleUpdateProperty = useCallback(async (propertyId: string, updates: Record<string, unknown>) => {
+    try {
+      await fetch(`/api/properties/${propertyId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      fetchData();
+      setToast({ message: "Property updated", type: "success" });
+    } catch {
+      setToast({ message: "Failed to update property", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleAddMarketing = useCallback(async (propertyId: string, serviceType: string) => {
+    try {
+      await fetch("/api/marketing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: propertyId,
+          service_type: serviceType,
+          status: "planned",
+          provider: "internal",
+        }),
+      });
+      fetchData();
+      setToast({ message: `Added ${serviceType} service`, type: "success" });
+    } catch {
+      setToast({ message: "Failed to add service", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleUpdateMarketing = useCallback(async (serviceId: string, updates: Record<string, string>) => {
+    try {
+      await fetch(`/api/marketing/${serviceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      fetchData();
+    } catch {
+      setToast({ message: "Failed to update service", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleDeleteMarketing = useCallback(async (serviceId: string) => {
+    try {
+      await fetch(`/api/marketing/${serviceId}`, { method: "DELETE" });
+      fetchData();
+      setToast({ message: "Service removed", type: "success" });
+    } catch {
+      setToast({ message: "Failed to remove service", type: "error" });
+    }
+  }, [fetchData]);
+
+  const handleRegisterPackage = useCallback(
+    async (propertyId: string, packageName: string, version: string, category: string) => {
+      try {
+        await fetch("/api/deployments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: propertyId,
+            package_name: packageName,
+            package_category: category,
+            installed_version: version,
+            status: "active",
+          }),
+        });
+        fetchData();
+        setRegisterOpen(false);
+        setToast({ message: `Registered ${packageName} v${version}`, type: "success" });
+      } catch {
+        setToast({ message: "Failed to register package", type: "error" });
+      }
+    },
+    [fetchData],
+  );
+
+  const rowHandlers = useMemo<RowHandlers>(() => ({
+    onTogglePin: handleTogglePin,
+    onUpgrade: handleUpgrade,
+    onAddMarketing: handleAddMarketing,
+    onUpdateMarketing: handleUpdateMarketing,
+    onDeleteMarketing: handleDeleteMarketing,
+    onUpdateProperty: handleUpdateProperty,
+  }), [handleTogglePin, handleUpgrade, handleAddMarketing, handleUpdateMarketing, handleDeleteMarketing, handleUpdateProperty]);
 
   // ── Derived data ─────────────────────────────────────────────────────────
   const byProperty = useMemo<ByPropertyIndex | null>(() => {
@@ -175,13 +339,30 @@ export function PropertyMatrix() {
 
       <AttentionStrip {...attention} />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <SavedViews
           currentLens={lens}
           currentOwner={owner}
           currentQuery={query}
           onApply={(v) => { setLens(v.lens); setOwner(v.owner); setQuery(v.query); }}
         />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setRegisterOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Register Package
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync Now"}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -248,6 +429,7 @@ export function PropertyMatrix() {
                   lens={lens}
                   index={byProperty!}
                   density={density}
+                  handlers={rowHandlers}
                 />
               ))}
               {filteredProperties.length === 0 && (
@@ -292,6 +474,32 @@ export function PropertyMatrix() {
         selectedIds={Array.from(selected)}
         onClose={() => setDialogOpen(false)}
       />
+
+      {registerOpen && data && (
+        <RegisterPackageModal
+          properties={data.properties}
+          onSubmit={handleRegisterPackage}
+          onClose={() => setRegisterOpen(false)}
+        />
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed right-4 top-20 z-50 flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg ${
+            toast.type === "success"
+              ? "border-emerald-500/20 bg-emerald-950 text-emerald-300"
+              : "border-red-500/20 bg-red-950 text-red-300"
+          }`}
+        >
+          {toast.type === "success" ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          {toast.message}
+          <button onClick={() => setToast(null)} className="ml-2 opacity-50 hover:opacity-100" aria-label="Dismiss">
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
