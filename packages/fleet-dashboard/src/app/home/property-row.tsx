@@ -1,7 +1,19 @@
-import Link from "next/link";
-import { CheckCircle2, ExternalLink, RefreshCcw } from "lucide-react";
-import type { ByPropertyIndex, Density, Lens, Property } from "./types";
+"use client";
+
+import { useState } from "react";
+import { ArrowUp, CheckCircle2, ExternalLink, Pin, PinOff, Plus, RefreshCcw, X } from "lucide-react";
+import type { ByPropertyIndex, Density, Deployment, Lens, MarketingService, Property } from "./types";
 import { cmsDeploy, healthMeta, needsUpgrade, ownershipClass, relativeTime, stageClass } from "./matrix-utils";
+import { InlineSelect, InlineText } from "./inline-edit";
+
+export interface RowHandlers {
+  onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
+  onUpgrade: (deploymentId: string, propertyId: string) => void;
+  onAddMarketing: (propertyId: string, serviceType: string) => void;
+  onUpdateMarketing: (serviceId: string, updates: Record<string, string>) => void;
+  onDeleteMarketing: (serviceId: string) => void;
+  onUpdateProperty: (propertyId: string, updates: Record<string, unknown>) => void;
+}
 
 interface RowProps {
   property: Property;
@@ -11,9 +23,10 @@ interface RowProps {
   lens: Lens;
   index: ByPropertyIndex;
   density: Density;
+  handlers: RowHandlers;
 }
 
-export function PropertyRow({ property, selected, onToggle, onPeek, lens, index, density }: RowProps) {
+export function PropertyRow({ property, selected, onToggle, onPeek, lens, index, density, handlers }: RowProps) {
   const health = healthMeta(property.health_status);
   const deployments = index.deployMap.get(property.id) ?? [];
   const skills = index.skillMap.get(property.id);
@@ -51,9 +64,34 @@ export function PropertyRow({ property, selected, onToggle, onPeek, lens, index,
       </td>
 
       {lens === "overview" && <OverviewColumns property={property} health={health} py={py} />}
-      {lens === "developer" && <DevColumns property={property} cms={cms} upgrade={upgrade} skills={skills} py={py} />}
-      {lens === "marketing" && <MktColumns property={property} marketing={marketing} py={py} />}
-      {lens === "business" && <BizColumns property={property} py={py} />}
+      {lens === "developer" && (
+        <DevColumns
+          property={property}
+          cms={cms}
+          upgrade={upgrade}
+          skills={skills}
+          py={py}
+          onTogglePin={handlers.onTogglePin}
+          onUpgrade={handlers.onUpgrade}
+        />
+      )}
+      {lens === "marketing" && (
+        <MktColumns
+          property={property}
+          marketing={marketing}
+          py={py}
+          onAdd={handlers.onAddMarketing}
+          onUpdate={handlers.onUpdateMarketing}
+          onDelete={handlers.onDeleteMarketing}
+        />
+      )}
+      {lens === "business" && (
+        <BizColumns
+          property={property}
+          py={py}
+          onUpdate={(updates) => handlers.onUpdateProperty(property.id, updates)}
+        />
+      )}
     </tr>
   );
 }
@@ -91,17 +129,65 @@ function OverviewColumns({ property, health, py }: { property: Property; health:
   );
 }
 
-function DevColumns({ property, cms, upgrade, skills, py }: {
+function DevColumns({
+  property,
+  cms,
+  upgrade,
+  skills,
+  py,
+  onTogglePin,
+  onUpgrade,
+}: {
   property: Property;
-  cms: ReturnType<typeof cmsDeploy>;
+  cms: Deployment | undefined;
   upgrade: boolean;
-  skills: ByPropertyIndex["skillMap"] extends Map<string, infer V> ? V | undefined : never;
+  skills: { active: number; outdated: number; failed: number; lastRun: string | null } | undefined;
   py: string;
+  onTogglePin: (id: string, currentlyPinned: boolean) => void;
+  onUpgrade: (id: string, propertyId: string) => void;
 }) {
   return (
     <>
-      <td className={`px-3 ${py} font-mono text-xs text-zinc-300`}>
-        {cms?.installed_version ?? <span className="text-zinc-600">—</span>}
+      <td className={`px-3 ${py}`}>
+        {cms ? (
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono text-xs text-zinc-300">{cms.installed_version ?? "?"}</span>
+            {upgrade && (
+              <>
+                <span className="flex items-center gap-0.5 text-[11px] text-amber-400">
+                  <ArrowUp className="h-3 w-3" />
+                  {cms.latest_version}
+                </span>
+                {!cms.pinned && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpgrade(cms.id, property.id);
+                    }}
+                    className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-400 hover:bg-amber-500/20"
+                  >
+                    Upgrade
+                  </button>
+                )}
+              </>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePin(cms.id, cms.pinned);
+              }}
+              className={`rounded p-0.5 transition-colors ${
+                cms.pinned ? "text-blue-400 hover:text-blue-300" : "text-zinc-600 hover:text-zinc-400"
+              }`}
+              title={cms.pinned ? "Unpin version" : "Pin version"}
+              aria-label={cms.pinned ? "Unpin version" : "Pin version"}
+            >
+              {cms.pinned ? <Pin className="h-3 w-3" /> : <PinOff className="h-3 w-3" />}
+            </button>
+          </div>
+        ) : (
+          <span className="text-xs text-zinc-600">—</span>
+        )}
       </td>
       <td className={`px-3 ${py}`}>
         {upgrade ? (
@@ -130,30 +216,203 @@ function DevColumns({ property, cms, upgrade, skills, py }: {
   );
 }
 
-function MktColumns({ property, marketing, py }: { property: Property; marketing: { service_type: string; status: string }[]; py: string }) {
+const SERVICE_LABELS: Record<string, string> = {
+  seo: "SEO",
+  content: "Content",
+  social: "Social",
+  paid_ads: "Paid Ads",
+  email: "Email",
+  analytics: "Analytics",
+  branding: "Branding",
+  pr: "PR",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  active: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
+  planned: "bg-blue-500/10 text-blue-400 ring-blue-500/20",
+  paused: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
+  completed: "bg-zinc-500/10 text-zinc-400 ring-zinc-500/20",
+};
+
+const STATUS_CYCLE: Record<string, string> = {
+  planned: "active",
+  active: "paused",
+  paused: "active",
+  completed: "planned",
+};
+
+const ALL_SERVICE_TYPES = ["seo", "content", "social", "paid_ads", "email", "analytics", "branding", "pr"] as const;
+
+function MktColumns({
+  property,
+  marketing,
+  py,
+  onAdd,
+  onUpdate,
+  onDelete,
+}: {
+  property: Property;
+  marketing: MarketingService[];
+  py: string;
+  onAdd: (propertyId: string, serviceType: string) => void;
+  onUpdate: (serviceId: string, updates: Record<string, string>) => void;
+  onDelete: (serviceId: string) => void;
+}) {
+  const [showAdd, setShowAdd] = useState(false);
   const active = marketing.filter((m) => m.status === "active").length;
   const planned = marketing.filter((m) => m.status === "planned").length;
+  const existingTypes = new Set(marketing.map((m) => m.service_type));
+  const availableTypes = ALL_SERVICE_TYPES.filter((t) => !existingTypes.has(t));
+
   return (
     <>
+      <td className={`px-3 ${py}`}>
+        <div className="flex flex-wrap items-center gap-1">
+          {marketing.map((s) => (
+            <span
+              key={s.id}
+              className={`group/chip inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset cursor-pointer ${STATUS_COLORS[s.status] ?? STATUS_COLORS.planned}`}
+              title={`Click to cycle status (${s.status} → ${STATUS_CYCLE[s.status] ?? "planned"})`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdate(s.id, { status: STATUS_CYCLE[s.status] ?? "planned" });
+              }}
+            >
+              {SERVICE_LABELS[s.service_type] ?? s.service_type}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(s.id);
+                }}
+                className="hidden group-hover/chip:inline-flex rounded-full p-0.5 hover:bg-white/10"
+                title="Remove service"
+                aria-label={`Remove ${s.service_type}`}
+              >
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </span>
+          ))}
+          {availableTypes.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAdd((v) => !v);
+                }}
+                className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-dashed border-zinc-700 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400"
+                title="Add service"
+                aria-label="Add marketing service"
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+              {showAdd && (
+                <div
+                  className="absolute left-0 top-7 z-20 rounded-md border border-zinc-700 bg-zinc-800 py-1 shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {availableTypes.map((t) => (
+                    <button
+                      key={t}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAdd(property.id, t);
+                        setShowAdd(false);
+                      }}
+                      className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-700"
+                    >
+                      {SERVICE_LABELS[t] ?? t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </td>
       <td className={`px-3 ${py} text-xs tabular-nums ${active > 0 ? "text-emerald-400" : "text-zinc-600"}`}>{active || "—"}</td>
       <td className={`px-3 ${py} text-xs tabular-nums ${planned > 0 ? "text-cyan-400" : "text-zinc-600"}`}>{planned || "—"}</td>
       <td className={`px-3 ${py} text-xs ${stageClass(property.business_stage)}`}>{property.business_stage}</td>
-      <td className={`px-3 ${py} text-xs text-zinc-400 tabular-nums`}>{property.domains.length || "—"}</td>
     </>
   );
 }
 
-function BizColumns({ property, py }: { property: Property; py: string }) {
+const BUSINESS_CATEGORIES = [
+  { value: "", label: "—" },
+  { value: "saas", label: "SaaS" },
+  { value: "marketplace", label: "Marketplace" },
+  { value: "directory", label: "Directory" },
+  { value: "content_site", label: "Content Site" },
+  { value: "agency_client", label: "Agency Client" },
+  { value: "internal_tool", label: "Internal Tool" },
+];
+
+const OWNERSHIP_OPTIONS = [
+  { value: "personal", label: "Personal" },
+  { value: "pandotic", label: "Pandotic" },
+  { value: "client", label: "Client" },
+];
+
+const STAGE_OPTIONS = [
+  { value: "idea", label: "Idea" },
+  { value: "development", label: "Development" },
+  { value: "active", label: "Active" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "sunset", label: "Sunset" },
+];
+
+function BizColumns({
+  property,
+  py,
+  onUpdate,
+}: {
+  property: Property;
+  py: string;
+  onUpdate: (updates: Record<string, unknown>) => void;
+}) {
   return (
     <>
       <td className={`px-3 ${py}`}>
-        <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${ownershipClass(property.ownership_type)}`}>
-          {property.ownership_type}{property.client_name ? ` · ${property.client_name}` : ""}
-        </span>
+        <div className="flex items-center gap-1">
+          <InlineSelect
+            value={property.ownership_type}
+            options={OWNERSHIP_OPTIONS}
+            onChange={(val) => onUpdate({ ownership_type: val })}
+            className={`font-medium ${ownershipClass(property.ownership_type).split(" ")[1] ?? "text-zinc-300"}`}
+          />
+          {property.ownership_type === "client" && (
+            <InlineText
+              value={property.client_name ?? ""}
+              placeholder="Client name"
+              onSave={(val) => onUpdate({ client_name: val || null })}
+              className="text-zinc-300"
+            />
+          )}
+        </div>
       </td>
-      <td className={`px-3 ${py} text-xs ${stageClass(property.business_stage)}`}>{property.business_stage}</td>
-      <td className={`px-3 ${py} text-xs text-zinc-400`}>{property.llc_entity ?? "—"}</td>
-      <td className={`px-3 ${py} text-xs text-zinc-400`}>{property.business_category ?? "—"}</td>
+      <td className={`px-3 ${py}`}>
+        <InlineSelect
+          value={property.business_stage}
+          options={STAGE_OPTIONS}
+          onChange={(val) => onUpdate({ business_stage: val })}
+          className={`font-medium ${stageClass(property.business_stage)}`}
+        />
+      </td>
+      <td className={`px-3 ${py}`}>
+        <InlineText
+          value={property.llc_entity ?? ""}
+          placeholder="LLC entity"
+          onSave={(val) => onUpdate({ llc_entity: val || null })}
+          className="text-zinc-400"
+        />
+      </td>
+      <td className={`px-3 ${py}`}>
+        <InlineSelect
+          value={property.business_category ?? ""}
+          options={BUSINESS_CATEGORIES}
+          onChange={(val) => onUpdate({ business_category: val || null })}
+          className="text-zinc-400"
+        />
+      </td>
     </>
   );
 }

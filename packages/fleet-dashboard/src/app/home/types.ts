@@ -29,13 +29,16 @@ export interface Property {
 }
 
 export interface Deployment {
+  id: string;
   property_id: string;
   package_name: string;
+  package_category: string;
   installed_version: string | null;
   latest_version: string | null;
   pinned: boolean;
   status: string;
   enabled_modules: string[];
+  bespoke_modules?: string[];
   last_health_check_at?: string | null;
 }
 
@@ -44,12 +47,15 @@ export interface SkillCount {
   active: number;
   outdated: number;
   failed: number;
+  lastRun: string | null;
 }
 
 export interface MarketingService {
+  id: string;
   property_id: string;
   service_type: string;
   status: string;
+  provider: string;
 }
 
 export interface DashboardData {
