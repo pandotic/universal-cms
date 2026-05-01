@@ -1,5 +1,26 @@
 # Universal CMS — Project Context for Claude
 
+## ⚡ Resume Point — OAuth + Phase 5 quick wins complete (May 1, 2026)
+
+**PR #107** (branch `claude/fix-overview-dashboard-4UQgl`, opened) ships two sessions:
+
+### Session 1: GitHub OAuth Flow (P2.10e) ✅
+- Implemented OAuth 2.0 with httpOnly secure cookies for GitHub token persistence
+- Wired OAuth into deploy wizard: removed manual PAT input, checks OAuth status on mount
+- Wired OAuth into onboard wizard: replaced PAT paste with OAuth connect button
+- Applied Hub DB migrations (manual via Supabase SQL editor):
+  - `00521_api_central_bridge.sql` (api_services, api_secrets, api_central_projects)
+  - `00522_hub_social_idempotent.sql` (hub_brand_voice_briefs, hub_content_pipeline)
+
+### Session 2: Phase 5 Quick Wins ✅
+- **Auto-refresh dashboard (5e)** — 5-minute interval with live countdown badge ("42s ago", "3m ago")
+- **Deployment detail slide-over (5a)** — Right-side panel showing package info, versions, modules, health check, GitHub link
+- **Business notes display (5c)** — Truncated text (50 chars) with click-to-expand popover
+
+**Note:** P2.10f (repo auto-detect) + P2.11 (deploy wizard) were already implemented in prior commits on this branch.
+
+---
+
 ## ⚡ Resume Point — Skill library blank-page fix (Apr 29, 2026)
 
 **PR #92** (branch `claude/fix-skill-library-display-mxyCB`, merged) makes
@@ -182,19 +203,23 @@ All 5 skills shipped via PR #83. To validate end-to-end on SPEED:
    `/skeptical-review` each child.
 4. Success criterion: steps 3–4 complete without manual SQL fixups.
 
-### Stabilization followups (next session)
+### Completed this session (May 1)
+
+- ✅ **P2.10e — GitHub OAuth flow** — Wired throughout deploy + onboard wizards
+- ✅ **P2.10f — Repo auto-detect** — Intelligent preset recommendation via Jaccard scoring
+- ✅ **P2.11 — CMS Deploy Wizard** (`/fleet/deploy`) — Full end-to-end with OAuth integration
+- ✅ **Phase 5 quick wins** — Auto-refresh badge, deployment detail panel, business notes truncation
+
+### Remaining stabilization items
 
 - **P1.8 — Stage 1 publish unblock.** Flip the "Allow GitHub Actions to
   create and approve pull requests" repo setting per `docs/RELEASE.md`
   § Pre-flight. Gated on user action.
-- **P2.10 — Hub Phase 3e–g onboarding** per
-  `docs/FLEET_DASHBOARD_ROADMAP.md`: GitHub OAuth (replace PAT paste),
-  repo auto-detect, module preset picker.
-- **P2.11 — Phase 4 CMS Deploy Wizard** (`/fleet/deploy`).
 - **Migration cold-apply tech debt.** 00502 / 00504 / 00508 allowlisted
   in `scripts/validate-migrations.sh` under `SKIP_MIGRATIONS`. Production
   unaffected; fix requires splitting RLS policies into post-table
   migrations.
+- **Phase 5 remaining items** — API cost aggregation (5d), Extract & Share skill (5g)
 
 ### Manual ops to run (PR #75 aftermath)
 
