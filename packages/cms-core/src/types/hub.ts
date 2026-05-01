@@ -116,6 +116,7 @@ export type HubPropertyInsert = Omit<
   | "package_version"
   | "target_package_version"
   | "last_module_sync_at"
+  | "webhook_secret"
 > & {
   health_status?: HealthStatus;
   ssl_valid?: boolean;
@@ -132,6 +133,7 @@ export type HubPropertyInsert = Omit<
   package_version?: string | null;
   target_package_version?: string | null;
   last_module_sync_at?: string | null;
+  webhook_secret?: string | null;
 };
 
 export type HubPropertyUpdate = Partial<
