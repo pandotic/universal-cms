@@ -122,17 +122,24 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { propertyId, ghToken, preset, modules } = body as {
+    const { propertyId, preset, modules } = body as {
       propertyId: string;
-      ghToken: string;
       preset: string;
       modules: string[];
     };
 
-    if (!propertyId || !ghToken || !modules?.length) {
+    if (!propertyId || !modules?.length) {
       return NextResponse.json(
-        { error: "propertyId, ghToken, and modules are required" },
+        { error: "propertyId and modules are required" },
         { status: 400 }
+      );
+    }
+
+    const ghToken = request.cookies.get("github_token")?.value;
+    if (!ghToken) {
+      return NextResponse.json(
+        { error: "GitHub authentication required" },
+        { status: 401 }
       );
     }
 
