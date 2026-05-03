@@ -68,14 +68,20 @@ export interface HubAgent {
   schedule: string | null; // Cron expression (e.g., "0 0 * * 0" for weekly)
   property_id: string;
   created_by: string;
+  // Anthropic Managed Agents linkage (00524) — populated by register script.
+  managed_agent_id: string | null;       // agt_... returned by agents.create()
+  managed_agent_version: number | null;  // version int from agents.create() / .update()
   created_at: string;
   updated_at: string;
 }
 
 export type HubAgentInsert = Omit<
   HubAgent,
-  "id" | "created_at" | "updated_at"
->;
+  "id" | "created_at" | "updated_at" | "managed_agent_id" | "managed_agent_version"
+> & {
+  managed_agent_id?: string | null;
+  managed_agent_version?: number | null;
+};
 
 export type HubAgentUpdate = Partial<
   Omit<HubAgent, "id" | "property_id" | "created_by" | "created_at">

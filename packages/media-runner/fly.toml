@@ -1,0 +1,31 @@
+# Fly.io config for the Pandotic Media Runner.
+#
+# Set secrets before deploy:
+#   fly secrets set ANTHROPIC_API_KEY=...
+#   fly secrets set HUB_SUPABASE_URL=...
+#   fly secrets set HUB_SUPABASE_SERVICE_ROLE_KEY=...
+#
+# Pre-PR3 (Long-Form Writer pilot): the above three secrets are enough.
+# PR 3 will add GEMINI_API_KEY + HEYGEN_API_KEY for media tools.
+
+app = "pandotic-media-runner"
+primary_region = "ord"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  RUNNER_POLL_INTERVAL_MS = "5000"
+  LOG_LEVEL = "info"
+
+# Single small worker is enough for the pilot — sessions are run sequentially
+# inside the worker (concurrency raised in PR 3 once tooling settles).
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[[restart]]
+  policy = "always"

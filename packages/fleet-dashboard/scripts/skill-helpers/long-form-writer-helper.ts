@@ -1,9 +1,11 @@
 /**
  * Helper for the marketing-long-form-writer skill.
  *
- * Two modes:
- *   --read <slug>                         → prints JSON context for Claude to draft a blog post
- *   --write <slug> --payload <file.json>  → inserts hub_content_pipeline row (qa_review) + pending QA review
+ * Three modes:
+ *   --read <slug>                          → prints JSON context for Claude to draft a blog post
+ *   --write <slug> --payload <file.json>   → inserts hub_content_pipeline row (qa_review) + pending QA review
+ *   --enqueue <slug> --payload <file.json> → enqueues a hub_agent_runs row for the Media Runner to pick up.
+ *                                            Body of file.json: { topic, target_keyword, secondary_keywords?, word_count_target? }
  *
  * Reads credentials from env:
  *   SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)
@@ -12,6 +14,7 @@
  * Run via:
  *   pnpm --filter @pandotic/fleet-dashboard long-form-writer-helper --read speed
  *   pnpm --filter @pandotic/fleet-dashboard long-form-writer-helper --write speed --payload /tmp/post.json
+ *   pnpm --filter @pandotic/fleet-dashboard long-form-writer-helper --enqueue speed --payload /tmp/topic.json
  *
  * Types inlined intentionally — tsx+CJS can't resolve `@pandotic/universal-cms/data/*`
  * subpaths. The playbook map mirrors packages/cms-core/src/data/hub-marketing-playbooks.ts
@@ -354,11 +357,150 @@ async function writeCommand(slug: string, payloadFile: string): Promise<void> {
   );
 }
 
+// ─── --enqueue: Managed Agents path ────────────────────────────────────────
+
+const AGENTS_TABLE = "hub_agents";
+const RUNS_TABLE = "hub_agent_runs";
+const WRITER_TYPE = "long_form_writer";
+
+interface EnqueuePayload {
+  topic: string;
+  target_keyword: string;
+  secondary_keywords?: string[];
+  word_count_target?: number;
+}
+
+function validateEnqueuePayload(raw: unknown): EnqueuePayload {
+  if (!raw || typeof raw !== "object") throw new Error("payload must be a JSON object");
+  const p = raw as Record<string, unknown>;
+  if (typeof p.topic !== "string" || p.topic.trim().length === 0) {
+    throw new Error("payload.topic must be a non-empty string");
+  }
+  if (typeof p.target_keyword !== "string" || p.target_keyword.trim().length === 0) {
+    throw new Error("payload.target_keyword must be a non-empty string");
+  }
+  return {
+    topic: p.topic,
+    target_keyword: p.target_keyword,
+    secondary_keywords: Array.isArray(p.secondary_keywords)
+      ? (p.secondary_keywords.filter((s) => typeof s === "string") as string[])
+      : undefined,
+    word_count_target:
+      typeof p.word_count_target === "number" ? p.word_count_target : undefined,
+  };
+}
+
+async function enqueueCommand(slug: string, payloadFile: string): Promise<void> {
+  const supabase = getSupabase();
+
+  const { data: property, error: propErr } = await supabase
+    .from(PROPERTY_TABLE)
+    .select(
+      "id, name, slug, url, relationship_type, site_profile, business_stage, business_category, kill_switch, domains"
+    )
+    .eq("slug", slug)
+    .maybeSingle();
+  if (propErr) throw propErr;
+  if (!property) throw new Error(`Property with slug '${slug}' not found`);
+  if (property.kill_switch) throw new Error("Kill switch is active; aborting");
+  if (property.business_stage !== "active") {
+    throw new Error(`Property stage is '${property.business_stage}', not 'active'; aborting`);
+  }
+
+  const prop = property as PropertyRow;
+  const playbook = PLAYBOOKS[relationshipTypeToPlaybook(prop.relationship_type)];
+  if (!playbook.contentTypes.includes("blog")) {
+    throw new Error(`Playbook '${playbook.type}' does not enable the blog channel; aborting`);
+  }
+
+  const [voiceRes, assetsRes, agentRes] = await Promise.all([
+    supabase.from(VOICE_TABLE).select("*").eq("property_id", prop.id).limit(1).maybeSingle(),
+    supabase.from(ASSETS_TABLE).select("*").eq("property_id", prop.id).maybeSingle(),
+    supabase
+      .from(AGENTS_TABLE)
+      .select("id, slug, agent_type, managed_agent_id, managed_agent_version, enabled")
+      .eq("property_id", prop.id)
+      .eq("agent_type", WRITER_TYPE)
+      .maybeSingle(),
+  ]);
+  if (voiceRes.error) throw voiceRes.error;
+  if (assetsRes.error) throw assetsRes.error;
+  if (agentRes.error) throw agentRes.error;
+
+  if (!voiceRes.data) {
+    throw new Error(
+      "No brand voice brief exists for this property; refusing to enqueue without voice calibration."
+    );
+  }
+  if (!agentRes.data) {
+    throw new Error(
+      `No hub_agents row of type '${WRITER_TYPE}' exists for property '${slug}'. Run register-marketing-agents first.`
+    );
+  }
+  if (!agentRes.data.enabled) {
+    throw new Error(`Long-Form Writer agent is disabled for '${slug}'.`);
+  }
+  if (!agentRes.data.managed_agent_id) {
+    throw new Error(
+      `Long-Form Writer agent for '${slug}' has no managed_agent_id. Run register-marketing-agents with ANTHROPIC_API_KEY set.`
+    );
+  }
+
+  const raw = readFileSync(payloadFile, "utf8");
+  const payload = validateEnqueuePayload(JSON.parse(raw));
+
+  const input = {
+    mode: WRITER_TYPE,
+    property_id: prop.id,
+    property_slug: prop.slug,
+    topic: payload.topic,
+    target_keyword: payload.target_keyword,
+    secondary_keywords: payload.secondary_keywords ?? [],
+    word_count_target: payload.word_count_target ?? 2000,
+    brand_voice: voiceRes.data,
+    brand_assets: assetsRes.data,
+    playbook,
+  };
+
+  const { data: run, error: runErr } = await supabase
+    .from(RUNS_TABLE)
+    .insert({
+      agent_id: agentRes.data.id,
+      property_id: prop.id,
+      status: "pending",
+      triggered_by: "manual",
+      started_at: null,
+      completed_at: null,
+      result: { input },
+      error_message: null,
+      session_id: null,
+    })
+    .select("id")
+    .single();
+
+  if (runErr) throw runErr;
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        run_id: run.id,
+        agent_id: agentRes.data.id,
+        managed_agent_id: agentRes.data.managed_agent_id,
+        property_id: prop.id,
+        next_action: `Tail the Media Runner logs; the runner will claim run_id=${run.id} on its next poll tick.`,
+      },
+      null,
+      2
+    )
+  );
+}
+
 function parseArgs(
   argv: string[]
-): { mode: "read" | "write"; slug: string; payload?: string } {
+): { mode: "read" | "write" | "enqueue"; slug: string; payload?: string } {
   const args = argv.slice(2);
-  let mode: "read" | "write" | null = null;
+  let mode: "read" | "write" | "enqueue" | null = null;
   let slug: string | null = null;
   let payload: string | undefined;
 
@@ -366,15 +508,18 @@ function parseArgs(
     const a = args[i];
     if (a === "--read") { mode = "read"; slug = args[++i]; }
     else if (a === "--write") { mode = "write"; slug = args[++i]; }
+    else if (a === "--enqueue") { mode = "enqueue"; slug = args[++i]; }
     else if (a === "--payload") { payload = args[++i]; }
   }
 
   if (!mode || !slug) {
-    console.error("Usage: long-form-writer-helper --read <slug> | --write <slug> --payload <file.json>");
+    console.error(
+      "Usage: long-form-writer-helper --read <slug> | --write <slug> --payload <file.json> | --enqueue <slug> --payload <file.json>"
+    );
     process.exit(2);
   }
-  if (mode === "write" && !payload) {
-    console.error("--write requires --payload <file.json>");
+  if ((mode === "write" || mode === "enqueue") && !payload) {
+    console.error(`--${mode} requires --payload <file.json>`);
     process.exit(2);
   }
 
@@ -384,7 +529,8 @@ function parseArgs(
 async function main() {
   const { mode, slug, payload } = parseArgs(process.argv);
   if (mode === "read") await readCommand(slug);
-  else await writeCommand(slug, payload!);
+  else if (mode === "write") await writeCommand(slug, payload!);
+  else await enqueueCommand(slug, payload!);
 }
 
 main().catch((err) => {
