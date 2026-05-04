@@ -30,6 +30,82 @@ stabilization items clear. Do NOT start work until explicitly resumed.
 
 ---
 
+## Session wrap — PMF integration plan (May 4, 2026)
+
+PR #109 merged: `docs/PMF_INTEGRATION_PLAN.md`. Decision and handoff
+doc only — no code. Replaces the iframe embed of `pmfdf.netlify.app`
+at `/tools/pmf-evaluator` with a route-group merge into the Hub
+(`packages/fleet-dashboard/src/app/(pmf)/...`). Two-phase plan:
+Phase A is a `prep-hub-merge` branch in the standalone PMF repo
+(version-bump to Hub stack, source layout mirroring, bridge-to-direct
+adapter, `MIGRATION_MANIFEST.md`); Phase B is the `cp -r` + rewire
+into this monorepo. Open questions tracked in the doc: PMF session
+storage replacement, Anthropic SDK alignment, fate of
+`apps/dashboard/`'s separate PMF iframe, deploy continuity for
+`pmfdf.netlify.app` during Phase A.
+
+### PMF Evaluator merge (deferred — see plan doc)
+
+`docs/PMF_INTEGRATION_PLAN.md` (merged via PR #109) holds the full
+two-phase plan. Not started. Phase A happens in the external PMF
+repo first; Phase B is the merge into `packages/fleet-dashboard/`.
+Pick this up when there's appetite to retire the iframe.
+
+---
+
+## ⚡ Resume Point — Skill library workflow redesign (Apr 30, 2026)
+
+**PR #100** (branch `claude/skill-library-workflow-EGgAm`, merged) rethinks
+the `/skills` screen from a read-only browse list into an action-first surface.
+
+- **Multi-select on skill cards.** Checkboxes appear on hover; once any card
+  is selected they stay visible on all cards. "Select All / Deselect All"
+  toggle added next to the search bar.
+- **Sticky action bar.** Slides up when 1+ skills are selected with:
+  - **"Deploy to Site →"** — navigates to `/skills/deploy?preselect=id1,id2,...`
+    with selected skills pre-checked on arrival.
+  - **"Update Fleet Deployments"** — calls `/api/skills/update` for each
+    selected skill; prompts for a GitHub token inline if not stored.
+- **Deploy page repo browser.** Replaced the plain text `owner/repo` input
+  with a full browseable picker: enter token + "Load Repos" to see all
+  accessible repos sorted by last-updated; clicking a row fills the input.
+  - **Live GitHub search** (debounced 350ms, 2+ chars) hits
+    `/api/github/repos?search=` which routes to GitHub's
+    `/search/repositories` endpoint — returns results across all accounts,
+    orgs, and collaborations, not just the paginated list.
+- **`/api/github/repos` search param.** New `?search=` query param skips
+  pagination and queries GitHub's search API instead.
+
+Files changed:
+- `packages/fleet-dashboard/src/app/skills/page.tsx`
+- `packages/fleet-dashboard/src/app/skills/deploy/page.tsx`
+- `packages/fleet-dashboard/src/app/api/github/repos/route.ts`
+
+---
+
+## ⚡ Resume Point — Repo hygiene wrap-up (Apr 29, 2026)
+
+**PR #99** (branch `claude/investigate-repo-hygiene-tCc4C`, merged) closes out
+the loose ends from the CLEANUP_AUDIT.md hygiene audit (PR #98).
+
+- **`packages/admin-schema/` deleted.** 8 files (3 migrations, 2 RLS, 1 seed,
+  package.json, README). No code consumers; `@universal-cms/` namespace; README
+  described it as "legacy reference". References removed from README.md,
+  DASHBOARD.md, docs/RELEASE.md.
+- **`CLEANUP_AUDIT.md` archived.** Moved to
+  `docs/archive/CLEANUP_AUDIT-2026-04-29.md`.
+- **CLAUDE.md corrected.** "Three archive branches" → two. Removed phantom
+  `archive/claude/plan-skill-onboarding-8drJN` bullet (branch was deleted
+  directly without archiving). Added factual note for all three directly-deleted
+  branches. Removed stale "Remaining branches to triage" entries
+  (`improve-website-ux-f77go`, `fix-issues-dark-mode-Xs1md` — both already
+  gone from remote).
+- **Two stale branches confirmed already on main** (`claude/admin-polish-and-
+  marketing-panels`, `claude/media-library-and-seo-panels` — their commits
+  landed via PRs #93 + #95). Both subsequently deleted from origin.
+
+---
+
 ## ⚡ Resume Point — Skill library blank-page fix (Apr 29, 2026)
 
 **PR #92** (branch `claude/fix-skill-library-display-mxyCB`, merged) makes
