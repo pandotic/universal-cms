@@ -1,5 +1,19 @@
 # Universal CMS — Project Context for Claude
 
+## Session wrap — PMF integration plan (May 4, 2026)
+
+PR #109 merged: `docs/PMF_INTEGRATION_PLAN.md`. Decision and handoff
+doc only — no code. Replaces the iframe embed of `pmfdf.netlify.app`
+at `/tools/pmf-evaluator` with a route-group merge into the Hub
+(`packages/fleet-dashboard/src/app/(pmf)/...`). Two-phase plan:
+Phase A is a `prep-hub-merge` branch in the standalone PMF repo
+(version-bump to Hub stack, source layout mirroring, bridge-to-direct
+adapter, `MIGRATION_MANIFEST.md`); Phase B is the `cp -r` + rewire
+into this monorepo. Open questions tracked in the doc: PMF session
+storage replacement, Anthropic SDK alignment, fate of
+`apps/dashboard/`'s separate PMF iframe, deploy continuity for
+`pmfdf.netlify.app` during Phase A.
+
 ## Session wrap — Hub bug fixes + template build repair (Apr 21, 2026)
 
 Four PRs shipped this session, starting from a user report that
@@ -23,6 +37,13 @@ Four PRs shipped this session, starting from a user report that
 - Sidebar now gates both `/team-hub` and `/initiatives` to founders.
 
 ## Outstanding Work
+
+### PMF Evaluator merge (deferred — see plan doc)
+
+`docs/PMF_INTEGRATION_PLAN.md` (merged via PR #109) holds the full
+two-phase plan. Not started. Phase A happens in the external PMF
+repo first; Phase B is the merge into `packages/fleet-dashboard/`.
+Pick this up when there's appetite to retire the iframe.
 
 ### Manual ops to run (PR #75 aftermath)
 
