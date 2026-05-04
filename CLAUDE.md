@@ -1,5 +1,35 @@
 # Universal CMS — Project Context for Claude
 
+## 🧭 Queued — Native iOS/Android app architecture (critical, not started)
+
+End-user native apps per consuming site. Runtime is Expo (RN + expo-router);
+Capacitor noted only as fallback. Full design lives at
+**`docs/plans/2026-05-04-native-app-architecture.md`** — Phases 0–4, ~3–4
+weeks, branch `claude/native-app-architecture-g9Mhn` (created but no commits
+yet). Pilot is `apps/pandotic-app` against `apps/pandotic-site`.
+
+Scope locked during planning:
+- Identity table is **pluggable per site** via
+  `cmsConfig.nativeApp.identityTable` (`'profiles'` to extend the admin role
+  enum, or `'app_users'` to keep end users in a separate table). Pilot uses
+  `'app_users'`.
+- Monetization is **entitlements + Stripe webhook only** — IAP /
+  RevenueCat / `expo-iap` deferred until a customer needs digital goods. The
+  `app_entitlements` table is provider-agnostic so the IAP switch is later
+  config, not refactor.
+- Foundations land in `template/`: `/api/v1/*` namespace, dual-mode
+  (Bearer-or-cookie) auth resolver in cms-core, CORS helper, three new
+  migrations (`00042_app_users.sql`, `00043_device_tokens.sql`,
+  `00044_app_entitlements.sql`), and a `react-native` conditional export in
+  cms-core.
+- New publishable package `@pandotic/cms-client` (RN-safe HTTP client,
+  ESM+CJS, ships through the existing Changeset pipeline).
+
+Treat this as the next major architectural project after current
+stabilization items clear. Do NOT start work until explicitly resumed.
+
+---
+
 ## ⚡ Resume Point — Skill library blank-page fix (Apr 29, 2026)
 
 **PR #92** (branch `claude/fix-skill-library-display-mxyCB`, merged) makes
