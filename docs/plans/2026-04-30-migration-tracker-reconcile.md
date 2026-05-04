@@ -1,6 +1,12 @@
 # Hub `schema_migrations` Tracker Reconcile
 
-**Status:** deferred — needs a focused DB-ops session with Supabase SQL editor access.
+**Status:** ✅ COMPLETED May 4, 2026 — all six missing versions
+(`00517`–`00522`) registered against project `rimbgolutrxpmwsoswhq` via
+the Step-2 Option A INSERT. Verification probes from Step 1 all came
+back positive (the plan-doc index name `issues_open_unique_per_submitter`
+was wrong — the actual indexes are `idx_issues_unique_open` /
+`idx_todos_unique_open` per `00518_team_hub_unique_open.sql`).
+Tracker now shows 6 rows ≥ 00517 as expected.
 
 **One-liner:** The Hub's `supabase_migrations.schema_migrations` table records migrations only through `00516`. Versions `00517`–`00522` were applied as raw SQL via the Supabase web editor, so they exist in the database but were never registered with the migration tracker. `supabase db push --linked` will refuse to run until this is reconciled.
 

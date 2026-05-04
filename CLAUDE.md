@@ -196,19 +196,19 @@ All 5 skills shipped via PR #83. To validate end-to-end on SPEED:
    https://supabase.com/dashboard/project/rimbgolutrxpmwsoswhq/sql/new and
    run.
 
-### Hub `schema_migrations` tracker drift
+### Hub `schema_migrations` tracker drift — RESOLVED (May 4, 2026)
 
-Surfaced Apr 30 while verifying the `00521 → 00522` rename row. The Hub's
-migration tracker has rows only through `00516`; `00517`–`00522` were
-applied as raw SQL via the editor and never registered. `supabase db push
---linked` and `supabase db pull --linked` both refuse to run until the
-tracker is reconciled. Database schema itself is correct — only the
-tracker is out of sync. **Do not** run the CLI's suggested
-`supabase migration repair --status reverted <v>` commands; that would
-mark applied changes as reverted.
+Reconciled via `INSERT … ON CONFLICT DO NOTHING` against
+`supabase_migrations.schema_migrations` on project `rimbgolutrxpmwsoswhq`.
+All six missing versions (`00517`–`00522`) now registered. Database
+state was verified ahead of the insert — every migration's representative
+objects (tables, columns, indexes, status type) confirmed present, so the
+empty `statements` arrays accurately reflect "applied out-of-band via SQL
+editor." `supabase db push --linked` / `db pull --linked` should now
+proceed without the "remote versions not found" error.
 
-Full reconcile plan with verification SQL + remediation steps:
-**`docs/plans/2026-04-30-migration-tracker-reconcile.md`**.
+Plan doc retained at `docs/plans/2026-04-30-migration-tracker-reconcile.md`
+for reference if the same drift pattern reappears.
 
 ### Watch-for: Version Packages PR (carried over)
 
