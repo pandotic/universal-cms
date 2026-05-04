@@ -1,6 +1,6 @@
 {
   "name": "@pandotic/skill-library",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skill library for Pandotic Hub — marketing skill definitions, deployment adapters, and scheduled fleet execution",
   "type": "module",
   "main": "./dist/index.js",
