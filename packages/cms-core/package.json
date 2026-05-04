@@ -1,6 +1,6 @@
 {
   "name": "@pandotic/universal-cms",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Universal CMS for Next.js + Supabase sites — modular admin panel, analytics, content management",
   "type": "module",
   "main": "./dist/index.js",
