@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PublicChrome } from "@/components/PublicChrome";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pandotic.ai"),
@@ -63,9 +65,11 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Navbar />
-        <main id="main-content" className="pt-16">{children}</main>
-        <Footer />
+        <Providers>
+          <PublicChrome navbar={<Navbar />} footer={<Footer />}>
+            {children}
+          </PublicChrome>
+        </Providers>
       </body>
     </html>
   );

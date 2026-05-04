@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ADMIN_LAYER_MODULES, MODULE_FIXTURES } from "../_fixtures";
-
-type LayerKey = keyof typeof ADMIN_LAYER_MODULES;
+import {
+  type AdminLayerKey,
+  getAdminLayer,
+  getAdminModule,
+} from "@pandotic/universal-cms/admin/modules";
 
 interface Props {
-  layer: LayerKey;
+  layer: AdminLayerKey;
   moduleKey: string;
 }
 
 export function ModuleDetailPreview({ layer, moduleKey }: Props) {
-  const fixture = MODULE_FIXTURES[moduleKey];
-  const layerMeta = ADMIN_LAYER_MODULES[layer];
+  const mod = getAdminModule(moduleKey);
+  const layerMeta = getAdminLayer(layer);
 
-  if (!fixture || !layerMeta.modules.includes(moduleKey)) {
+  if (!mod || mod.layer !== layer) {
     notFound();
   }
 
@@ -26,14 +28,14 @@ export function ModuleDetailPreview({ layer, moduleKey }: Props) {
           {layerMeta.title}
         </Link>
         <span>/</span>
-        <span className="text-zinc-300">{fixture.label}</span>
+        <span className="text-zinc-300">{mod.label}</span>
       </div>
 
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-white">
-          {fixture.label}
+          {mod.label}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">{fixture.description}</p>
+        <p className="mt-1 text-sm text-zinc-500">{mod.description}</p>
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-200/80">
@@ -57,7 +59,7 @@ export function ModuleDetailPreview({ layer, moduleKey }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/50">
-            {fixture.rows.map((row, i) => (
+            {mod.previewRows.map((row, i) => (
               <tr key={i} className="transition-colors hover:bg-zinc-800/30">
                 <td className="px-4 py-3">
                   <div className="font-medium text-zinc-100">{row.title}</div>

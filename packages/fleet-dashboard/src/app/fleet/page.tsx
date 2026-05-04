@@ -150,12 +150,23 @@ function FleetDashboardContent() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [selectedDeployment, setSelectedDeployment] = useState<(PackageDeployment & { propertyName: string }) | null>(null);
+  const [secondsSinceRefresh, setSecondsSinceRefresh] = useState(0);
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 60_000);
+    const interval = setInterval(loadData, 5 * 60 * 1000); // 5 minutes
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!lastRefreshed) return;
+    const timer = setInterval(() => {
+      const seconds = Math.floor((Date.now() - lastRefreshed.getTime()) / 1000);
+      setSecondsSinceRefresh(seconds);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lastRefreshed]);
 
   useEffect(() => {
     if (toast) {
@@ -499,6 +510,14 @@ function FleetDashboardContent() {
         />
       )}
 
+      {/* Deployment Detail Slide-Over */}
+      {selectedDeployment && (
+        <DeploymentDetailPanel
+          deployment={selectedDeployment}
+          onClose={() => setSelectedDeployment(null)}
+        />
+      )}
+
       {/* Partial-data warnings (e.g. optional migrations not applied) */}
       {warnings.length > 0 && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-300/90">
@@ -520,8 +539,8 @@ function FleetDashboardContent() {
           <p className="mt-1 text-sm text-zinc-500">
             {data.properties.length} propert{data.properties.length !== 1 ? "ies" : "y"} across the fleet
             {lastRefreshed && (
-              <span className="ml-2 text-zinc-600">
-                · updated {lastRefreshed.toLocaleTimeString()}
+              <span className="ml-2 inline-block rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs text-emerald-400 ring-1 ring-emerald-500/20">
+                {secondsSinceRefresh < 60 ? `${secondsSinceRefresh}s ago` : `${Math.floor(secondsSinceRefresh / 60)}m ago`}
               </span>
             )}
           </p>
@@ -665,12 +684,14 @@ function FleetDashboardContent() {
                 {activeTab === "deployments" && (
                   <DeploymentsCols
                     propertyId={property.id}
+                    propertyName={property.name}
                     cmsDeployment={getCmsDeployment(property.id)}
                     otherDeployments={getDeployments(property.id).filter(
                       (d) => d.package_name !== "@pandotic/universal-cms"
                     )}
                     onTogglePin={handleTogglePin}
                     onUpgrade={handleUpgrade}
+                    onSelectDeployment={(deployment) => setSelectedDeployment({ ...deployment, propertyName: property.name })}
                   />
                 )}
                 {activeTab === "skills" && (
@@ -735,20 +756,21 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
 
 function DeploymentsCols({
   propertyId,
+  propertyName,
   cmsDeployment,
   otherDeployments,
   onTogglePin,
   onUpgrade,
+  onSelectDeployment,
 }: {
   propertyId: string;
+  propertyName: string;
   cmsDeployment?: PackageDeployment;
   otherDeployments: PackageDeployment[];
   onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
   onUpgrade: (deploymentId: string, propertyId: string) => void;
+  onSelectDeployment: (deployment: PackageDeployment) => void;
 }) {
-  // Split into two components so each render path has a fixed hook count —
-  // avoids the React #310 class of bug where hook order could desync between
-  // rows that do and don't have a CMS deployment.
   if (!cmsDeployment) {
     return <DeploymentsColsEmpty otherDeployments={otherDeployments} />;
   }
@@ -759,6 +781,7 @@ function DeploymentsCols({
       otherDeployments={otherDeployments}
       onTogglePin={onTogglePin}
       onUpgrade={onUpgrade}
+      onSelectDeployment={onSelectDeployment}
     />
   );
 }
@@ -790,12 +813,14 @@ function DeploymentsColsFull({
   otherDeployments,
   onTogglePin,
   onUpgrade,
+  onSelectDeployment,
 }: {
   propertyId: string;
   cmsDeployment: PackageDeployment;
   otherDeployments: PackageDeployment[];
   onTogglePin: (deploymentId: string, currentlyPinned: boolean) => void;
   onUpgrade: (deploymentId: string, propertyId: string) => void;
+  onSelectDeployment: (deployment: PackageDeployment) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -811,17 +836,19 @@ function DeploymentsColsFull({
     <>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+          <button
+            onClick={() => onSelectDeployment(cmsDeployment)}
+            className={`inline-flex cursor-pointer items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 ${
               cmsDeployment.status === "failed"
-                ? "bg-red-500/10 text-red-400 ring-red-500/20"
+                ? "bg-red-500/10 text-red-400 ring-red-500/20 hover:bg-red-500/20"
                 : isOutdated
-                  ? "bg-amber-500/10 text-amber-400 ring-amber-500/20"
-                  : "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+                  ? "bg-amber-500/10 text-amber-400 ring-amber-500/20 hover:bg-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20 hover:bg-emerald-500/20"
             }`}
+            title="Click to view details"
           >
             v{cmsDeployment.installed_version ?? "?"}
-          </span>
+          </button>
           {isOutdated && (
             <>
               <span className="flex items-center gap-0.5 text-xs text-amber-400">
@@ -1169,6 +1196,81 @@ function InlineText({
   );
 }
 
+function TruncatedNotes({
+  value,
+  placeholder,
+  onSave,
+}: {
+  value: string;
+  placeholder: string;
+  onSave: (val: string) => void;
+}) {
+  const [showPopover, setShowPopover] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const MAX_DISPLAY = 50;
+  const isTruncated = value && value.length > MAX_DISPLAY;
+  const displayText = isTruncated ? value.substring(0, MAX_DISPLAY) + "..." : value;
+
+  if (editing) {
+    return (
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          if (draft !== value) onSave(draft);
+          setEditing(false);
+          setShowPopover(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+        autoFocus
+        className="w-full rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-xs text-zinc-300 focus:border-zinc-500 focus:outline-none resize-none"
+        rows={4}
+      />
+    );
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => { setShowPopover(!showPopover); setDraft(value); }}
+        className="text-left text-xs text-zinc-300 hover:text-white max-w-xs truncate"
+        title={value || placeholder}
+      >
+        {displayText || <span className="text-zinc-600">{placeholder}</span>}
+      </button>
+      {showPopover && (
+        <div className="absolute right-0 top-full z-40 mt-2 w-72 rounded-lg border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
+          <div className="space-y-3">
+            <div className="max-h-40 overflow-y-auto rounded bg-zinc-800 p-2 text-xs text-zinc-300 whitespace-pre-wrap break-words">
+              {value || <span className="text-zinc-600">{placeholder}</span>}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setEditing(true); }}
+                className="flex-1 rounded bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setShowPopover(false)}
+                className="flex-1 rounded border border-zinc-700 px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BusinessCols({
   property,
   onUpdate,
@@ -1226,13 +1328,144 @@ function BusinessCols({
         />
       </td>
       <td className="px-4 py-3">
-        <InlineText
+        <TruncatedNotes
           value={property.business_notes ?? ""}
           placeholder="Add notes..."
           onSave={(val) => onUpdate({ business_notes: val || null })}
         />
       </td>
     </>
+  );
+}
+
+// ─── Deployment Detail Panel ──────────────────────────────────────────────
+
+function DeploymentDetailPanel({
+  deployment,
+  onClose,
+}: {
+  deployment: PackageDeployment & { propertyName: string };
+  onClose: () => void;
+}) {
+  const moduleCount = deployment.enabled_modules.length;
+  const bespokeCount = deployment.bespoke_modules.length;
+  const isOutdated =
+    deployment.installed_version &&
+    deployment.latest_version &&
+    deployment.installed_version !== deployment.latest_version;
+
+  return (
+    <div className="fixed inset-0 z-40 flex">
+      <div onClick={onClose} className="flex-1 bg-black/40 backdrop-blur-sm" />
+      <div className="w-96 flex-shrink-0 border-l border-zinc-800 bg-zinc-900 p-6 shadow-lg overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-white truncate">{deployment.propertyName}</h2>
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 flex-shrink-0">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Package Info */}
+          <div>
+            <h3 className="text-xs font-medium text-zinc-400 mb-3 uppercase">Package Info</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Package:</span>
+                <span className="text-white font-mono">{deployment.package_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Category:</span>
+                <span className="text-zinc-300 capitalize">{deployment.package_category}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Status:</span>
+                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+                  deployment.status === "active"
+                    ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+                    : "bg-amber-500/10 text-amber-400 ring-amber-500/20"
+                }`}>
+                  {deployment.status}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Versions */}
+          <div>
+            <h3 className="text-xs font-medium text-zinc-400 mb-3 uppercase">Versions</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Installed:</span>
+                <span className="text-white font-mono">{deployment.installed_version ?? "—"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Latest:</span>
+                <span className={`font-mono ${isOutdated ? "text-amber-400" : "text-emerald-400"}`}>
+                  {deployment.latest_version ?? "—"}
+                </span>
+              </div>
+              {deployment.pinned && (
+                <div className="flex items-center gap-2 text-blue-400 text-xs">
+                  <Pin className="h-3 w-3" />
+                  Version pinned
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Modules */}
+          <div>
+            <h3 className="text-xs font-medium text-zinc-400 mb-3 uppercase">Modules ({moduleCount}{bespokeCount > 0 ? ` + ${bespokeCount}` : ""})</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {deployment.enabled_modules.map((m) => (
+                <span key={m} className="inline-flex rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">
+                  {m}
+                </span>
+              ))}
+              {deployment.bespoke_modules.map((m) => (
+                <span key={m} className="inline-flex rounded-full bg-purple-900/30 px-2 py-0.5 text-xs text-purple-300">
+                  {m}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Health */}
+          <div>
+            <h3 className="text-xs font-medium text-zinc-400 mb-3 uppercase">Health</h3>
+            <div className="text-sm">
+              {deployment.last_health_check_at ? (
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Last check:</span>
+                  <span className="text-zinc-300">
+                    {new Date(deployment.last_health_check_at).toLocaleDateString()} {new Date(deployment.last_health_check_at).toLocaleTimeString()}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-zinc-500 text-xs">No health checks recorded</p>
+              )}
+            </div>
+          </div>
+
+          {/* GitHub Repo */}
+          {deployment.github_repo && (
+            <div>
+              <h3 className="text-xs font-medium text-zinc-400 mb-3 uppercase">Repository</h3>
+              <a
+                href={`https://github.com/${deployment.github_repo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200"
+              >
+                <span className="truncate text-zinc-300 font-mono">{deployment.github_repo}</span>
+                <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

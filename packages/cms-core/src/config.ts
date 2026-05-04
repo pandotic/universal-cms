@@ -90,6 +90,27 @@ export interface CmsConfig {
 
   adminNav: CmsNavGroup[];
 
+  /**
+   * How the admin sidebar treats nav items whose module is disabled.
+   *
+   * - `'hide'` (default, backward-compatible) — items for disabled modules
+   *   are filtered out of the sidebar.
+   * - `'preview'` — items render greyed-out with a "Not enabled" badge and
+   *   link to a preview page (controlled by `inactiveModulePreviewBase`)
+   *   that shows sample data + an "Enable in Hub" CTA. Use this when you
+   *   want operators to see every module the universal CMS ships, even
+   *   the ones not activated for the current site.
+   */
+  inactiveModulesMode?: "hide" | "preview";
+
+  /**
+   * Base href for inactive-module preview pages. Joined with the module id
+   * to form the link target — e.g. `/admin/modules` + `directory` →
+   * `/admin/modules/directory`. Only used when `inactiveModulesMode` is
+   * `'preview'`. Defaults to `/admin/modules`.
+   */
+  inactiveModulePreviewBase?: string;
+
   analytics: {
     // Provider-agnostic: configured via site_settings in admin
     // This just controls which providers are available in the admin UI
@@ -164,7 +185,7 @@ export const MODULE_MIGRATIONS: Record<CmsModuleName, string[]> = {
   errorLog: ["00018_error_log"],
   activityLog: ["00007_activity_log"],
   bulkImport: [], // UI-only, uses existing tables
-  apiUsage: ["00025_api_usage_tracking"],
+  apiUsage: ["00027_api_usage_tracking"],
 };
 
 // Migrations that are always required regardless of module selection

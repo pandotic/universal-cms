@@ -83,14 +83,27 @@ export default function DeployPage() {
   const [selectedPreset, setSelectedPreset] = useState("appMarketing");
   const [customModules, setCustomModules] = useState<string[]>([]);
 
-  // GitHub token
-  const [ghToken, setGhToken] = useState("");
+  // GitHub OAuth
+  const [isGithubAuthenticated, setIsGithubAuthenticated] = useState(false);
+  const [githubUser, setGithubUser] = useState<string | null>(null);
 
   useEffect(() => {
     loadEligibleProperties();
-    const stored = typeof window !== "undefined" ? localStorage.getItem("gh_token") : null;
-    if (stored) setGhToken(stored);
+    checkGithubStatus();
   }, []);
+
+  async function checkGithubStatus() {
+    try {
+      const res = await fetch("/api/github/oauth/status");
+      const data = await res.json();
+      if (data.authenticated) {
+        setIsGithubAuthenticated(true);
+        setGithubUser(data.login);
+      }
+    } catch {
+      // OAuth not configured, stay unauthenticated
+    }
+  }
 
   async function loadEligibleProperties() {
     try {
@@ -128,19 +141,16 @@ export default function DeployPage() {
   }
 
   async function handleDeploy() {
-    if (!selectedPropertyId || !ghToken) return;
+    if (!selectedPropertyId || !isGithubAuthenticated) return;
     setDeploying(true);
     setError(null);
 
     try {
-      if (typeof window !== "undefined") localStorage.setItem("gh_token", ghToken);
-
       const res = await fetch("/api/fleet/deploy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: selectedPropertyId,
-          ghToken,
           preset: selectedPreset,
           modules: activeModules,
         }),
@@ -342,15 +352,33 @@ export default function DeployPage() {
             </p>
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">GitHub Token</label>
-            <input
-              type="password"
-              value={ghToken}
-              onChange={(e) => setGhToken(e.target.value)}
-              placeholder="ghp_..."
-              className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:border-zinc-500 focus:outline-none"
-            />
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <h3 className="text-sm font-medium text-zinc-400 mb-3">GitHub Authentication</h3>
+            {isGithubAuthenticated ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="text-sm text-zinc-300">Connected as <span className="font-medium text-white">@{githubUser}</span></span>
+                </div>
+                <button
+                  onClick={async () => {
+                    await fetch("/api/github/oauth/logout", { method: "POST" });
+                    setIsGithubAuthenticated(false);
+                    setGithubUser(null);
+                  }}
+                  className="text-xs text-zinc-500 hover:text-zinc-300"
+                >
+                  Disconnect
+                </button>
+              </div>
+            ) : (
+              <a
+                href="/api/github/oauth/authorize"
+                className="inline-flex items-center gap-2 rounded-md bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20"
+              >
+                Connect GitHub
+              </a>
+            )}
           </div>
         </div>
       )}
@@ -403,7 +431,7 @@ export default function DeployPage() {
           ) : (
             <button
               onClick={handleDeploy}
-              disabled={!ghToken || deploying}
+              disabled={!isGithubAuthenticated || deploying}
               className="flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
             >
               {deploying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}

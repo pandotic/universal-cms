@@ -28,7 +28,10 @@ ALTER TABLE hub_content_pipeline ADD COLUMN IF NOT EXISTS source_content_id UUID
 -- The existing enum has: draft, review, approved, published, archived
 -- We need to add: drafted, qa_review, needs_human_review, revision_requested, scheduled
 -- Strategy: convert to text + CHECK for flexibility
+-- Drop column defaults first so DROP TYPE can succeed (defaults retain enum type ref).
+ALTER TABLE hub_content_pipeline ALTER COLUMN status DROP DEFAULT;
 ALTER TABLE hub_content_pipeline ALTER COLUMN status TYPE TEXT;
+ALTER TABLE hub_content_pipeline ALTER COLUMN status SET DEFAULT 'draft';
 DROP TYPE IF EXISTS social_content_status;
 ALTER TABLE hub_content_pipeline ADD CONSTRAINT hub_content_pipeline_status_check
   CHECK (status IN (
@@ -37,11 +40,13 @@ ALTER TABLE hub_content_pipeline ADD CONSTRAINT hub_content_pipeline_status_chec
   ));
 
 -- Convert platform from enum to text for flexibility
+ALTER TABLE hub_content_pipeline ALTER COLUMN platform DROP DEFAULT;
 ALTER TABLE hub_content_pipeline ALTER COLUMN platform TYPE TEXT;
 ALTER TABLE hub_content_pipeline ALTER COLUMN platform DROP NOT NULL;
 DROP TYPE IF EXISTS social_platform;
 
 -- Convert content_type from enum to text for flexibility
+ALTER TABLE hub_content_pipeline ALTER COLUMN content_type DROP DEFAULT;
 ALTER TABLE hub_content_pipeline ALTER COLUMN content_type TYPE TEXT;
 ALTER TABLE hub_content_pipeline ALTER COLUMN content_type DROP NOT NULL;
 DROP TYPE IF EXISTS social_content_type;
@@ -57,4 +62,12 @@ CREATE INDEX IF NOT EXISTS idx_hub_content_pipeline_source_content_id
 -- Rename existing indexes and triggers to match new table name
 -- (PostgreSQL renames indexes automatically with ALTER TABLE RENAME,
 -- but triggers keep their old names — update for clarity)
-ALTER FUNCTION IF EXISTS update_hub_social_content_updated_at() RENAME TO update_hub_content_pipeline_updated_at;
+-- ALTER FUNCTION does not support IF EXISTS in PostgreSQL; wrap the
+-- rename in a DO block so cold-apply (where the old function never
+-- existed) doesn't fail.
+DO $$ BEGIN
+  ALTER FUNCTION update_hub_social_content_updated_at() RENAME TO update_hub_content_pipeline_updated_at;
+EXCEPTION
+  WHEN undefined_function THEN NULL;
+  WHEN duplicate_function THEN NULL;
+END $$;

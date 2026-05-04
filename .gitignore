@@ -3,9 +3,13 @@ dist/
 .env
 .env.*
 !.env.example
-reference/
 .next/
 out/
 next-env.d.ts
 .turbo/
 *.tsbuildinfo
+playwright-report/
+test-results/
+playwright/.cache/
+.DS_Store
+**/.DS_Store

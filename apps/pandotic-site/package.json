@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @pandotic/universal-cms build && next build",
+    "sync-cms-config": "node scripts/sync-cms-config.mjs",
+    "build": "pnpm sync-cms-config && pnpm --filter @pandotic/universal-cms build && next build",
     "start": "next start",
     "lint": "next lint"
   },

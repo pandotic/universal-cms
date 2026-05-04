@@ -221,6 +221,39 @@
     "path": "skills/marketing-director"
   },
   {
+    "id": "marketing-skeptical-reviewer",
+    "name": "Marketing — Skeptical Reviewer",
+    "icon": "Shield",
+    "category": "Marketing Ops",
+    "description": "QA gate for every piece of content in the Pandotic marketing pipeline. Scores factual claims, hallucination risk, brand-voice match, AI tells, CTA clarity, grammar, and per-content-type rules. Writes to hub_content_qa_reviews and flips hub_content_pipeline.status to approved (auto-pilot) or needs_human_review (default).",
+    "triggers": ["skeptical review", "/skeptical-review", "QA pipeline item", "gate the draft", "review the latest draft", "flag content"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-skeptical-reviewer"
+  },
+  {
+    "id": "marketing-long-form-writer",
+    "name": "Marketing — Long-Form Writer",
+    "icon": "BookOpen",
+    "category": "Marketing Ops",
+    "description": "Draft a 1,500–3,000-word blog post grounded in a property's brand voice, SEO keyword, and playbook. Submits the draft to hub_content_pipeline in qa_review state and opens a pending hub_content_qa_reviews row pointing at the Skeptical Reviewer. Refuses to draft when no brand voice brief exists (quality floor).",
+    "triggers": ["write longform", "/write-longform", "draft a blog", "long-form content", "write a post", "draft a post"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-long-form-writer"
+  },
+  {
+    "id": "marketing-repurposing-specialist",
+    "name": "Marketing — Repurposing Specialist",
+    "icon": "Component",
+    "category": "Marketing Ops",
+    "description": "Atomize an approved blog post into up to 9 child pieces — 5 platform-rotated social posts (linkedin, twitter, instagram, facebook, linkedin), 1 newsletter excerpt, and 3 quote cards — each a hub_content_pipeline row linked via source_content_id and gated by the Skeptical Reviewer. Honors playbook gates (socialStrategy=skip, newsletterEnabled=false) to produce only what the property's playbook permits.",
+    "triggers": ["repurpose", "/repurpose", "atomize blog", "break down the post", "turn the post into social"],
+    "version": "0.1.0",
+    "author": "pandotic",
+    "path": "skills/marketing-repurposing-specialist"
+  },
+  {
     "id": "close-session",
     "name": "Close Session",
     "icon": "Wrench",

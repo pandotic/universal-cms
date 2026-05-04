@@ -432,9 +432,9 @@ ones listed by `getRequiredMigrations(cmsConfig)`.
 | `00022_forms_and_leads` | ============================================================================ — `forms`, `form_submissions`, `cta_blocks` |
 | `00023_ai_conversations` | AI conversation persistence for the CMS chat assistant — `ai_conversations` |
 | `00024_theme_customization` | Theme customization settings |
-| `00025_api_usage_tracking` | API Usage Tracking — `api_usage`, `api_keys`, `api_audit` |
 | `00025_projects` | Projects showcase tables — `projects`, `project_sections` |
 | `00026_tracking_and_webmaster` | Tracking & Webmaster verification settings |
+| `00027_api_usage_tracking` | API Usage Tracking — `api_usage`, `api_keys`, `api_audit` |
 | `00030_video_content` | Video content generation tables for HeyGen integration — `videos`, `video_generation_log` |
 | `00031_content_page_tags` | Add tags column to content_pages for blog/insights categorization |
 | `00032_business_entities` | Business Entities: companies + user_companies — `companies`, `user_companies` |
@@ -637,6 +637,27 @@ export interface CmsConfig {
 
   adminNav: CmsNavGroup[];
 
+  /**
+   * How the admin sidebar treats nav items whose module is disabled.
+   *
+   * - `'hide'` (default, backward-compatible) — items for disabled modules
+   *   are filtered out of the sidebar.
+   * - `'preview'` — items render greyed-out with a "Not enabled" badge and
+   *   link to a preview page (controlled by `inactiveModulePreviewBase`)
+   *   that shows sample data + an "Enable in Hub" CTA. Use this when you
+   *   want operators to see every module the universal CMS ships, even
+   *   the ones not activated for the current site.
+   */
+  inactiveModulesMode?: "hide" | "preview";
+
+  /**
+   * Base href for inactive-module preview pages. Joined with the module id
+   * to form the link target — e.g. `/admin/modules` + `directory` →
+   * `/admin/modules/directory`. Only used when `inactiveModulesMode` is
+   * `'preview'`. Defaults to `/admin/modules`.
+   */
+  inactiveModulePreviewBase?: string;
+
   analytics: {
     // Provider-agnostic: configured via site_settings in admin
     // This just controls which providers are available in the admin UI
@@ -711,7 +732,7 @@ export const MODULE_MIGRATIONS: Record<CmsModuleName, string[]> = {
   errorLog: ["00018_error_log"],
   activityLog: ["00007_activity_log"],
   bulkImport: [], // UI-only, uses existing tables
-  apiUsage: ["00025_api_usage_tracking"],
+  apiUsage: ["00027_api_usage_tracking"],
 };
 
 // Migrations that are always required regardless of module selection

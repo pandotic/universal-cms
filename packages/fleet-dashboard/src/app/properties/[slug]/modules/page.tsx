@@ -9,9 +9,13 @@ import {
   modulePresets,
   type CmsModuleName,
 } from "@pandotic/universal-cms/config";
-import { ADMIN_LAYER_MODULES, MODULE_FIXTURES } from "../../../cms/_fixtures";
+import {
+  type AdminLayerKey,
+  getAdminLayer,
+  getAdminModulesByLayer,
+} from "@pandotic/universal-cms/admin/modules";
 
-type LayerKey = keyof typeof ADMIN_LAYER_MODULES;
+type LayerKey = AdminLayerKey;
 
 interface ModulesResponse {
   data: {
@@ -218,7 +222,8 @@ export default function PropertyModulesPage() {
 
       {/* Module groups */}
       {LAYER_ORDER.map((layer) => {
-        const meta = ADMIN_LAYER_MODULES[layer];
+        const meta = getAdminLayer(layer);
+        const layerModules = getAdminModulesByLayer(layer);
         return (
           <div
             key={layer}
@@ -229,31 +234,29 @@ export default function PropertyModulesPage() {
               <p className="mt-0.5 text-xs text-zinc-500">{meta.description}</p>
             </div>
             <ul className="divide-y divide-zinc-800/70">
-              {meta.modules.map((mod) => {
-                const fixture = MODULE_FIXTURES[mod];
-                const migrations = MODULE_MIGRATIONS[mod as CmsModuleName] ?? [];
-                const isOn = enabled.has(mod);
+              {layerModules.map((mod) => {
+                const migrations =
+                  MODULE_MIGRATIONS[mod.id as CmsModuleName] ?? [];
+                const isOn = enabled.has(mod.id);
                 return (
-                  <li key={mod} className="flex items-start gap-3 px-4 py-3">
+                  <li key={mod.id} className="flex items-start gap-3 px-4 py-3">
                     <label className="flex cursor-pointer items-start gap-3">
                       <input
                         type="checkbox"
                         checked={isOn}
-                        onChange={() => toggle(mod)}
+                        onChange={() => toggle(mod.id)}
                         className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-950 text-white accent-white"
                       />
                       <div>
                         <div className="text-sm font-medium text-zinc-100">
-                          {fixture?.label ?? mod}
+                          {mod.label}
                           <span className="ml-2 font-mono text-xs text-zinc-500">
-                            {mod}
+                            {mod.id}
                           </span>
                         </div>
-                        {fixture?.description && (
-                          <p className="mt-0.5 text-xs text-zinc-400">
-                            {fixture.description}
-                          </p>
-                        )}
+                        <p className="mt-0.5 text-xs text-zinc-400">
+                          {mod.description}
+                        </p>
                         {migrations.length > 0 && (
                           <p className="mt-1 font-mono text-[10px] text-zinc-600">
                             Migrations: {migrations.join(", ")}

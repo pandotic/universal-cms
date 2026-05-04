@@ -20,11 +20,73 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -r --filter '@pandotic/universal-cms' --filter '@pandotic/skill-library' typecheck
-      - run: pnpm test
-      - run: pnpm build
+      - name: Build cms-core + skill-library (typecheck prereq — downstream packages resolve subpaths via dist)
+        run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+      - run: pnpm -r typecheck
+      - run: pnpm test
+      - name: Build fleet-dashboard (Hub)
+        run: pnpm --filter @pandotic/fleet-dashboard build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Build template
+        run: pnpm --filter universal-cms-template build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cms
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+      - name: Validate hub migrations cold-apply cleanly
+        env:
+          PGURL: postgres://postgres:postgres@127.0.0.1:5432/cms
+        run: ./scripts/validate-migrations.sh
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build cms-core + skill-library (workspace prereqs)
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Install Playwright browsers
+        run: pnpm --filter @pandotic/fleet-dashboard exec playwright install --with-deps chromium
+      - name: Run Playwright smokes
+        run: pnpm --filter @pandotic/fleet-dashboard test:e2e
+        env:
+          CI: "true"
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/fleet-dashboard/playwright-report
+          retention-days: 7
 
   ai-context-drift:
     runs-on: ubuntu-latest

@@ -90,6 +90,8 @@ export interface HubProperty {
   package_version: string | null;
   target_package_version: string | null;
   last_module_sync_at: string | null;
+  // Per-property HMAC secret for /api/webhooks/agent-run authentication (00522)
+  webhook_secret: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -114,6 +116,7 @@ export type HubPropertyInsert = Omit<
   | "package_version"
   | "target_package_version"
   | "last_module_sync_at"
+  | "webhook_secret"
 > & {
   health_status?: HealthStatus;
   ssl_valid?: boolean;
@@ -130,6 +133,7 @@ export type HubPropertyInsert = Omit<
   package_version?: string | null;
   target_package_version?: string | null;
   last_module_sync_at?: string | null;
+  webhook_secret?: string | null;
 };
 
 export type HubPropertyUpdate = Partial<

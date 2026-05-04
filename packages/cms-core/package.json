@@ -161,6 +161,11 @@
       "types": "./dist/admin/hooks.d.ts",
       "development": "./src/admin/hooks.ts"
     },
+    "./admin/modules": {
+      "import": "./dist/admin/modules.js",
+      "types": "./dist/admin/modules.d.ts",
+      "development": "./src/admin/modules.ts"
+    },
     "./components/ui": {
       "import": "./dist/components/ui/index.js",
       "types": "./dist/components/ui/index.d.ts",
@@ -396,6 +401,16 @@
       "types": "./dist/data/hub-skill-contract.d.ts",
       "development": "./src/data/hub-skill-contract.ts"
     },
+    "./types/hub-media-assets": {
+      "import": "./dist/types/hub-media-assets.js",
+      "types": "./dist/types/hub-media-assets.d.ts",
+      "development": "./src/types/hub-media-assets.ts"
+    },
+    "./data/hub-media": {
+      "import": "./dist/data/hub-media.js",
+      "types": "./dist/data/hub-media.d.ts",
+      "development": "./src/data/hub-media.ts"
+    },
     "./error-logging": {
       "import": "./dist/error-logging/index.js",
       "types": "./dist/error-logging/index.d.ts",
@@ -486,8 +501,8 @@
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.102.1",
     "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.6",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.469.0",
     "next": "^16.0.0",

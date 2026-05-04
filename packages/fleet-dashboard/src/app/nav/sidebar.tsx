@@ -23,9 +23,7 @@ import {
   Megaphone,
   Share2,
   ShieldCheck,
-  ShoppingBag,
   Sparkles,
-  Target,
   Users,
   Wrench,
   X,
@@ -53,23 +51,20 @@ const GROUPS: NavGroup[] = [
   {
     label: "Workspace",
     links: [
-      { href: "/", label: "Overview", icon: LayoutDashboard },
+      { href: "/", label: "Alerts", icon: LayoutDashboard },
       { href: "/fleet", label: "Fleet Matrix", icon: Globe },
-      { href: "/properties", label: "Properties", icon: Globe },
     ],
   },
   {
     label: "Team",
     links: [
       { href: "/team-hub", label: "Team Hub", icon: CalendarClock, foundersOnly: true },
-      { href: "/initiatives", label: "Initiatives", icon: Target, foundersOnly: true },
     ],
   },
   {
     label: "Build",
     links: [
       { href: "/skills", label: "Skills", icon: Zap },
-      { href: "/skill-store", label: "Skill Store", icon: ShoppingBag },
       { href: "/agents", label: "Agents", icon: Bot },
       { href: "/playbooks", label: "Playbooks", icon: ListChecks },
       { href: "/modules", label: "Modules", icon: Wrench },
@@ -84,22 +79,9 @@ const GROUPS: NavGroup[] = [
       { href: "/marketing-ops/pipeline", label: "Content Pipeline", icon: ListChecks },
       { href: "/marketing-ops/link-building", label: "Link Building", icon: Link2 },
       { href: "/marketing-ops/qa", label: "QA & Reviews", icon: ShieldCheck },
-    ],
-  },
-  {
-    label: "Content",
-    links: [
       { href: "/cms/projects", label: "Projects", icon: Briefcase },
       { href: "/cms/content", label: "Pages & Blog", icon: FileText },
       { href: "/social", label: "Social", icon: Share2 },
-    ],
-  },
-  {
-    label: "CMS Admin",
-    links: [
-      { href: "/cms/marketing-cms", label: "Marketing CMS", icon: Megaphone },
-      { href: "/cms/app-admin", label: "App Admin", icon: LayoutDashboard },
-      { href: "/cms/group-admin", label: "Group Admin", icon: ShieldCheck },
     ],
   },
   {

@@ -8,11 +8,11 @@ A modular, config-driven CMS framework for Next.js + Supabase. Extract your admi
 universal-cms/
 ├── packages/
 │   ├── cms-core/          # @pandotic/universal-cms — the CMS npm package
-│   ├── admin-core/        # @universal-cms/admin-core — headless admin logic (RBAC, services, hooks)
-│   ├── admin-ui/          # @universal-cms/admin-ui — React admin UI components
-│   └── admin-schema/      # @universal-cms/admin-schema — Supabase SQL migrations for admin tables
+│   ├── fleet-dashboard/   # @pandotic/fleet-dashboard — Pandotic Hub (Next.js 16)
+│   ├── skill-library/     # @pandotic/skill-library — marketing skills + deployment adapters
 ├── apps/
-│   └── dashboard/         # @universal-cms/dashboard — admin hub app (Vite + React)
+│   ├── pandotic-site/     # @pandotic/pandotic-site — marketing site (Next.js)
+│   └── dashboard/         # @universal-cms/dashboard — legacy Vite admin (superseded by fleet-dashboard)
 ├── template/              # Starter Next.js 16 app (uses cms-core)
 └── docs/                  # Documentation
 ```
@@ -27,10 +27,10 @@ The admin packages implement a three-tier permission model:
 | Group Admin | `org_admin` | Manages a specific organization and its members |
 | Entity Admin | `entity_admin` | Manages specific entities they own or are assigned |
 
-**Entity Adapter Pattern**: Apps define an `EntityAdapter` to tell the admin system what their domain entity is (e.g., "Home" in HomeDoc, "Concert" in ConcertBucket). The admin-ui components render list/detail views based on this adapter.
+**Entity Adapter Pattern**: Apps define an `EntityAdapter` to tell the admin system what their domain entity is (e.g., "Home" in HomeDoc, "Concert" in ConcertBucket). The admin components render list/detail views based on this adapter.
 
 ```typescript
-import type { EntityAdapter } from '@universal-cms/admin-core';
+import type { EntityAdapter } from '@pandotic/universal-cms/admin';
 
 const myAdapter: EntityAdapter = {
   entityName: 'Widget',
@@ -47,6 +47,11 @@ const myAdapter: EntityAdapter = {
 ```
 
 ## Quick Start
+
+> **Standing up a new site that consumes the published package?**
+> See [`docs/CONSUMER_ONBOARDING.md`](./docs/CONSUMER_ONBOARDING.md) for
+> the greenfield runbook (PAT setup, `.npmrc`, Supabase, Netlify).
+> The steps below are for working **inside this monorepo**.
 
 ### 1. Clone and install
 
@@ -158,55 +163,33 @@ import { rateLimit, validateInput } from "@pandotic/universal-cms/security";
 - **AI:** Anthropic Claude (optional)
 - **Language:** TypeScript (strict)
 
-## Admin Dashboard
+## Admin Dashboards
 
-The admin dashboard (`apps/dashboard/`) is a standalone Vite + React app that dogfoods the admin packages.
+Two admin surfaces ship in this repo:
 
-```bash
-# Setup
-cp apps/dashboard/.env.example apps/dashboard/.env
-# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+- **Pandotic Hub** (`packages/fleet-dashboard/`) — the active cross-property mission control. Next.js 16, deployed on Netlify. This is what founders use day-to-day.
+- **Legacy Vite dashboard** (`apps/dashboard/`) — an older oversight hub, kept for reference. Superseded by fleet-dashboard; do not extend.
 
-# Run admin-schema migrations first (provides user_profiles, user_roles, organizations, etc.)
-# Then run apps/dashboard/supabase/migrations/001_connected_apps.sql
-
-# Build packages (order matters)
-pnpm --filter @universal-cms/admin-core build
-pnpm --filter @universal-cms/admin-ui build
-
-# Start dashboard
-pnpm --filter @universal-cms/dashboard dev
-```
-
-The dashboard is an **oversight hub** — it shows connected apps with health status and deep-links into each app's own admin UI. It does not remotely control other apps.
-
-### Installing Admin Packages in Other Apps
-
-```bash
-# Via git dependency
-pnpm add @universal-cms/admin-core@github:pandotic/universal-cms#main --filter your-app
-# Or link locally during development
-pnpm --filter your-app add @universal-cms/admin-core@workspace:*
-```
+Per-site marketing/app admin lives in `@pandotic/universal-cms` (cms-core) and is rendered inside each consuming site's `/admin` route.
 
 ## Development
 
 ```bash
+# Install
+pnpm install
+
 # Typecheck everything
 pnpm -r typecheck
 
-# Build admin packages (order matters: admin-core before admin-ui)
-pnpm --filter @universal-cms/admin-core build
-pnpm --filter @universal-cms/admin-ui build
+# Tests (98 in cms-core)
+pnpm test
 
-# Typecheck just cms-core
-cd packages/cms-core && pnpm typecheck
+# Build the publishable packages
+pnpm build
 
-# Typecheck just template
-cd template && pnpm typecheck
-
-# Typecheck dashboard
-pnpm --filter @universal-cms/dashboard type-check
+# Build the Hub + template (what CI also runs)
+pnpm --filter @pandotic/fleet-dashboard build
+pnpm --filter universal-cms-template build
 ```
 
 ## License

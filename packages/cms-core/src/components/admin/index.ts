@@ -18,6 +18,28 @@ export { PlatformAdminRoute } from "./shared/PlatformAdminRoute.js";
 export type { PlatformAdminRouteProps } from "./shared/PlatformAdminRoute.js";
 export { EntityManagementPanel } from "./shared/EntityManagementPanel.js";
 export type { EntityManagementPanelProps } from "./shared/EntityManagementPanel.js";
+export { ModulePreviewPanel } from "./shared/ModulePreviewPanel.js";
+export type { ModulePreviewPanelProps } from "./shared/ModulePreviewPanel.js";
+
+// Marketing-CMS module panels — drop-in CRUD UIs for individual cms-core
+// modules. Each takes an authenticated SupabaseClient and uses the matching
+// data/* helpers under the hood.
+export { ContentPageEditor } from "./panels/ContentPageEditor.js";
+export type { ContentPageEditorProps } from "./panels/ContentPageEditor.js";
+export { RedirectsPanel } from "./panels/RedirectsPanel.js";
+export type { RedirectsPanelProps } from "./panels/RedirectsPanel.js";
+export { CtaManagerPanel } from "./panels/CtaManagerPanel.js";
+export type { CtaManagerPanelProps } from "./panels/CtaManagerPanel.js";
+export { FormsPanel } from "./panels/FormsPanel.js";
+export type { FormsPanelProps } from "./panels/FormsPanel.js";
+export { LandingPagesPanel } from "./panels/LandingPagesPanel.js";
+export type { LandingPagesPanelProps } from "./panels/LandingPagesPanel.js";
+export { BrandGuidePanel } from "./panels/BrandGuidePanel.js";
+export type { BrandGuidePanelProps } from "./panels/BrandGuidePanel.js";
+export { MediaLibraryPanel } from "./panels/MediaLibraryPanel.js";
+export type { MediaLibraryPanelProps } from "./panels/MediaLibraryPanel.js";
+export { SEOPanel } from "./panels/SEOPanel.js";
+export type { SEOPanelProps } from "./panels/SEOPanel.js";
 
 // Platform-tier admin panels (ported from @universal-cms/admin-ui)
 export { UserManagementPanel } from "./platform/UserManagementPanel.js";

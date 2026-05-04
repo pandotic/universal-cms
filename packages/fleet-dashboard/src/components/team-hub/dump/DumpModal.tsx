@@ -92,6 +92,14 @@ export function DumpModal() {
             toast.success('Added to issues list')
             closeDumpModal()
           },
+          onError: (err) => {
+            if ((err as { code?: string }).code === 'duplicate_open') {
+              toast.info('Already on the open issues list')
+              closeDumpModal()
+            } else {
+              toast.error('Could not save issue')
+            }
+          },
         }
       )
     } else if (effectiveType === 'todo') {
@@ -108,6 +116,14 @@ export function DumpModal() {
           onSuccess: () => {
             toast.success('Added to to-dos')
             closeDumpModal()
+          },
+          onError: (err) => {
+            if ((err as { code?: string }).code === 'duplicate_open') {
+              toast.info('Already on the open to-dos list')
+              closeDumpModal()
+            } else {
+              toast.error('Could not save to-do')
+            }
           },
         }
       )
